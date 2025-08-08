@@ -1,0 +1,1034 @@
+{% extends "base.html" %}
+
+{% block title %}Correção Automática{% endblock %}
+
+{% block content %}
+    <!-- Background com efeito glassmorphism -->
+    <div class="main-wrapper">
+        <div class="background-shapes">
+            <div class="shape shape-1"></div>
+            <div class="shape shape-2"></div>
+            <div class="shape shape-3"></div>
+        </div>
+
+        <div class="container">
+            <!-- Header com animação -->
+            <header class="modern-header">
+                <div class="header-content">
+                    <h1><i class="fas fa-robot"></i> Correção Automática de Gabaritos</h1>
+                    <p>Sistema EduCorreção - Correção automática 100% funcional</p>
+                </div>
+                <div class="header-stats">
+                    <div class="stat-item">
+                        <span class="stat-number" id="total-processados">0</span>
+                        <span class="stat-label">Processados</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="total-sucessos">0</span>
+                        <span class="stat-label">Sucessos</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="total-erros">0</span>
+                        <span class="stat-label">Erros</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Seção de Upload com design moderno -->
+            <section class="upload-section">
+                <div class="upload-card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <div class="card-title">
+                            <h2>Upload de Gabaritos</h2>
+                            <p>Envie os gabaritos em PDF para correção automática</p>
+                        </div>
+                    </div>
+
+                    <div class="card-content">
+                        <form id="form-upload" class="modern-form">
+                            <!-- Configurações de Processamento -->
+                            <div class="config-section">
+                                <h3><i class="fas fa-cog"></i> Configurações de Processamento</h3>
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="num_quadrilateros">Número de Blocos</label>
+                                        <select id="num_quadrilateros" name="num_quadrilateros" required>
+                                            <option value="2">2 Blocos</option>
+                                            <option value="4" selected>4 Blocos</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="num_questoes">Questões por Bloco</label>
+                                        <select id="num_questoes" name="num_questoes" required>
+                                            <option value="10">10 Questões</option>
+                                            <option value="11" selected>11 Questões</option>
+                                            <option value="12">12 Questões</option>
+                                            <option value="24">24 Questões</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="num_alternativas">Alternativas</label>
+                                        <select id="num_alternativas" name="num_alternativas" required>
+                                            <option value="4" selected>4 Alternativas (A-D)</option>
+                                            <option value="5">5 Alternativas (A-E)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Configurações de Período e Ano -->
+                            <div class="config-section">
+                                <h3><i class="fas fa-calendar-alt"></i> Informações do Período</h3>
+                                <div class="form-grid">
+                                    <div class="form-group">
+                                        <label for="ano_avaliacao">Ano da Avaliação *</label>
+                                        <select id="ano_avaliacao" name="ano_avaliacao" required>
+                                            <option value="">Selecione o ano</option>
+                                            <option value="2024">2024</option>
+                                            <option value="2025" selected>2025</option>
+                                            <option value="2026">2026</option>
+                                            <option value="2027">2027</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="periodo_avaliacao">Período da Avaliação *</label>
+                                        <select id="periodo_avaliacao" name="periodo_avaliacao" required>
+                                            <option value="">Selecione o período</option>
+                                            <option value="1">1º Bimestre</option>
+                                            <option value="2">2º Bimestre</option>
+                                            <option value="3">3º Bimestre</option>
+                                            <option value="4">4º Bimestre</option>
+                                            <option value="diagnostica">Avaliação Diagnóstica</option>
+                                            <option value="recuperacao">Recuperação</option>
+                                            <option value="final">Avaliação Final</option>
+                                        </select>
+                                    </div>
+
+
+                                </div>
+                            </div>
+
+                            <!-- Área de Upload -->
+                            <div class="upload-area" id="upload-area">
+                                <div class="upload-content">
+                                    <i class="fas fa-file-pdf"></i>
+                                    <h3>Arraste os PDFs aqui ou clique para selecionar</h3>
+                                    <p>Suporte a múltiplos arquivos PDF</p>
+                                    <input type="file" id="pdf-files" name="files" multiple accept=".pdf" style="display: none;">
+                                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('pdf-files').click()">
+                                        <i class="fas fa-folder-open"></i>
+                                        Selecionar Arquivos
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Lista de Arquivos -->
+                            <div class="files-list" id="files-list" style="display: none;">
+                                <h4><i class="fas fa-list"></i> Arquivos Selecionados</h4>
+                                <div id="files-container"></div>
+                            </div>
+
+                            <!-- Botão de Processamento -->
+                            <div class="form-buttons">
+                                <button type="submit" class="btn btn-primary btn-block" id="btn-processar">
+                                    <i class="fas fa-play"></i>
+                                    Processar Gabaritos
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Seção de Progresso -->
+            <section class="progress-section" id="progress-section" style="display:none;">
+                <div class="progress-card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-sync-alt"></i>
+                        </div>
+                        <div class="card-title">
+                            <h2>Processando Gabaritos</h2>
+                            <p>Sistema EduCorreção em execução</p>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="progress-bar">
+                                <div class="progress-fill" id="progress-fill"></div>
+                            </div>
+                            <span class="progress-text" id="progress-text">0%</span>
+                        </div>
+                        <div class="progress-log" id="progress-log"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Seção de Resultados -->
+            <section class="results-section" id="results-section" style="display:none;">
+                <div class="results-card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="card-title">
+                            <h2>Resultados da Correção</h2>
+                            <p>Gabaritos processados com sucesso</p>
+                        </div>
+                        <div class="results-actions">
+                            <button class="btn btn-success" id="btn-importar-todos" onclick="importarTodosResultados()">
+                                <i class="fas fa-download"></i>
+                                Importar Todos para Lança Resultado
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="results-grid" id="results-grid">
+                            <!-- Resultados serão inseridos aqui via JS -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Botão Voltar -->
+            <div class="back-section">
+                <a href="/dashboard" class="btn btn-back">
+                    <i class="fas fa-arrow-left"></i>
+                    Voltar ao Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmação -->
+    <div class="modal-overlay" id="modal-confirmar">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Confirmar Importação</h3>
+                <button class="close-btn" onclick="fecharModal('modal-confirmar')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Deseja importar este resultado para o sistema de lança resultado?</p>
+                <div class="resultado-info" id="resultado-info"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="fecharModal('modal-confirmar')">
+                    <i class="fas fa-times"></i>
+                    Cancelar
+                </button>
+                <button class="btn btn-primary" id="btn-confirmar-importacao">
+                    <i class="fas fa-check"></i>
+                    Confirmar Importação
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <style>
+        /* Estilos para Correção Automática */
+        :root {
+            --primary: #6C63FF;
+            --primary-dark: #4D44DB;
+            --secondary: #FFFFFD;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --info: #17a2b8;
+            --gray-light: #f8f9fa;
+            --text-primary: #6C63FF;
+            --text-secondary: #8B85FF;
+        }
+
+        .main-wrapper {
+            position: relative;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .background-shapes {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .shape {
+            position: absolute;
+            border-radius: 50%;
+            background: linear-gradient(45deg, rgba(108, 99, 255, 0.1), rgba(139, 133, 255, 0.05));
+            animation: float 20s infinite ease-in-out;
+        }
+
+        .shape-1 {
+            width: 300px;
+            height: 300px;
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .shape-2 {
+            width: 200px;
+            height: 200px;
+            top: 50%;
+            right: 10%;
+            animation-delay: 7s;
+        }
+
+        .shape-3 {
+            width: 150px;
+            height: 150px;
+            bottom: 20%;
+            left: 50%;
+            animation-delay: 14s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            33% { transform: translateY(-30px) rotate(120deg); }
+            66% { transform: translateY(30px) rotate(240deg); }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        .modern-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(108, 99, 255, 0.3);
+        }
+
+        .header-content {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .modern-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 0 0 0.5rem 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .modern-header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin: 0;
+        }
+
+        .header-stats {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 1rem 1.5rem;
+            min-width: 120px;
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+        }
+
+        .stat-number {
+            display: block;
+            font-size: 2rem;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Cards */
+        .upload-card, .progress-card, .results-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            margin-bottom: 2rem;
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .card-header {
+            background: var(--gray-light);
+            padding: 1.5rem;
+            border-bottom: 1px solid #e1e8ed;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--primary);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .card-title {
+            flex: 1;
+        }
+
+        .card-title h2 {
+            font-size: 1.3rem;
+            color: var(--primary-dark);
+            margin: 0 0 0.25rem 0;
+        }
+
+        .card-title p {
+            color: #666;
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        .card-content {
+            padding: 2rem;
+        }
+
+        /* Configurações */
+        .config-section {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .config-section h3 {
+            color: var(--primary-dark);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: var(--primary-dark);
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .form-group select {
+            padding: 0.75rem;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        /* Upload Area */
+        .upload-area {
+            border: 3px dashed #e1e8ed;
+            border-radius: 12px;
+            padding: 3rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            margin-bottom: 1.5rem;
+        }
+
+        .upload-area.dragover {
+            border-color: var(--primary);
+            background: rgba(108, 99, 255, 0.05);
+        }
+
+        .upload-content i {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .upload-content h3 {
+            color: var(--primary-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .upload-content p {
+            color: #666;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Files List */
+        .files-list {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .files-list h4 {
+            color: var(--primary-dark);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .file-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            border: 1px solid #e1e8ed;
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .file-icon {
+            color: var(--danger);
+            font-size: 1.2rem;
+        }
+
+        .file-name {
+            font-weight: 500;
+            color: var(--primary-dark);
+        }
+
+        .file-size {
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .file-remove {
+            background: none;
+            border: none;
+            color: var(--danger);
+            cursor: pointer;
+            padding: 0.25rem;
+            border-radius: 4px;
+            transition: background 0.3s ease;
+        }
+
+        .file-remove:hover {
+            background: rgba(220, 53, 69, 0.1);
+        }
+
+        /* Progress */
+        .progress-bar-container {
+            margin-bottom: 1.5rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e1e8ed;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--text-secondary));
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 10px;
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-weight: 600;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .progress-log {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            line-height: 1.4;
+        }
+
+        .log-entry {
+            margin-bottom: 0.25rem;
+            padding: 0.25rem 0;
+        }
+
+        .log-success { color: var(--success); }
+        .log-error { color: var(--danger); }
+        .log-info { color: var(--info); }
+
+        /* Results */
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .result-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            border: 1px solid #e1e8ed;
+            transition: all 0.3s ease;
+        }
+
+        .result-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .result-card.success {
+            border-left: 4px solid var(--success);
+        }
+
+        .result-card.error {
+            border-left: 4px solid var(--danger);
+        }
+
+        .result-header {
+            padding: 1rem;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e1e8ed;
+        }
+
+        .result-title {
+            font-weight: 600;
+            color: var(--primary-dark);
+            margin-bottom: 0.25rem;
+        }
+
+        .result-subtitle {
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .result-body {
+            padding: 1rem;
+        }
+
+        .result-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .info-item {
+            text-align: center;
+            padding: 0.75rem;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .info-label {
+            font-size: 0.75rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.25rem;
+        }
+
+        .info-value {
+            font-weight: 600;
+            color: var(--primary-dark);
+        }
+
+        .result-answers {
+            margin-bottom: 1rem;
+        }
+
+        .answers-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--primary-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .answers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 0.5rem;
+        }
+
+        .answer-block {
+            background: #f8f9fa;
+            border-radius: 6px;
+            padding: 0.5rem;
+            text-align: center;
+        }
+
+        .block-title {
+            font-size: 0.75rem;
+            color: #666;
+            margin-bottom: 0.25rem;
+        }
+
+        .block-answers {
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            color: var(--primary-dark);
+        }
+
+        .result-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .results-actions {
+            margin-left: auto;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            text-align: center;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--text-secondary));
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success), #34ce57);
+            color: white;
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, var(--info), #20c997);
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        .btn-back {
+            background: var(--gray-light);
+            color: var(--primary-dark);
+            border: 1px solid #e1e8ed;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-block {
+            width: 100%;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            -webkit-backdrop-filter: blur(5px);
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 90%;
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .modal-header h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .close-btn:hover {
+            background: #f7fafc;
+            color: var(--text-primary);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .modal-footer {
+            padding: 1.5rem;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+
+        .resultado-info {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        /* Toast */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            background: white;
+            border-radius: 12px;
+            padding: 16px 20px;
+            min-width: 300px;
+            max-width: 400px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            border-left: 4px solid;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transform: translateX(100%);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .toast.success { border-left-color: #28a745; }
+        .toast.error { border-left-color: #dc3545; }
+        .toast.warning { border-left-color: #ffc107; }
+        .toast.info { border-left-color: #17a2b8; }
+
+        .toast-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        .toast.success .toast-icon { background: #28a745; }
+        .toast.error .toast-icon { background: #dc3545; }
+        .toast.warning .toast-icon { background: #ffc107; }
+        .toast.info .toast-icon { background: #17a2b8; }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-title {
+            font-weight: 600;
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 2px;
+        }
+
+        .toast-message {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            font-size: 18px;
+            color: #999;
+            cursor: pointer;
+            padding: 0;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .toast-close:hover {
+            color: #666;
+        }
+
+        /* Back Section */
+        .back-section {
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .modern-header {
+                padding: 1.5rem 1rem;
+            }
+
+            .modern-header h1 {
+                font-size: 2rem;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .header-stats {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .card-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-footer {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+
+    <script src="/js/correcao-automatica.js"></script>
+{% endblock %} 

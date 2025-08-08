@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Correção Automática</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-button {
+            background: #6C63FF;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        .test-button:hover {
+            background: #4D44DB;
+        }
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Teste do Sistema de Correção Automática</h1>
+        
+        <div id="status-container"></div>
+        
+        <button class="test-button" onclick="testarInicializacao()">
+            Testar Inicialização
+        </button>
+        
+        <button class="test-button" onclick="testarFuncoesGlobais()">
+            Testar Funções Globais
+        </button>
+        
+        <button class="test-button" onclick="testarAbrirPDF()">
+            Testar Abrir PDF
+        </button>
+        
+        <button class="test-button" onclick="limparStatus()">
+            Limpar Status
+        </button>
+    </div>
+
+    <script>
+        function adicionarStatus(mensagem, tipo = 'success') {
+            const container = document.getElementById('status-container');
+            const status = document.createElement('div');
+            status.className = `status ${tipo}`;
+            status.textContent = `${new Date().toLocaleTimeString()}: ${mensagem}`;
+            container.appendChild(status);
+        }
+
+        function testarInicializacao() {
+            try {
+                if (window.correcaoAutomatica) {
+                    adicionarStatus('✅ Sistema de correção automática inicializado com sucesso');
+                } else {
+                    adicionarStatus('❌ Sistema de correção automática não encontrado', 'error');
+                }
+            } catch (error) {
+                adicionarStatus(`❌ Erro ao verificar inicialização: ${error.message}`, 'error');
+            }
+        }
+
+        function testarFuncoesGlobais() {
+            try {
+                const funcoes = ['fecharModal', 'importarTodosResultados', 'abrirPDF', 'removeFile'];
+                let todasExistem = true;
+                
+                funcoes.forEach(funcao => {
+                    if (typeof window[funcao] === 'function') {
+                        adicionarStatus(`✅ Função ${funcao} disponível`);
+                    } else {
+                        adicionarStatus(`❌ Função ${funcao} não encontrada`, 'error');
+                        todasExistem = false;
+                    }
+                });
+                
+                if (todasExistem) {
+                    adicionarStatus('✅ Todas as funções globais estão disponíveis');
+                }
+            } catch (error) {
+                adicionarStatus(`❌ Erro ao testar funções: ${error.message}`, 'error');
+            }
+        }
+
+        function testarAbrirPDF() {
+            try {
+                if (typeof abrirPDF === 'function') {
+                    adicionarStatus('✅ Função abrirPDF disponível - testando...');
+                    // Simular chamada da função
+                    abrirPDF(0);
+                    adicionarStatus('✅ Função abrirPDF executada (sem arquivo real)');
+                } else {
+                    adicionarStatus('❌ Função abrirPDF não encontrada', 'error');
+                }
+            } catch (error) {
+                adicionarStatus(`❌ Erro ao testar abrirPDF: ${error.message}`, 'error');
+            }
+        }
+
+        function limparStatus() {
+            document.getElementById('status-container').innerHTML = '';
+        }
+
+        // Testar automaticamente quando a página carregar
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                testarInicializacao();
+                testarFuncoesGlobais();
+            }, 1000);
+        });
+    </script>
+
+    <!-- Carregar o script de correção automática -->
+    <script src="js/correcao-automatica.js"></script>
+</body>
+</html> 

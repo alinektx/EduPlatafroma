@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Model Canvas Interativo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Kalam:wght@700&display=swap" rel="stylesheet">
+    <style>
+        /* Estilo para a fonte do título principal */
+        .font-kalam {
+            font-family: 'Kalam', cursive;
+        }
+        /* Estilo para o corpo do texto */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* Fundo cinza claro */
+        }
+        /* Estilo para os blocos editáveis */
+        .canvas-block {
+            background-color: white;
+            border: 1px solid #d1d5db; /* Borda cinza */
+            padding: 1rem;
+            height: 100%;
+            min-height: 120px; /* Altura mínima para garantir espaço */
+            overflow-y: auto; /* Scroll se o conteúdo for grande */
+            border-radius: 0.5rem; /* Cantos arredondados */
+            transition: box-shadow 0.3s ease;
+        }
+        .canvas-block:focus-within {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5); /* Sombra ao focar */
+        }
+        /* Estilo para o placeholder do conteúdo editável */
+        [contenteditable][data-placeholder]:empty:before {
+            content: attr(data-placeholder);
+            color: #9ca3af;
+            pointer-events: none;
+            display: block; /* Garante que o placeholder seja exibido */
+        }
+        /* Estilo para os ícones */
+        .icon {
+            width: 24px;
+            height: 24px;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 p-4 sm:p-6 md:p-8">
+
+    <div class="max-w-7xl mx-auto">
+        <h1 class="text-4xl md:text-5xl text-center font-kalam text-gray-800 mb-8">
+            Desenhe seu modelo de negócio
+        </h1>
+
+        <div class="grid grid-cols-10 gap-4">
+            
+            <!-- Cabeçalhos das Seções -->
+            <div class="col-span-10 md:col-span-4 text-center py-2 bg-blue-500 text-white font-bold rounded-t-lg">COMO FAÇO?</div>
+            <div class="col-span-10 md:col-span-2 text-center py-2 bg-red-500 text-white font-bold rounded-t-lg">O QUE FAÇO?</div>
+            <div class="col-span-10 md:col-span-4 text-center py-2 bg-green-600 text-white font-bold rounded-t-lg">PARA QUEM?</div>
+
+            <!-- Bloco: Parcerias-Chave -->
+            <div class="col-span-10 md:col-span-2 row-span-2 flex flex-col gap-2 p-2 bg-blue-50 border-blue-200 border rounded-b-lg">
+                <h2 class="font-bold text-gray-700 flex items-center gap-2">
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m-7.5-2.962a3.75 3.75 0 015.968.088v-2.022a1.75 1.75 0 00-1.75-1.75h-2.5a1.75 1.75 0 00-1.75 1.75v2.022a3.75 3.75 0 015.968-.088zM18 18.72A9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m-7.5-2.962a3.75 3.75 0 015.968.088v-2.022a1.75 1.75 0 00-1.75-1.75h-2.5a1.75 1.75 0 00-1.75 1.75v2.022a3.75 3.75 0 015.968-.088zM12.75 6.036A9.002 9.002 0 0121 12c0 1.603-.434 3.105-1.196 4.426m-1.196-4.426a3.75 3.75 0 01-5.968-.088v-2.022a1.75 1.75 0 00-1.75-1.75h-2.5a1.75 1.75 0 00-1.75 1.75v2.022a3.75 3.75 0 015.968.088z" /></svg>
+                    Parcerias-Chave
+                </h2>
+                <div contenteditable="true" class="canvas-block" data-placeholder="Quem são seus parceiros e fornecedores chave?"></div>
+            </div>
+
+            <!-- Blocos: Atividades-Chave e Recursos-Chave -->
+            <div class="col-span-10 md:col-span-2 row-span-2 flex flex-col gap-4 p-2 bg-blue-50 border-blue-200 border rounded-b-lg">
+                <div class="flex-1 flex flex-col gap-2">
+                    <h2 class="font-bold text-gray-700 flex items-center gap-2">
+                        <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" /></svg>
+                        Atividades-Chave
+                    </h2>
+                    <div contenteditable="true" class="canvas-block" data-placeholder="Que atividades chave sua proposta de valor requer?"></div>
+                </div>
+                <div class="flex-1 flex flex-col gap-2">
+                    <h2 class="font-bold text-gray-700 flex items-center gap-2">
+                        <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                        Recursos-Chave
+                    </h2>
+                    <div contenteditable="true" class="canvas-block" data-placeholder="Quais recursos chave sua proposta de valor requer?"></div>
+                </div>
+            </div>
+
+            <!-- Bloco: Proposta de Valor -->
+            <div class="col-span-10 md:col-span-2 row-span-2 flex flex-col gap-2 p-2 bg-red-50 border-red-200 border rounded-b-lg">
+                <h2 class="font-bold text-gray-700 flex items-center gap-2">
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 11.25v8.25a8.25 8.25 0 01-16.5 0v-8.25a8.25 8.25 0 0116.5 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 15.75a3.75 3.75 0 003.75-3.75V4.5a3.75 3.75 0 00-7.5 0v7.5A3.75 3.75 0 0012 15.75z" /></svg>
+                    Proposta de Valor
+                </h2>
+                <div contenteditable="true" class="canvas-block" data-placeholder="Que valor você entrega ao cliente? Qual problema está ajudando a resolver?"></div>
+            </div>
+
+            <!-- Blocos: Relacionamento com Clientes e Canais -->
+            <div class="col-span-10 md:col-span-2 row-span-2 flex flex-col gap-4 p-2 bg-green-50 border-green-200 border rounded-b-lg">
+                <div class="flex-1 flex flex-col gap-2">
+                    <h2 class="font-bold text-gray-700 flex items-center gap-2">
+                        <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" /></svg>
+                        Relacionamento com Clientes
+                    </h2>
+                    <div contenteditable="true" class="canvas-block" data-placeholder="Que tipo de relação cada segmento de clientes espera que você estabeleça?"></div>
+                </div>
+                <div class="flex-1 flex flex-col gap-2">
+                    <h2 class="font-bold text-gray-700 flex items-center gap-2">
+                        <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10l2-2h8a1 1 0 001-1z" /></svg>
+                        Canais
+                    </h2>
+                    <div contenteditable="true" class="canvas-block" data-placeholder="Através de quais canais seus segmentos de clientes querem ser alcançados?"></div>
+                </div>
+            </div>
+
+            <!-- Bloco: Segmentos de Mercado -->
+            <div class="col-span-10 md:col-span-2 row-span-2 flex flex-col gap-2 p-2 bg-green-50 border-green-200 border rounded-b-lg">
+                <h2 class="font-bold text-gray-700 flex items-center gap-2">
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" /></svg>
+                        Segmentos de Mercado
+                </h2>
+                <div contenteditable="true" class="canvas-block" data-placeholder="Para quem estamos criando valor? Quem são seus clientes mais importantes?"></div>
+            </div>
+
+            <!-- Cabeçalho Inferior -->
+            <div class="col-span-10 text-center py-2 bg-amber-600 text-white font-bold rounded-t-lg mt-4">QUANTO?</div>
+
+            <!-- Bloco: Estrutura de Custos -->
+            <div class="col-span-10 md:col-span-5 flex flex-col gap-2 p-2 bg-amber-50 border-amber-200 border rounded-b-lg">
+                <h2 class="font-bold text-gray-700 flex items-center gap-2">
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h6m3-3.75l-3 3m3 0l-3-3m-9.75 6h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5z" /></svg>
+                    Estrutura de Custos
+                </h2>
+                <div contenteditable="true" class="canvas-block" data-placeholder="Quais são os custos mais importantes inerentes ao seu modelo de negócio?"></div>
+            </div>
+
+            <!-- Bloco: Fontes de Renda -->
+            <div class="col-span-10 md:col-span-5 flex flex-col gap-2 p-2 bg-amber-50 border-amber-200 border rounded-b-lg">
+                <h2 class="font-bold text-gray-700 flex items-center gap-2">
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-15c-.621 0-1.125-.504-1.125-1.125v-9.75c0-.621.504-1.125 1.125-1.125h1.5" /></svg>
+                    Fontes de Renda
+                </h2>
+                <div contenteditable="true" class="canvas-block" data-placeholder="Para qual valor nossos clientes estão realmente dispostos a pagar?"></div>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,893 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard Gráfico{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .dashboard-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+
+    .dashboard-header h1 {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        font-weight: 700;
+    }
+
+    .dashboard-header p {
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+        text-align: center;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    .stat-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        color: var(--primary);
+    }
+
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--dark);
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        color: #666;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .charts-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .chart-card {
+        background: white;
+        padding: 2rem;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+    }
+
+    .chart-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .chart-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+    .chart-icon {
+        font-size: 1.5rem;
+        margin-right: 1rem;
+        color: var(--primary);
+    }
+
+    .chart-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: var(--dark);
+    }
+
+    .chart-container {
+        height: 400px;
+        position: relative;
+    }
+
+    .ranking-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 1rem;
+    }
+
+    .ranking-table th,
+    .ranking-table td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #eee;
+    }
+
+    .ranking-table th {
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        color: white;
+        font-weight: 600;
+    }
+
+    .ranking-table tr:nth-child(even) {
+        background-color: #f8f9fa;
+    }
+
+    .ranking-table tr:hover {
+        background-color: #e3f2fd;
+    }
+
+    .position-badge {
+        display: inline-block;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        text-align: center;
+        line-height: 30px;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .position-1 { background: linear-gradient(135deg, #ffd700, #ffed4e); color: #333; }
+    .position-2 { background: linear-gradient(135deg, #c0c0c0, #e0e0e0); color: #333; }
+    .position-3 { background: linear-gradient(135deg, #cd7f32, #daa520); color: white; }
+    .position-other { background: linear-gradient(135deg, #6c757d, #495057); color: white; }
+
+    .progress-bar {
+        width: 100%;
+        height: 8px;
+        background-color: #e9ecef;
+        border-radius: 4px;
+        overflow: hidden;
+        margin-top: 5px;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--primary), var(--accent));
+        border-radius: 4px;
+        transition: width 0.3s ease;
+    }
+
+    .filters-section {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+        margin-bottom: 2rem;
+    }
+
+    .filters-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        align-items: end;
+    }
+
+    .filter-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .filter-group label {
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--dark);
+    }
+
+    .filter-group select,
+    .filter-group input {
+        padding: 0.75rem;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        font-size: 0.9rem;
+        transition: border-color 0.3s ease;
+    }
+
+    .filter-group select:focus,
+    .filter-group input:focus {
+        outline: none;
+        border-color: var(--primary);
+    }
+
+    .btn-apply {
+        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .btn-apply:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(108, 99, 255, 0.3);
+    }
+
+    .loading {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 200px;
+        color: var(--primary);
+        font-size: 1.2rem;
+    }
+
+    .loading i {
+        animation: spin 1s linear infinite;
+        margin-right: 1rem;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 768px) {
+        .charts-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .filters-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Header -->
+    <div class="dashboard-header">
+        <h1><i class="fas fa-chart-pie"></i> Dashboard Gráfico</h1>
+        <p>Análise visual dos resultados de avaliação, ranking de alunos e habilidades mais acertadas</p>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filters-section">
+        <h3 style="margin-bottom: 1rem; color: var(--dark);">
+            <i class="fas fa-filter"></i> Filtros
+        </h3>
+        <div class="filters-grid">
+            <div class="filter-group">
+                <label for="ano-filter">Ano</label>
+                <select id="ano-filter">
+                    <option value="">Todos os anos</option>
+                    <option value="2025">2025</option>
+                    <option value="2024">2024</option>
+                    <option value="2023">2023</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="escola-filter">Escola</label>
+                <select id="escola-filter">
+                    <option value="">Todas as escolas</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="componente-filter">Componente</label>
+                <select id="componente-filter">
+                    <option value="">Todos os componentes</option>
+                    <option value="Português">Português</option>
+                    <option value="Matemática">Matemática</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="caderno-filter">Caderno</label>
+                <select id="caderno-filter">
+                    <option value="">Todos os cadernos</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <button class="btn-apply" onclick="aplicarFiltros()">
+                    <i class="fas fa-search"></i> Aplicar Filtros
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Estatísticas Gerais -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-number" id="total-alunos">0</div>
+            <div class="stat-label">Total de Alunos</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="stat-number" id="media-geral">0%</div>
+            <div class="stat-label">Média Geral</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-trophy"></i>
+            </div>
+            <div class="stat-number" id="melhor-nota">0%</div>
+            <div class="stat-label">Melhor Nota</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-book"></i>
+            </div>
+            <div class="stat-number" id="habilidades-testadas">0</div>
+            <div class="stat-label">Habilidades Testadas</div>
+        </div>
+    </div>
+
+    <!-- Gráficos -->
+    <div class="charts-grid">
+        <!-- Gráfico de Ranking de Alunos -->
+        <div class="chart-card">
+            <div class="chart-header">
+                <div class="chart-icon">
+                    <i class="fas fa-medal"></i>
+                </div>
+                <div class="chart-title">Top 10 Alunos - Ranking de Desempenho</div>
+            </div>
+            <div class="chart-container">
+                <div id="ranking-chart"></div>
+            </div>
+        </div>
+
+
+
+        <!-- Gráfico de Distribuição de Notas -->
+        <div class="chart-card">
+            <div class="chart-header">
+                <div class="chart-icon">
+                    <i class="fas fa-chart-bar"></i>
+                </div>
+                <div class="chart-title">Distribuição de Notas por Faixa</div>
+            </div>
+            <div class="chart-container">
+                <div id="distribuicao-chart"></div>
+            </div>
+        </div>
+
+        <!-- Gráfico de Habilidades Mais Acertadas e Mais Erradas -->
+        <div class="chart-card">
+            <div class="chart-header">
+                <div class="chart-icon">
+                    <i class="fas fa-chart-bar"></i>
+                </div>
+                <div class="chart-title">Habilidades Mais Acertadas vs Mais Erradas</div>
+            </div>
+            <div class="chart-container">
+                <div id="habilidades-comparativo-chart"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabela de Ranking Detalhada -->
+    <div class="chart-card">
+        <div class="chart-header">
+            <div class="chart-icon">
+                <i class="fas fa-list-ol"></i>
+            </div>
+            <div class="chart-title">Ranking Completo de Alunos</div>
+        </div>
+        <div id="ranking-table-container">
+            <div class="loading">
+                <i class="fas fa-spinner"></i>
+                Carregando ranking...
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Dados simulados para demonstração
+let dadosDashboard = {
+    estatisticas: {
+        totalAlunos: 271,
+        mediaGeral: 68.5,
+        melhorNota: 95.2,
+        habilidadesTestadas: 24
+    },
+    rankingAlunos: [
+        { nome: 'Fernando Ribeiro', nota: 95.2, turma: '5º ano A', escola: 'EMEF Teste' },
+        { nome: 'Fernanda Alves', nota: 92.8, turma: '5º ano B', escola: 'EMEF Teste' },
+        { nome: 'Lucas Oliveira', nota: 89.5, turma: '5º ano A', escola: 'EMEF Teste' },
+        { nome: 'Eduarda Ferreira', nota: 87.3, turma: '5º ano C', escola: 'EMEF Teste' },
+        { nome: 'Carlos Alves', nota: 85.1, turma: '5º ano B', escola: 'EMEF Teste' },
+        { nome: 'Ana Silva', nota: 82.7, turma: '6º ano A', escola: 'Colégio Aline' },
+        { nome: 'Pedro Santos', nota: 80.4, turma: '6º ano B', escola: 'Colégio Aline' },
+        { nome: 'Maria Costa', nota: 78.9, turma: '7º ano A', escola: 'Escola Municipal' },
+        { nome: 'João Lima', nota: 76.2, turma: '7º ano B', escola: 'Escola Municipal' },
+        { nome: 'Sofia Pereira', nota: 74.8, turma: '8º ano A', escola: 'EMEF Teste' }
+    ],
+    habilidadesAcertadas: [
+        { habilidade: 'EF05LP01 - Leitura e interpretação de textos', acertos: 85, total: 100 },
+        { habilidade: 'EF05MA01 - Operações matemáticas básicas', acertos: 78, total: 100 },
+        { habilidade: 'EF05LP02 - Produção de texto', acertos: 72, total: 100 },
+        { habilidade: 'EF05MA02 - Geometria e medidas', acertos: 68, total: 100 },
+        { habilidade: 'EF05MA03 - Análise de gráficos e tabelas', acertos: 65, total: 100 },
+        { habilidade: 'EF05LP03 - Gramática e ortografia', acertos: 62, total: 100 },
+        { habilidade: 'EF05MA04 - Resolução de problemas', acertos: 58, total: 100 },
+        { habilidade: 'EF05LP04 - Compreensão textual', acertos: 55, total: 100 }
+    ],
+    distribuicaoNotas: [
+        { faixa: '90-100%', quantidade: 15, percentual: 5.5 },
+        { faixa: '80-89%', quantidade: 45, percentual: 16.6 },
+        { faixa: '70-79%', quantidade: 78, percentual: 28.8 },
+        { faixa: '60-69%', quantidade: 89, percentual: 32.8 },
+        { faixa: '50-59%', quantidade: 34, percentual: 12.5 },
+        { faixa: '0-49%', quantidade: 10, percentual: 3.7 }
+    ],
+    componentesCurriculares: [
+        { componente: 'Português', media: 72.5 },
+        { componente: 'Matemática', media: 68.3 }
+    ],
+    habilidadesComparativo: [
+        { habilidade: 'EF05LP01 - Leitura e interpretação de textos', acertos: 85, erros: 15, componente: 'Português' },
+        { habilidade: 'EF05MA01 - Operações matemáticas básicas', acertos: 78, erros: 22, componente: 'Matemática' },
+        { habilidade: 'EF05LP02 - Produção de texto', acertos: 72, erros: 28, componente: 'Português' },
+        { habilidade: 'EF05MA02 - Geometria e medidas', acertos: 68, erros: 32, componente: 'Matemática' },
+        { habilidade: 'EF05MA03 - Análise de gráficos e tabelas', acertos: 65, erros: 35, componente: 'Matemática' },
+        { habilidade: 'EF05LP03 - Gramática e ortografia', acertos: 62, erros: 38, componente: 'Português' },
+        { habilidade: 'EF05MA04 - Resolução de problemas', acertos: 58, erros: 42, componente: 'Matemática' },
+        { habilidade: 'EF05LP04 - Compreensão textual', acertos: 55, erros: 45, componente: 'Português' }
+    ]
+};
+
+// Função para carregar dados da API
+async function carregarDadosDashboard() {
+    try {
+        console.log('Carregando dados do dashboard...');
+        
+        // Obter filtros atuais
+        const filtros = {
+            ano: document.getElementById('ano-filter').value,
+            escola: document.getElementById('escola-filter').value,
+            componente: document.getElementById('componente-filter').value,
+            caderno: document.getElementById('caderno-filter').value
+        };
+        
+        // Fazer chamada para a API
+        const response = await fetch('/api/dashboard-grafico/dados', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(filtros)
+        });
+        
+        if (response.ok) {
+            const dados = await response.json();
+            dadosDashboard = dados;
+            console.log('Dados carregados com sucesso:', dados);
+        } else {
+            console.error('Erro na API:', response.status);
+            // Usar dados simulados como fallback
+        }
+        
+        atualizarEstatisticas();
+        criarGraficos();
+        await criarTabelaRanking();
+        
+    } catch (error) {
+        console.error('Erro ao carregar dados:', error);
+        // Usar dados simulados como fallback
+        atualizarEstatisticas();
+        criarGraficos();
+        await criarTabelaRanking();
+    }
+}
+
+// Função para atualizar estatísticas
+function atualizarEstatisticas() {
+    document.getElementById('total-alunos').textContent = dadosDashboard.estatisticas.totalAlunos;
+    document.getElementById('media-geral').textContent = dadosDashboard.estatisticas.mediaGeral + '%';
+    document.getElementById('melhor-nota').textContent = dadosDashboard.estatisticas.melhorNota + '%';
+    document.getElementById('habilidades-testadas').textContent = dadosDashboard.estatisticas.habilidadesTestadas;
+}
+
+// Função para criar gráfico de ranking
+function criarGraficoRanking() {
+    const options = {
+        series: [{
+            name: 'Nota',
+            data: dadosDashboard.rankingAlunos.map(aluno => aluno.nota)
+        }],
+        chart: {
+            type: 'bar',
+            height: 350,
+            toolbar: {
+                show: false
+            }
+        },
+        plotOptions: {
+            bar: {
+                horizontal: false,
+                columnWidth: '55%',
+                endingShape: 'rounded',
+                colors: {
+                    ranges: [{
+                        from: 90,
+                        to: 100,
+                        color: '#2ecc71'
+                    }, {
+                        from: 80,
+                        to: 89,
+                        color: '#3498db'
+                    }, {
+                        from: 70,
+                        to: 79,
+                        color: '#f39c12'
+                    }, {
+                        from: 0,
+                        to: 69,
+                        color: '#e74c3c'
+                    }]
+                }
+            },
+        },
+        dataLabels: {
+            enabled: false
+        },
+        stroke: {
+            show: true,
+            width: 2,
+            colors: ['transparent']
+        },
+        xaxis: {
+            categories: dadosDashboard.rankingAlunos.map(aluno => aluno.nome.split(' ')[0]),
+            labels: {
+                rotate: -45,
+                style: {
+                    fontSize: '12px'
+                }
+            }
+        },
+        yaxis: {
+            title: {
+                text: 'Nota (%)'
+            }
+        },
+        fill: {
+            opacity: 1
+        },
+        tooltip: {
+            y: {
+                formatter: function (val) {
+                    return val + "%"
+                }
+            }
+        }
+    };
+
+    const chart = new ApexCharts(document.querySelector("#ranking-chart"), options);
+    chart.render();
+}
+
+
+
+// Função para criar gráfico de distribuição
+function criarGraficoDistribuicao() {
+    const options = {
+        series: [{
+            name: 'Alunos',
+            data: dadosDashboard.distribuicaoNotas.map(d => d.quantidade)
+        }],
+        chart: {
+            type: 'bar',
+            height: 350,
+            toolbar: {
+                show: false
+            }
+        },
+        plotOptions: {
+            bar: {
+                horizontal: false,
+                columnWidth: '70%',
+                endingShape: 'rounded'
+            },
+        },
+        dataLabels: {
+            enabled: true,
+            formatter: function (val) {
+                return val
+            },
+            style: {
+                fontSize: '12px',
+                colors: ['#fff']
+            }
+        },
+        stroke: {
+            show: true,
+            width: 2,
+            colors: ['transparent']
+        },
+        xaxis: {
+            categories: dadosDashboard.distribuicaoNotas.map(d => d.faixa),
+            title: {
+                text: 'Faixa de Notas'
+            }
+        },
+        yaxis: {
+            title: {
+                text: 'Quantidade de Alunos'
+            }
+        },
+        fill: {
+            opacity: 1,
+            colors: ['#667eea', '#764ba2', '#f093fb', '#f5576c', '#4facfe', '#00f2fe']
+        },
+        tooltip: {
+            y: {
+                formatter: function (val) {
+                    return val + " alunos"
+                }
+            }
+        }
+    };
+
+    const chart = new ApexCharts(document.querySelector("#distribuicao-chart"), options);
+    chart.render();
+}
+
+// Função para criar gráfico comparativo de habilidades
+function criarGraficoHabilidadesComparativo() {
+    const options = {
+        series: [{
+            name: 'Acertos',
+            data: dadosDashboard.habilidadesComparativo.map(h => h.acertos)
+        }, {
+            name: 'Erros',
+            data: dadosDashboard.habilidadesComparativo.map(h => h.erros)
+        }],
+        chart: {
+            type: 'bar',
+            height: 350,
+            stacked: true,
+            toolbar: {
+                show: false
+            }
+        },
+        plotOptions: {
+            bar: {
+                horizontal: true,
+                dataLabels: {
+                    total: {
+                        enabled: true,
+                        offsetX: 0,
+                        style: {
+                            fontSize: '13px',
+                            fontWeight: 900
+                        }
+                    }
+                }
+            },
+        },
+        stroke: {
+            width: 1,
+            colors: ['#fff']
+        },
+        title: {
+            text: 'Acertos vs Erros por Habilidade'
+        },
+        xaxis: {
+            categories: dadosDashboard.habilidadesComparativo.map(h => {
+                // Extrair código e nome da habilidade
+                const partes = h.habilidade.split(' - ');
+                const codigo = partes[0];
+                const nome = partes[1] ? partes[1].split(' ').slice(0, 2).join(' ') : '';
+                return `${codigo}\n${nome}`;
+            }),
+            labels: {
+                formatter: function (val) {
+                    return val + "%"
+                },
+                style: {
+                    fontSize: '11px'
+                }
+            }
+        },
+        yaxis: {
+            title: {
+                text: undefined
+            },
+        },
+        tooltip: {
+            shared: false,
+            y: {
+                formatter: function (val) {
+                    return val + "%"
+                }
+            }
+        },
+        colors: ['#2ecc71', '#e74c3c'],
+        legend: {
+            position: 'top',
+            horizontalAlign: 'left',
+            offsetX: 40
+        }
+    };
+
+    const chart = new ApexCharts(document.querySelector("#habilidades-comparativo-chart"), options);
+    chart.render();
+}
+
+// Função para criar todos os gráficos
+function criarGraficos() {
+    criarGraficoRanking();
+    criarGraficoDistribuicao();
+    criarGraficoHabilidadesComparativo();
+}
+
+// Função para criar tabela de ranking
+async function criarTabelaRanking() {
+    const container = document.getElementById('ranking-table-container');
+    
+    try {
+        // Buscar dados reais do ranking
+        const response = await fetch('/api/relatorios/ranking-aprendizagem', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                tipo_ranking: 'aluno'
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.dados && data.dados.ranking) {
+            const ranking = data.dados.ranking;
+            
+            let html = `
+                <table class="ranking-table">
+                    <thead>
+                        <tr>
+                            <th>Posição</th>
+                            <th>Aluno</th>
+                            <th>Turma</th>
+                            <th>Escola</th>
+                            <th>Nota</th>
+                            <th>Desempenho</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            ranking.forEach((item, index) => {
+                const posicao = index + 1;
+                let positionClass = 'position-other';
+                if (posicao === 1) positionClass = 'position-1';
+                else if (posicao === 2) positionClass = 'position-2';
+                else if (posicao === 3) positionClass = 'position-3';
+                
+                // Extrair nome, turma e escola do campo 'nome'
+                const nomeCompleto = item.nome;
+                const match = nomeCompleto.match(/^(.+?) \((.+?) - (.+?)\)$/);
+                const nome = match ? match[1] : nomeCompleto;
+                const turma = match ? match[2] : '';
+                const escola = match ? match[3] : '';
+                const nota = parseFloat(item.aprendizado);
+                
+                html += `
+                    <tr>
+                        <td>
+                            <span class="position-badge ${positionClass}">${posicao}º</span>
+                        </td>
+                        <td><strong>${nome}</strong></td>
+                        <td>${turma}</td>
+                        <td>${escola}</td>
+                        <td><strong>${nota}%</strong></td>
+                        <td>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${nota}%"></div>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                    </tbody>
+                </table>
+            `;
+            
+            container.innerHTML = html;
+        } else {
+            container.innerHTML = '<p>Nenhum dado de ranking disponível</p>';
+        }
+    } catch (error) {
+        console.error('Erro ao carregar ranking:', error);
+        container.innerHTML = '<p>Erro ao carregar dados do ranking</p>';
+    }
+}
+
+// Função para aplicar filtros
+function aplicarFiltros() {
+    const ano = document.getElementById('ano-filter').value;
+    const escola = document.getElementById('escola-filter').value;
+    const componente = document.getElementById('componente-filter').value;
+    const caderno = document.getElementById('caderno-filter').value;
+    
+    console.log('Aplicando filtros:', { ano, escola, componente, caderno });
+    
+    // Recarregar dados com os novos filtros
+    carregarDadosDashboard();
+}
+
+// Função para carregar opções dos filtros
+async function carregarFiltros() {
+    try {
+        // Carregar escolas
+        const responseEscolas = await fetch('/api/escolas');
+        const dataEscolas = await responseEscolas.json();
+        const escolas = dataEscolas.escolas || dataEscolas;
+        
+        const selectEscola = document.getElementById('escola-filter');
+        escolas.forEach(escola => {
+            const option = document.createElement('option');
+            option.value = escola.id;
+            option.textContent = escola.nome;
+            selectEscola.appendChild(option);
+        });
+        
+        // Carregar cadernos
+        const responseCadernos = await fetch('/api/cadernos');
+        const dataCadernos = await responseCadernos.json();
+        const cadernos = dataCadernos.cadernos || dataCadernos;
+        
+        const selectCaderno = document.getElementById('caderno-filter');
+        cadernos.forEach(caderno => {
+            const option = document.createElement('option');
+            option.value = caderno.id;
+            option.textContent = caderno.titulo;
+            selectCaderno.appendChild(option);
+        });
+        
+    } catch (error) {
+        console.error('Erro ao carregar filtros:', error);
+    }
+}
+
+// Inicializar dashboard quando a página carregar
+document.addEventListener('DOMContentLoaded', function() {
+    carregarFiltros();
+    carregarDadosDashboard();
+});
+</script>
+{% endblock %} 

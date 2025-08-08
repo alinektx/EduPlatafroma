@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste Newsletter</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6C63FF;
+            --secondary: #4D44DB;
+            --accent: #FF6584;
+            --success: #2ecc71;
+            --warning: #f39c12;
+            --info: #3498db;
+            --light-bg: #F8F9FA;
+            --dark-text: #2E2E3A;
+            --light-text: #666;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background-color: var(--light-bg);
+            padding: 2rem;
+        }
+
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        /* ===== NEWSLETTER SECTION ===== */
+        .newsletter {
+            padding: 3rem 2rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            position: relative;
+            overflow: hidden;
+            border-radius: 15px;
+            margin: 2rem 0;
+        }
+
+        .newsletter-content {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .newsletter h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: white;
+        }
+
+        .newsletter p {
+            font-size: 1.2rem;
+            margin-bottom: 2.5rem;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        .newsletter-form {
+            background: rgba(255, 255, 255, 0.1);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            border: none;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--dark-text);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+        }
+
+        .form-group input:focus {
+            outline: none;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .form-group input::placeholder {
+            color: var(--light-text);
+        }
+
+        .newsletter-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 1rem 3rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 5px 20px rgba(255, 101, 132, 0.3);
+            width: 100%;
+            justify-content: center;
+        }
+
+        .newsletter-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 101, 132, 0.4);
+            background: #ff4d6d;
+        }
+
+        .newsletter-benefits {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .benefit-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .benefit-item i {
+            color: var(--accent);
+            font-size: 1rem;
+        }
+
+        .success-message {
+            background: rgba(46, 204, 113, 0.9);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 15px;
+            margin-top: 1rem;
+            display: none;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .debug-info {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            padding: 1rem;
+            margin: 1rem 0;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Teste da Seção Newsletter</h1>
+        
+        <div class="debug-info">
+            <strong>Status:</strong> Seção newsletter implementada<br>
+            <strong>Data:</strong> <span id="currentDate"></span><br>
+            <strong>Cache:</strong> <span id="cacheStatus"></span>
+        </div>
+
+        <!-- Newsletter Section -->
+        <section class="newsletter" id="newsletter">
+            <div class="newsletter-content">
+                <h2>Fique por dentro das novidades!</h2>
+                <p>Inscreva-se para receber atualizações exclusivas sobre novas funcionalidades, dicas pedagógicas e novidades da plataforma</p>
+                
+                <div class="newsletter-form">
+                    <form id="newsletterForm">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="nome">Nome Completo</label>
+                                <input type="text" id="nome" name="nome" placeholder="Digite seu nome completo" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="email">E-mail</label>
+                                <input type="email" id="email" name="email" placeholder="seu@email.com" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="whatsapp">WhatsApp</label>
+                                <input type="tel" id="whatsapp" name="whatsapp" placeholder="(99) 99999-9999" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="newsletter-btn">
+                            <i class="fas fa-paper-plane"></i>
+                            Inscrever-se Gratuitamente
+                        </button>
+                    </form>
+                    
+                    <div class="success-message" id="successMessage">
+                        <i class="fas fa-check-circle"></i>
+                        Inscrição realizada com sucesso! Em breve você receberá nossas novidades.
+                    </div>
+                </div>
+                
+                <div class="newsletter-benefits">
+                    <div class="benefit-item">
+                        <i class="fas fa-bell"></i>
+                        <span>Novidades em primeira mão</span>
+                    </div>
+                    <div class="benefit-item">
+                        <i class="fas fa-gift"></i>
+                        <span>Conteúdo exclusivo</span>
+                    </div>
+                    <div class="benefit-item">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Sem spam, apenas conteúdo útil</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="debug-info">
+            <strong>Instruções:</strong><br>
+            1. Se você não vê a seção newsletter, tente:<br>
+            &nbsp;&nbsp;• Ctrl+F5 (hard refresh)<br>
+            &nbsp;&nbsp;• Limpar cache do navegador<br>
+            &nbsp;&nbsp;• Abrir em aba anônima<br>
+            2. Teste o formulário preenchendo os campos<br>
+            3. Verifique se aparece a mensagem de sucesso
+        </div>
+    </div>
+
+    <script>
+        // Debug info
+        document.getElementById('currentDate').textContent = new Date().toLocaleString('pt-BR');
+        document.getElementById('cacheStatus').textContent = 'Verificar cache do navegador';
+
+        // Newsletter form handling
+        document.getElementById('newsletterForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const nome = document.getElementById('nome').value;
+            const email = document.getElementById('email').value;
+            const whatsapp = document.getElementById('whatsapp').value;
+            
+            // Validação básica
+            if (!nome || !email || !whatsapp) {
+                alert('Por favor, preencha todos os campos!');
+                return;
+            }
+            
+            // Validação de email
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                alert('Por favor, insira um e-mail válido!');
+                return;
+            }
+            
+            // Simular envio
+            const submitBtn = document.querySelector('.newsletter-btn');
+            const originalText = submitBtn.innerHTML;
+            
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+            submitBtn.disabled = true;
+            
+            setTimeout(() => {
+                // Mostrar mensagem de sucesso
+                document.getElementById('successMessage').style.display = 'block';
+                
+                // Limpar formulário
+                document.getElementById('newsletterForm').reset();
+                
+                // Restaurar botão
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+                
+                console.log('✅ Newsletter funcionando! Dados:', { nome, email, whatsapp });
+                
+                // Esconder mensagem após 5 segundos
+                setTimeout(() => {
+                    document.getElementById('successMessage').style.display = 'none';
+                }, 5000);
+                
+            }, 1500);
+        });
+        
+        // Máscara para WhatsApp
+        document.getElementById('whatsapp').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length <= 11) {
+                value = value.replace(/^(\d{2})(\d)/g, '($1) $2');
+                value = value.replace(/(\d)(\d{4})$/, '$1-$2');
+                e.target.value = value;
+            }
+        });
+
+        console.log('🚀 Página de teste carregada!');
+    </script>
+</body>
+</html> 

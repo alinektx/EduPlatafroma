@@ -1,0 +1,453 @@
+{% extends "base.html" %}
+
+{% block title %}Canvas de Modelo de Negócio{% endblock %}
+
+{% block extra_css %}
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Kalam:wght@700&display=swap" rel="stylesheet">
+<style>
+    /* Estilo para a fonte do título principal */
+    .font-kalam {
+        font-family: 'Kalam', cursive;
+    }
+    /* Estilo para o corpo do texto */
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f8fafc; /* Fundo cinza claro */
+    }
+    /* Estilo para os blocos editáveis */
+    .canvas-block {
+        background-color: white;
+        border: 1px solid #d1d5db; /* Borda cinza */
+        padding: 1rem;
+        height: 100%;
+        min-height: 120px; /* Altura mínima para garantir espaço */
+        overflow-y: auto; /* Scroll se o conteúdo for grande */
+        border-radius: 0.5rem; /* Cantos arredondados */
+        transition: box-shadow 0.3s ease;
+    }
+    .canvas-block:focus-within {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5); /* Sombra ao focar */
+    }
+    /* Estilo para o placeholder do conteúdo editável */
+    [contenteditable][data-placeholder]:empty:before {
+        content: attr(data-placeholder);
+        color: #9ca3af;
+        pointer-events: none;
+        display: block; /* Garante que o placeholder seja exibido */
+    }
+            /* Estilo para os ícones */
+        .icon {
+            width: 24px;
+            height: 24px;
+            opacity: 0.7;
+        }
+        
+        /* Estilo para preservar quebras de linha */
+        .canvas-block {
+            white-space: pre-line;
+            line-height: 1.6;
+        }
+        
+        /* Melhorar espaçamento em telas grandes */
+        @media (min-width: 1024px) {
+            .canvas-block {
+                font-size: 0.95rem;
+                line-height: 1.7;
+            }
+        }
+</style>
+{% endblock %}
+
+{% block content %}
+    <div class="bg-slate-50 p-2 sm:p-4 md:p-6">
+        <div class="w-full max-w-none mx-auto">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-4xl md:text-5xl text-center font-kalam text-gray-800 flex-1">
+                Canvas Modelo de Negocios 
+            </h1>
+            <button id="editButton" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors duration-200 flex items-center gap-2">
+                <i class="fas fa-edit"></i>
+                <span id="editButtonText">Editar Canvas</span>
+            </button>
+        </div>
+
+        <div class="grid grid-cols-12 gap-2">
+            
+            <!-- Cabeçalhos das Seções -->
+            <div class="col-span-12 md:col-span-4 text-center py-2 bg-blue-500 text-white font-bold rounded-t-lg">COMO FAÇO?</div>
+            <div class="col-span-12 md:col-span-2 text-center py-2 bg-red-500 text-white font-bold rounded-t-lg">O QUE FAÇO?</div>
+            <div class="col-span-12 md:col-span-6 text-center py-2 bg-green-600 text-white font-bold rounded-t-lg">PARA QUEM?</div>
+
+            <!-- Bloco: Parcerias-Chave -->
+            <div class="col-span-12 md:col-span-2 row-span-2 flex flex-col gap-2 p-2 bg-blue-50 border-blue-200 border rounded-b-lg">
+                <h2 class="font-bold text-gray-700 flex items-center gap-2">
+                    <i class="fas fa-handshake"></i>
+                    Parcerias-Chave
+                </h2>
+                <div contenteditable="true" class="canvas-block" data-placeholder="Quem são seus parceiros e fornecedores chave?">
+                    • Secretarias de Educação Municipais e Estaduais
+
+                    • Escolas Públicas e Privadas
+
+                    • Editoras de Material Didático
+
+                    • Fornecedores de Tecnologia Educacional
+
+                    • Consultores Pedagógicos
+
+                    • Universidades e Institutos de Pesquisa
+
+                    • Empresas de TI e Desenvolvimento
+                </div>
+            </div>
+
+            <!-- Blocos: Atividades-Chave e Recursos-Chave -->
+            <div class="col-span-12 md:col-span-2 row-span-2 flex flex-col gap-4 p-2 bg-blue-50 border-blue-200 border rounded-b-lg">
+                <div class="flex-1 flex flex-col gap-2">
+                    <h2 class="font-bold text-gray-700 flex items-center gap-2">
+                        <i class="fas fa-tasks"></i>
+                        Atividades-Chave
+                    </h2>
+                    <div contenteditable="true" class="canvas-block" data-placeholder="Que atividades chave sua proposta de valor requer?">
+                        • Desenvolvimento de Software Educacional
+
+                        • Correção Automática de Avaliações
+
+                        • Geração de Relatórios Pedagógicos
+
+                        • Suporte Técnico e Treinamento
+
+                        • Atualização de Conteúdo BNCC
+
+                        • Análise de Dados Educacionais
+
+                        • Implementação de IA para Educação
+                    </div>
+                </div>
+                <div class="flex-1 flex flex-col gap-2">
+                    <h2 class="font-bold text-gray-700 flex items-center gap-2">
+                        <i class="fas fa-database"></i>
+                        Recursos-Chave
+                    </h2>
+                    <div contenteditable="true" class="canvas-block" data-placeholder="Quais recursos chave sua proposta de valor requer?">
+                        • Plataforma Web Inteligente
+
+                        • Sistema de IA para Correção
+
+                        • Base de Dados BNCC Completa
+
+                        • Equipe de Desenvolvedores
+
+                        • Infraestrutura Cloud Escalável
+
+                        • Algoritmos de Machine Learning
+
+                        • Banco de Questões e Avaliações
+
+                        • Sistema de Relatórios Avançados
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bloco: Proposta de Valor -->
+            <div class="col-span-12 md:col-span-2 row-span-2 flex flex-col gap-2 p-2 bg-red-50 border-red-200 border rounded-b-lg">
+                <h2 class="font-bold text-gray-700 flex items-center gap-2">
+                    <i class="fas fa-gift"></i>
+                    Proposta de Valor
+                </h2>
+                <div contenteditable="true" class="canvas-block" data-placeholder="Que valor você entrega ao cliente? Qual problema está ajudando a resolver?">
+                    • Correção Automática de Avaliações com IA
+
+                    • Relatórios Pedagógicos Detalhados e Personalizados
+
+                    • Alinhamento Automático com BNCC
+
+                    • Economia de 80% do Tempo dos Professores
+
+                    • Melhoria no Desempenho dos Alunos
+
+                    • Plataforma Intuitiva e Fácil de Usar
+
+                    • Suporte Técnico Especializado 24/7
+
+                    • Análise de Dados Educacionais em Tempo Real
+
+                    • Personalização de Conteúdo por Aluno
+
+                    • Integração com Sistemas Escolares Existentes
+                </div>
+            </div>
+
+            <!-- Blocos: Relacionamento com Clientes e Canais -->
+            <div class="col-span-12 md:col-span-3 row-span-2 flex flex-col gap-4 p-2 bg-green-50 border-green-200 border rounded-b-lg">
+                <div class="flex-1 flex flex-col gap-2">
+                    <h2 class="font-bold text-gray-700 flex items-center gap-2">
+                        <i class="fas fa-heart"></i>
+                        Relacionamento com Clientes
+                    </h2>
+                    <div contenteditable="true" class="canvas-block" data-placeholder="Que tipo de relação cada segmento de clientes espera que você estabeleça?">
+                        • Suporte Técnico Personalizado
+
+                        • Treinamento e Capacitação Continuada
+
+                        • Comunidade de Usuários Online
+
+                        • Atualizações Regulares da Plataforma
+
+                        • Consultoria Pedagógica Especializada
+
+                        • Acompanhamento de Implementação
+
+                        • Webinars e Workshops Mensais
+
+                        • Canal de Feedback Direto
+                    </div>
+                </div>
+                <div class="flex-1 flex flex-col gap-2">
+                    <h2 class="font-bold text-gray-700 flex items-center gap-2">
+                        <i class="fas fa-truck"></i>
+                        Canais
+                    </h2>
+                    <div contenteditable="true" class="canvas-block" data-placeholder="Através de quais canais seus segmentos de clientes querem ser alcançados?">
+                        • Website e Plataforma Online
+
+                        • Vendas Diretas para Escolas
+
+                        • Parcerias com Secretarias de Educação
+
+                        • Redes Sociais e Marketing Digital
+
+                        • Eventos Educacionais e Feiras
+
+                        • Indicações de Clientes Satisfeitos
+
+                        • Parcerias com Editoras
+
+                        • Programa de Afiliados Educacionais
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bloco: Segmentos de Mercado -->
+            <div class="col-span-12 md:col-span-3 row-span-2 flex flex-col gap-2 p-2 bg-green-50 border-green-200 border rounded-b-lg">
+                <h2 class="font-bold text-gray-700 flex items-center gap-2">
+                    <i class="fas fa-user-graduate"></i>
+                    Segmentos de Mercado
+                </h2>
+                <div contenteditable="true" class="canvas-block" data-placeholder="Para quem estamos criando valor? Quem são seus clientes mais importantes?">
+                    • Escolas Públicas Municipais
+
+                    • Escolas Públicas Estaduais
+
+                    • Escolas Privadas
+
+                    • Secretarias de Educação
+
+                    • Professores e Coordenadores
+
+                    • Diretores Escolares
+
+                    • Gestores Educacionais
+
+                    • Instituições de Ensino Superior
+
+                    • Centros de Formação de Professores
+
+                    • Organizações Educacionais
+                </div>
+            </div>
+
+            <!-- Cabeçalho Inferior -->
+            <div class="col-span-12 text-center py-2 bg-amber-600 text-white font-bold rounded-t-lg mt-4">QUANTO?</div>
+
+            <!-- Bloco: Estrutura de Custos -->
+            <div class="col-span-12 md:col-span-6 flex flex-col gap-2 p-2 bg-amber-50 border-amber-200 border rounded-b-lg">
+                <h2 class="font-bold text-gray-700 flex items-center gap-2">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                    Estrutura de Custos
+                </h2>
+                <div contenteditable="true" class="canvas-block" data-placeholder="Quais são os custos mais importantes inerentes ao seu modelo de negócio?">
+                    • Desenvolvimento e Manutenção de Software
+
+                    • Infraestrutura Cloud e Servidores
+
+                    • Equipe de Desenvolvimento e TI
+
+                    • Suporte Técnico e Treinamento
+
+                    • Marketing e Vendas
+
+                    • Pesquisa e Desenvolvimento (P&D)
+
+                    • Licenças de Software e APIs
+
+                    • Segurança e Compliance
+
+                    • Serviços de IA e Machine Learning
+
+                    • Treinamento da Equipe
+                </div>
+            </div>
+
+            <!-- Bloco: Fontes de Renda -->
+            <div class="col-span-12 md:col-span-6 flex flex-col gap-2 p-2 bg-amber-50 border-amber-200 border rounded-b-lg">
+                <h2 class="font-bold text-gray-700 flex items-center gap-2">
+                    <i class="fas fa-cash-register"></i>
+                    Fontes de Renda
+                </h2>
+                <div contenteditable="true" class="canvas-block" data-placeholder="Para qual valor nossos clientes estão realmente dispostos a pagar?">
+                    • Licenciamento de Software por Escola (R$ 5.000/mês)
+
+                    • Assinatura Mensal por Aluno (R$ 15/aluno/mês)
+
+                    • Consultoria e Implementação (R$ 50.000/projeto)
+
+                    • Treinamento e Capacitação (R$ 2.000/dia)
+
+                    • Personalização e Customização (R$ 20.000/projeto)
+
+                    • Suporte Premium 24/7 (R$ 3.000/mês)
+
+                    • Relatórios Avançados (R$ 500/mês)
+
+                    • Integração com Sistemas Existentes (R$ 15.000/projeto)
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let editMode = false;
+
+// Carregar dados salvos ao iniciar
+document.addEventListener('DOMContentLoaded', function() {
+    loadCanvas();
+    setupEditButton();
+    
+    // Adicionar atalhos de teclado
+    document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && e.key === 's') {
+            e.preventDefault();
+            if (editMode) {
+                toggleEditMode();
+            }
+        }
+    });
+});
+
+function setupEditButton() {
+    const editButton = document.getElementById('editButton');
+    const editButtonText = document.getElementById('editButtonText');
+    
+    editButton.addEventListener('click', function() {
+        toggleEditMode();
+    });
+}
+
+function toggleEditMode() {
+    editMode = !editMode;
+    const editButton = document.getElementById('editButton');
+    const editButtonText = document.getElementById('editButtonText');
+    const canvasBlocks = document.querySelectorAll('.canvas-block');
+    
+    if (editMode) {
+        // Ativar modo de edição
+        editButton.className = 'bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors duration-200 flex items-center gap-2';
+        editButton.innerHTML = '<i class="fas fa-save"></i><span id="editButtonText">Salvar Canvas</span>';
+        editButtonText.textContent = 'Salvar Canvas';
+        
+        canvasBlocks.forEach(block => {
+            block.style.border = '2px solid #3b82f6';
+            block.style.backgroundColor = '#f0f9ff';
+            block.style.cursor = 'text';
+        });
+        
+        showNotification('Modo de edição ativado! Clique nos blocos para editar.', 'info');
+    } else {
+        // Desativar modo de edição
+        editButton.className = 'bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors duration-200 flex items-center gap-2';
+        editButton.innerHTML = '<i class="fas fa-edit"></i><span id="editButtonText">Editar Canvas</span>';
+        editButtonText.textContent = 'Editar Canvas';
+        
+        canvasBlocks.forEach(block => {
+            block.style.border = '';
+            block.style.backgroundColor = '';
+            block.style.cursor = '';
+        });
+        
+        saveCanvas();
+    }
+}
+
+function saveCanvas() {
+    const canvasData = {};
+    
+    document.querySelectorAll('[contenteditable]').forEach(item => {
+        const placeholder = item.getAttribute('data-placeholder');
+        // Usar innerHTML para preservar quebras de linha
+        const content = item.innerHTML.trim();
+        
+        if (content && content !== placeholder) {
+            canvasData[placeholder] = content;
+        }
+    });
+    
+    // Salvar no localStorage
+    localStorage.setItem('eduPlataformaCanvas', JSON.stringify(canvasData));
+    
+    // Mostrar notificação
+    showNotification('Canvas salvo com sucesso!', 'success');
+}
+
+function loadCanvas() {
+    const savedData = localStorage.getItem('eduPlataformaCanvas');
+    
+    if (savedData) {
+        const canvasData = JSON.parse(savedData);
+        
+        document.querySelectorAll('[contenteditable]').forEach(item => {
+            const placeholder = item.getAttribute('data-placeholder');
+            
+            if (canvasData[placeholder]) {
+                // Usar innerHTML para preservar quebras de linha
+                item.innerHTML = canvasData[placeholder];
+            }
+        });
+    }
+}
+
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: ${type === 'success' ? '#28a745' : type === 'info' ? '#3b82f6' : '#ef4444'};
+        color: white;
+        padding: 15px 25px;
+        border-radius: 25px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        z-index: 10000;
+        font-weight: 600;
+        max-width: 400px;
+        text-align: center;
+    `;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 4000);
+}
+</script>
+{% endblock %} 

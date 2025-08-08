@@ -1,0 +1,1760 @@
+{% extends "base.html" %}
+
+{% block title %}Gestão de Escolas{% endblock %}
+
+{% block content %}
+    <div class="escolas-container">
+        <!-- Sistema de Notificações Toast -->
+        <div id="toast-container" class="toast-container"></div>
+        
+        <!-- Header da página -->
+        <header class="page-header">
+                <div class="header-content">
+                <h1><i class="fas fa-school"></i> Gestão de Escolas</h1>
+                    <p>Sistema inteligente para administrar instituições de ensino</p>
+                </div>
+            <div class="header-stats">
+                    <div class="stat-item">
+                        <span class="stat-number" id="total-escolas">0</span>
+                        <span class="stat-label">Escolas</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="total-redes">0</span>
+                        <span class="stat-label">Redes</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="total-zonas">0</span>
+                        <span class="stat-label">Zonas</span>
+                    </div>
+                </div>
+            </header>
+
+        <!-- Seções de ações -->
+        <section class="actions-section">
+            <div class="actions-grid">
+                <!-- Card de Cadastro -->
+                <div class="action-card form-card">
+                <div class="card-header">
+                        <div class="card-icon">
+                        <i class="fas fa-plus-circle"></i>
+                    </div>
+                        <div class="card-title">
+                        <h2>Nova Escola</h2>
+                        <p>Adicione uma nova escola ao sistema</p>
+                    </div>
+                </div>
+
+                    <div class="card-content">
+                <form id="form-escola" class="modern-form">
+                            <div class="form-row single-column">
+                                <div class="form-group">
+                                    <label for="nome">Nome da Escola *</label>
+                                    <input type="text" id="nome" name="nome" required placeholder="Digite o nome da escola">
+                            </div>
+                        </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="rede">Rede de Ensino *</label>
+                                <select id="rede" name="rede" required>
+                                    <option value="">Selecione a rede</option>
+                                    <option value="Estadual">Estadual</option>
+                                    <option value="Municipal">Municipal</option>
+                                    <option value="Federal">Federal</option>
+                                    <option value="Particular">Particular</option>
+                                </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="zona">Zona *</label>
+                                <select id="zona" name="zona" required>
+                                    <option value="">Selecione a zona</option>
+                                    <option value="Urbana">Urbana</option>
+                                    <option value="Rural">Rural</option>
+                                </select>
+                        </div>
+                    </div>
+
+                            <div class="form-buttons">
+                                <button type="submit" class="btn btn-primary btn-block">
+                            <i class="fas fa-save"></i>
+                            Cadastrar Escola
+                    </button>
+                            </div>
+                </form>
+                    </div>
+                </div>
+            </div>
+            </section>
+
+        <!-- Lista de Escolas -->
+        <section class="list-section">
+            <div class="list-card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-list"></i>
+                    </div>
+                    <div class="card-title">
+                        <h2>Escolas Cadastradas</h2>
+                        <p>Visualize e gerencie todas as escolas</p>
+                    </div>
+                    <div class="search-box">
+                        <input type="text" id="search-escolas" placeholder="Buscar escola...">
+                        <i class="fas fa-search"></i>
+                    </div>
+                </div>
+                <div class="card-content">
+
+                <div class="escolas-grid" id="escolas-container">
+                    <!-- As escolas serão carregadas dinamicamente -->
+                </div>
+
+                <!-- Mensagem quando não há escolas -->
+                <div class="empty-state" id="empty-state" style="display: none;">
+                    <div class="empty-icon">
+                            <i class="fas fa-school"></i>
+                    </div>
+                    <h3>Nenhuma escola cadastrada</h3>
+                    <p>Comece adicionando a primeira escola ao sistema</p>
+                </div>
+                        </div>
+                    </div>
+                </section>
+
+        <!-- Botão Voltar -->
+        <div class="back-section">
+            <a href="/dashboard" class="btn btn-back">
+                <i class="fas fa-arrow-left"></i>
+                Voltar ao Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Modal de Edição de Escola -->
+    <div id="editEscolaModal" class="modal-overlay" style="display: none;">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2><i class="fas fa-edit"></i> Editar Escola</h2>
+                <button class="modal-close" onclick="closeEditEscolaModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-content">
+                <form id="editEscolaForm" class="modern-form">
+                    <input type="hidden" id="editEscolaId">
+                    <div class="form-row single-column">
+                        <div class="form-group">
+                            <label for="editNome">Nome da Escola *</label>
+                            <input type="text" id="editNome" required placeholder="Digite o nome da escola">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editRede">Rede de Ensino *</label>
+                            <select id="editRede" required>
+                                <option value="">Selecione a rede</option>
+                                <option value="Estadual">Estadual</option>
+                                <option value="Municipal">Municipal</option>
+                                <option value="Federal">Federal</option>
+                                <option value="Particular">Particular</option>
+                            </select>
+                            </div>
+                        <div class="form-group">
+                            <label for="editZona">Zona *</label>
+                            <select id="editZona" required>
+                                <option value="">Selecione a zona</option>
+                                <option value="Urbana">Urbana</option>
+                                <option value="Rural">Rural</option>
+                            </select>
+                            </div>
+                        </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" onclick="closeEditEscolaModal()">
+                            <i class="fas fa-times"></i>
+                            Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                            Salvar Alterações
+                    </button>
+                </div>
+            </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmação de Exclusão -->
+    <div id="deleteEscolaModal" class="modal-overlay" style="display: none;">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2><i class="fas fa-trash-alt"></i> Confirmar Exclusão</h2>
+                <button class="modal-close" onclick="closeDeleteEscolaModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-content">
+                <div id="dependencia-loading" style="display: none;">
+                    <div class="loading-spinner">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Verificando dependências...</p>
+                    </div>
+                </div>
+                
+                <div id="dependencia-content">
+                    <p class="text-center mb-4">Tem certeza que deseja excluir esta escola?</p>
+                    <p class="text-center text-muted small">Esta ação não pode ser desfeita e pode afetar dados relacionados.</p>
+                    
+                    <!-- Alertas de dependências -->
+                    <div id="dependencias-alert" style="display: none;"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeDeleteEscolaModal()">
+                    <i class="fas fa-times"></i>
+                    Cancelar
+                </button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteEscolaBtn">
+                    <i class="fas fa-trash"></i>
+                    Excluir Escola
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6C63FF;
+            --primary-dark: #4D44DB;
+            --secondary: #FFFFFD;
+            --accent: #6C63FF;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --dark: #1a1a2e;
+            --light: #FFFFFD;
+            --glass: rgba(108, 99, 255, 0.25);
+            --glass-border: rgba(108, 99, 255, 0.18);
+            --shadow: 0 8px 32px 0 rgba(108, 99, 255, 0.37);
+            --text-primary: #1a1a2e;
+            --text-secondary: #6c757d;
+            --gray-light: #f8f9fa;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f8f9fa;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .escolas-container {
+            padding: 0;
+            max-width: 100%;
+        }
+
+        /* Header da página */
+        .page-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 2rem 1.5rem;
+            margin: -1.5rem -1.5rem 2rem -1.5rem;
+            border-radius: 0 0 20px 20px;
+        }
+
+        .header-content {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 0 0 0.5rem 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .page-header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin: 0;
+        }
+
+        .header-stats {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 1rem 1.5rem;
+            min-width: 120px;
+        }
+
+        .stat-number {
+            display: block;
+            font-size: 2rem;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Actions Section */
+        .actions-section {
+            margin-bottom: 2rem;
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .action-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .action-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+        }
+
+        .card-header {
+            background: var(--gray-light);
+            padding: 1.5rem;
+            border-bottom: 1px solid #e1e8ed;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--primary);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .card-title {
+            flex: 1;
+        }
+
+        .card-title h2 {
+            font-size: 1.3rem;
+            color: var(--primary-dark);
+            margin: 0 0 0.25rem 0;
+        }
+
+        .card-title p {
+            color: #666;
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        .card-content {
+            padding: 1.5rem;
+        }
+
+        /* Search Box */
+        .search-box {
+            position: relative;
+            margin-left: auto;
+        }
+
+        .search-box input {
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            border: 2px solid #e1e8ed;
+            border-radius: 25px;
+            width: 250px;
+            font-size: 1rem;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+        }
+
+        /* List Section */
+        .list-section {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .list-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        /* Form Styles */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-row.single-column {
+            grid-template-columns: 1fr;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: var(--primary-dark);
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 2px solid #e1e8ed;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #fafbfc;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.1);
+        }
+
+        .form-group select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.75rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+            min-height: 48px;
+        }
+
+        .form-group select:hover {
+            border-color: var(--primary);
+            cursor: pointer;
+        }
+
+        /* Melhorar aparência dos select no Firefox */
+        .form-group select::-moz-focus-inner {
+            border: 0;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            text-align: center;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .btn-back {
+            background: var(--gray-light);
+            color: var(--primary-dark);
+            border: 1px solid #e1e8ed;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-block {
+            width: 100%;
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 12px;
+        }
+
+        /* Form buttons */
+        .form-buttons {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e1e8ed;
+        }
+
+        /* Back Section */
+        .back-section {
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        /* Grid de Escolas */
+        .escolas-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .escola-card {
+            background: white;
+            border-radius: 15px;
+            border: 2px solid #e1e8ed;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .escola-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            border-color: var(--primary);
+        }
+
+        .escola-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .escola-codigo {
+            flex: 1;
+        }
+
+        .codigo-badge {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-block;
+        }
+
+        .escola-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .edit-btn {
+            background: rgba(52, 168, 83, 0.1);
+            color: #34a853;
+            border: 1px solid rgba(52, 168, 83, 0.2);
+        }
+
+        .delete-btn {
+            background: rgba(234, 67, 53, 0.1);
+            color: #ea4335;
+            border: 1px solid rgba(234, 67, 53, 0.2);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .edit-btn:hover {
+            background: #34a853;
+            color: white;
+            border-color: #34a853;
+        }
+
+        .delete-btn:hover {
+            background: #ea4335;
+            color: white;
+            border-color: #ea4335;
+        }
+
+        .escola-info {
+            space-y: 1rem;
+        }
+
+        .escola-meta {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #666;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .meta-item i {
+            color: var(--primary);
+            width: 16px;
+        }
+
+        .escola-description {
+            color: #333;
+            line-height: 1.6;
+            font-size: 0.95rem;
+            text-align: justify;
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 10px;
+            border-left: 4px solid var(--primary);
+            font-weight: 600;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+
+        .empty-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--gray-light);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            color: var(--primary);
+            font-size: 2rem;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin: 0 0 0.5rem 0;
+            color: var(--primary-dark);
+        }
+
+
+
+        /* Modal Overlay Animado */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(30, 41, 59, 0.8);
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            display: flex !important;
+            opacity: 1;
+        }
+
+        .modal-container {
+            background: white;
+            border-radius: 18px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            width: 95%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 0;
+            transform: translateY(-50px) scale(0.9);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .modal-overlay.active .modal-container {
+            transform: translateY(0) scale(1);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 1.5rem 2rem;
+            border-radius: 18px 18px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .modal-content {
+            padding: 2rem;
+        }
+
+        .modal-footer {
+            padding: 1.5rem 2rem;
+            border-top: 1px solid #e1e8ed;
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .modern-form .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .modern-form .form-row.single-column {
+            grid-template-columns: 1fr;
+        }
+
+        .modern-form .form-group label {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+            display: block;
+        }
+
+        .modern-form .form-group input,
+        .modern-form .form-group select,
+        .modern-form .form-group textarea {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 2px solid #e1e8ed;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #fafbfc;
+        }
+
+        .modern-form .form-group input:focus,
+        .modern-form .form-group select:focus,
+        .modern-form .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.1);
+        }
+
+        /* Botão de fechar mais visível */
+        .modal-close {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            font-size: 1.5rem;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover { 
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.1);
+        }
+
+        /* Botão de perigo para exclusão */
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+            border: none;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+        }
+
+        /* Classes utilitárias */
+        .text-center {
+            text-align: center;
+        }
+
+        .mb-4 {
+            margin-bottom: 1.5rem;
+        }
+
+        .text-muted {
+            color: #6c757d;
+        }
+
+        .small {
+            font-size: 0.875rem;
+        }
+
+        /* Loading Spinner */
+        .loading-spinner {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+
+        .loading-spinner i {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+
+        .loading-spinner p {
+            margin: 0;
+            font-size: 1rem;
+        }
+
+        /* Alertas de Dependência */
+        .dependencia-alert {
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-left: 4px solid;
+            font-size: 0.95rem;
+        }
+
+        .dependencia-alert.success {
+            background: #d4edda;
+            border-left-color: #28a745;
+            color: #155724;
+        }
+
+        .dependencia-alert.warning {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+            color: #856404;
+        }
+
+        .dependencia-alert.danger {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+            color: #721c24;
+        }
+
+        .dependencia-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .dependencia-header i {
+            font-size: 1.25rem;
+        }
+
+        .dependencia-list {
+            margin: 0;
+            padding-left: 0;
+            list-style: none;
+        }
+
+        .dependencia-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .dependencia-item:last-child {
+            border-bottom: none;
+        }
+
+        .dependencia-item strong {
+            color: inherit;
+        }
+
+        .dependencia-exemplos {
+            margin-top: 0.5rem;
+            padding-left: 1rem;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .dependencia-exemplos ul {
+            margin: 0.25rem 0;
+            padding-left: 1rem;
+        }
+
+        .dependencia-exemplos li {
+            margin: 0.25rem 0;
+        }
+
+        /* Botão desabilitado */
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        .btn:disabled:hover {
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        /* Sistema de Notificações Toast */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            background: white;
+            border-radius: 12px;
+            padding: 16px 20px;
+            min-width: 300px;
+            max-width: 400px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            border-left: 4px solid;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transform: translateX(100%);
+            opacity: 0;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            border-left-color: #28a745;
+        }
+
+        .toast.error {
+            border-left-color: #dc3545;
+        }
+
+        .toast.warning {
+            border-left-color: #ffc107;
+        }
+
+        .toast.info {
+            border-left-color: #17a2b8;
+        }
+
+        .toast-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        .toast.success .toast-icon {
+            background: #28a745;
+        }
+
+        .toast.error .toast-icon {
+            background: #dc3545;
+        }
+
+        .toast.warning .toast-icon {
+            background: #ffc107;
+        }
+
+        .toast.info .toast-icon {
+            background: #17a2b8;
+        }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-title {
+            font-weight: 600;
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 2px;
+        }
+
+        .toast-message {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            font-size: 18px;
+            color: #999;
+            cursor: pointer;
+            padding: 0;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .toast-close:hover {
+            color: #666;
+        }
+
+        .toast-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 0 0 12px 12px;
+            animation: toast-progress 4s linear forwards;
+        }
+
+        @keyframes toast-progress {
+            from { width: 100%; }
+            to { width: 0%; }
+        }
+
+
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .page-header {
+                padding: 1.5rem 1rem;
+                margin: -1rem -1rem 1.5rem -1rem;
+            }
+
+            .page-header h1 {
+                font-size: 2rem;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .header-stats {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .actions-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .card-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .search-box {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .search-box input {
+                width: 100%;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .btn-block {
+                max-width: 100%;
+                padding: 0.875rem 1.5rem;
+                font-size: 1rem;
+            }
+
+            .form-buttons {
+                padding-top: 1rem;
+                margin-top: 1rem;
+            }
+
+            .escolas-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .escola-meta {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .escola-card {
+                padding: 1rem;
+            }
+
+            .escola-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .escola-actions {
+                align-self: flex-end;
+            }
+            
+            .toast-container {
+                top: 10px;
+                right: 10px;
+                left: 10px;
+            }
+
+            .toast {
+                min-width: auto;
+                max-width: none;
+            }
+        }
+    </style>
+
+    <!-- Script escola.js integrado inline -->
+    <script>
+        /*
+        MELHORIAS IMPLEMENTADAS NO MODAL DE ESCOLA:
+        
+        1. DESIGN MODERNO:
+           - Modal com design baseado no padrão das habilidades e kanban
+           - Header com gradiente roxo (#6C63FF) seguindo padrão das outras telas
+           - Botão de fechar estilizado no header
+           - Animações suaves de entrada/saída
+           
+        2. SISTEMA DE NOTIFICAÇÕES:
+           - Toast notifications para feedback das ações
+           - Diferentes tipos: success, error, warning, info
+           - Animações e auto-dismiss
+           
+        3. MODAIS MELHORADOS:
+           - Modal de edição com formulário moderno
+           - Modal de confirmação de exclusão
+           - Responsividade para dispositivos móveis
+           - Backdrop blur e overlay escuro
+           
+        4. FUNCIONALIDADES:
+           - Validação de formulários
+           - Chamadas AJAX para API
+           - Feedback visual das ações
+           - Controle de estado dos modais
+           
+        5. PADRÃO DE CORES:
+           - Roxo principal: #6C63FF
+           - Roxo escuro: #4D44DB
+           - Cores de feedback: verde, vermelho, amarelo, azul
+           - Gradientes modernos
+        */
+        // Sistema de Notificações Toast
+        function showToast(type, title, message) {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+
+            // Criar elemento toast
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            // Definir ícones para cada tipo
+            const icons = {
+                success: '✓',
+                error: '✕',
+                warning: '⚠',
+                info: 'ℹ'
+            };
+
+            toast.innerHTML = `
+                <div class="toast-icon">
+                    ${icons[type] || 'ℹ'}
+                </div>
+                <div class="toast-content">
+                    <div class="toast-title">${title}</div>
+                    <div class="toast-message">${message}</div>
+                </div>
+                <button class="toast-close" onclick="closeToast(this)">×</button>
+                <div class="toast-progress"></div>
+            `;
+
+            // Adicionar ao container
+            container.appendChild(toast);
+
+            // Mostrar toast com animação
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 100);
+
+            // Auto remover após 4 segundos
+            setTimeout(() => {
+                closeToast(toast);
+            }, 4000);
+        }
+
+        function closeToast(element) {
+            const toast = element.classList ? element : element.closest('.toast');
+            if (toast) {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }
+        }
+
+        // Funções de conveniência para diferentes tipos de toast
+        function showSuccess(title, message = '') {
+            showToast('success', title, message);
+        }
+
+        function showError(title, message = '') {
+            showToast('error', title, message);
+        }
+
+        function showWarning(title, message = '') {
+            showToast('warning', title, message);
+        }
+
+        function showInfo(title, message = '') {
+            showToast('info', title, message);
+        }
+
+        // Função para abrir modal de edição
+        function openEditModal(id, nome, rede, zona) {
+            document.getElementById('editEscolaId').value = id;
+            document.getElementById('editNome').value = nome;
+            document.getElementById('editRede').value = rede;
+            document.getElementById('editZona').value = zona;
+            
+            const modal = document.getElementById('editEscolaModal');
+            modal.style.display = 'flex';
+            setTimeout(() => {
+                modal.classList.add('active');
+            }, 10);
+        }
+
+        // Função para fechar modal de edição
+        function closeEditEscolaModal() {
+            const modal = document.getElementById('editEscolaModal');
+            modal.classList.remove('active');
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300);
+        }
+
+        // Função para abrir modal de exclusão
+        function openDeleteModal(id, nome) {
+            window.escolaToDelete = id;
+            window.escolaNome = nome;
+            
+            // Resetar estado do modal
+            document.getElementById('dependencia-loading').style.display = 'none';
+            document.getElementById('dependencia-content').style.display = 'block';
+            document.getElementById('dependencias-alert').style.display = 'none';
+            document.getElementById('confirmDeleteEscolaBtn').disabled = false;
+            
+            // Atualizar texto inicial
+            document.querySelector('#dependencia-content p').innerHTML = 
+                `Tem certeza que deseja excluir a escola <strong>${nome}</strong>?`;
+            
+            const modal = document.getElementById('deleteEscolaModal');
+            modal.style.display = 'flex';
+            setTimeout(() => {
+                modal.classList.add('active');
+                // Verificar dependências após abrir o modal
+                verificarDependenciasEscola(id);
+            }, 10);
+        }
+
+        // Função para fechar modal de exclusão
+        function closeDeleteEscolaModal() {
+            const modal = document.getElementById('deleteEscolaModal');
+            modal.classList.remove('active');
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300);
+            window.escolaToDelete = null;
+        }
+
+        // Fechar modal clicando fora
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal-overlay')) {
+                if (e.target.id === 'editEscolaModal') {
+                    closeEditEscolaModal();
+                } else if (e.target.id === 'deleteEscolaModal') {
+                    closeDeleteEscolaModal();
+                }
+            }
+        });
+
+        // Função para atualizar estatísticas
+        function updateStats() {
+            // Tentar atualizar estatísticas se os elementos existirem
+            const totalEscolas = document.getElementById('total-escolas');
+            const totalRedes = document.getElementById('total-redes');
+            const totalZonas = document.getElementById('total-zonas');
+            
+            if (totalEscolas) totalEscolas.textContent = '0';
+            if (totalRedes) totalRedes.textContent = '0';
+            if (totalZonas) totalZonas.textContent = '0';
+        }
+
+        // Funções auxiliares para estatísticas
+        function getTotalEscolas() {
+            return document.querySelectorAll('.escola-card').length;
+        }
+
+        function getTotalRedes() {
+            const redes = new Set();
+            document.querySelectorAll('.escola-card').forEach(card => {
+                const badge = card.querySelector('.badge-estadual, .badge-municipal, .badge-federal, .badge-particular');
+                if (badge) redes.add(badge.textContent);
+            });
+            return redes.size;
+        }
+
+        function getTotalZonas() {
+            const zonas = new Set();
+            document.querySelectorAll('.escola-card').forEach(card => {
+                const badge = card.querySelector('.badge-urbana, .badge-rural');
+                if (badge) zonas.add(badge.textContent);
+            });
+            return zonas.size;
+        }
+
+        // Função para buscar escolas
+        document.getElementById('search-escolas').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const escolaCards = document.querySelectorAll('.escola-card');
+            
+            escolaCards.forEach(card => {
+                const nome = card.querySelector('h3').textContent.toLowerCase();
+                if (nome.includes(searchTerm)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+
+        // Exemplo de como implementar os botões de ação nos cards das escolas
+        // Esta função deve ser chamada quando os cards são criados dinamicamente
+        function adicionarBotoesAcao(escolaCard, escola) {
+            const actionsDiv = escolaCard.querySelector('.escola-actions');
+            if (actionsDiv) {
+                actionsDiv.innerHTML = `
+                    <button class="action-btn edit-btn" onclick="openEditModal(${escola.id}, '${escola.nome}', '${escola.rede}', '${escola.zona}')" title="Editar escola">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="action-btn delete-btn" onclick="openDeleteModal(${escola.id}, '${escola.nome}')" title="Excluir escola">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                `;
+            }
+        }
+
+        // Configurar eventos dos modais
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStats();
+            carregarEscolas(); // Carregar escolas na inicialização
+            
+            // Event listener para o formulário principal
+            const form = document.getElementById('form-escola');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    salvarEscola();
+                });
+            }
+            
+            // Event listener para o formulário de edição
+            const editForm = document.getElementById('editEscolaForm');
+            if (editForm) {
+                editForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    salvarEscolaModal();
+                });
+            }
+
+            // Event listener para confirmar exclusão
+            const confirmDeleteBtn = document.getElementById('confirmDeleteEscolaBtn');
+            if (confirmDeleteBtn) {
+                confirmDeleteBtn.addEventListener('click', confirmarExclusaoEscola);
+            }
+        });
+
+        // Função para carregar escolas
+        async function carregarEscolas() {
+            try {
+                const response = await fetch('/api/escolas');
+                if (response.ok) {
+                    const data = await response.json();
+                    const escolas = data.escolas || data || [];
+                    renderizarEscolas(escolas);
+                } else {
+                    console.error('Erro ao carregar escolas:', response.status);
+                    showError('Erro', 'Não foi possível carregar as escolas');
+                }
+            } catch (error) {
+                console.error('Erro ao carregar escolas:', error);
+                showError('Erro', 'Erro de conexão ao carregar escolas');
+            }
+        }
+
+        // Função para renderizar escolas
+        function renderizarEscolas(escolas) {
+            const escolasContainer = document.getElementById('escolas-container');
+            const emptyState = document.getElementById('empty-state');
+            
+            if (!escolas || escolas.length === 0) {
+                escolasContainer.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            escolasContainer.style.display = 'grid';
+            emptyState.style.display = 'none';
+            escolasContainer.innerHTML = '';
+            
+            escolas.forEach(escola => {
+                const escolaCard = document.createElement('div');
+                escolaCard.className = 'escola-card';
+                escolaCard.setAttribute('data-id', escola.id);
+                
+                // Criar um código único para a escola baseado no ID
+                const escolaCodigo = `ESC${String(escola.id).padStart(3, '0')}`;
+                
+                escolaCard.innerHTML = `
+                    <div class="escola-header">
+                        <div class="escola-codigo">
+                            <span class="codigo-badge">${escolaCodigo}</span>
+                        </div>
+                        <div class="escola-actions">
+                            <button class="action-btn edit-btn" onclick="openEditModal(${escola.id}, '${escola.nome}', '${escola.rede}', '${escola.zona}')" title="Editar escola">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="action-btn delete-btn" onclick="openDeleteModal(${escola.id}, '${escola.nome}')" title="Excluir escola">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="escola-info">
+                        <div class="escola-meta">
+                            <div class="meta-item">
+                                <i class="fas fa-network-wired"></i>
+                                <span>${escola.rede}</span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-map-marker-alt"></i>
+                                <span>${escola.zona}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="escola-description">
+                            ${escola.nome}
+                        </div>
+                    </div>
+                `;
+                
+                escolasContainer.appendChild(escolaCard);
+            });
+        }
+
+        // Função para salvar nova escola
+        async function salvarEscola() {
+            const escola = {
+                nome: document.getElementById('nome').value,
+                rede: document.getElementById('rede').value,
+                zona: document.getElementById('zona').value
+            };
+
+            try {
+                const response = await fetch('/api/escolas', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(escola)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success || response.ok) {
+                    showSuccess('Sucesso!', 'Escola cadastrada com sucesso!');
+                    document.getElementById('form-escola').reset();
+                    carregarEscolas(); // Recarregar lista
+                } else {
+                    showError('Erro', data.error || 'Erro ao cadastrar escola');
+                }
+            } catch (error) {
+                console.error('Erro ao cadastrar escola:', error);
+                showError('Erro', 'Erro ao cadastrar escola. Tente novamente');
+            }
+        }
+
+        // Função para salvar escola editada no modal
+        async function salvarEscolaModal() {
+            const escolaId = document.getElementById('editEscolaId').value;
+            const escola = {
+                nome: document.getElementById('editNome').value,
+                rede: document.getElementById('editRede').value,
+                zona: document.getElementById('editZona').value
+            };
+
+            try {
+                const response = await fetch(`/api/escolas/${escolaId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(escola)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success || response.ok) {
+                    closeEditEscolaModal();
+                    showSuccess('Sucesso!', 'Escola atualizada com sucesso!');
+                    carregarEscolas(); // Recarregar lista
+                } else {
+                    showError('Erro', data.error || 'Erro ao atualizar escola');
+                }
+            } catch (error) {
+                console.error('Erro ao atualizar escola:', error);
+                showError('Erro', 'Erro ao atualizar escola. Tente novamente');
+            }
+        }
+
+        // Função para verificar dependências da escola
+        async function verificarDependenciasEscola(escolaId) {
+            try {
+                // Mostrar loading
+                document.getElementById('dependencia-loading').style.display = 'block';
+                document.getElementById('dependencia-content').style.display = 'none';
+                
+                const response = await fetch(`/api/escolas/${escolaId}/dependencias`);
+                const data = await response.json();
+                
+                // Esconder loading
+                document.getElementById('dependencia-loading').style.display = 'none';
+                document.getElementById('dependencia-content').style.display = 'block';
+                
+                if (data.success) {
+                    const dependencias = data.dependencias;
+                    const alertContainer = document.getElementById('dependencias-alert');
+                    
+                    if (dependencias.pode_excluir) {
+                        // Pode excluir - mostrar alerta verde
+                        alertContainer.innerHTML = `
+                            <div class="dependencia-alert success">
+                                <div class="dependencia-header">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Pode ser excluída com segurança</span>
+                                </div>
+                                <p>Esta escola não possui dados vinculados e pode ser excluída sem problemas.</p>
+                            </div>
+                        `;
+                        alertContainer.style.display = 'block';
+                        document.getElementById('confirmDeleteEscolaBtn').disabled = false;
+                    } else {
+                        // Não pode excluir - mostrar dependências
+                        let alertHTML = `
+                            <div class="dependencia-alert danger">
+                                <div class="dependencia-header">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <span>Não é possível excluir esta escola</span>
+                                </div>
+                                <p>Esta escola possui dados vinculados que impedem sua exclusão:</p>
+                                <ul class="dependencia-list">
+                        `;
+                        
+                        dependencias.detalhes.forEach(detalhe => {
+                            alertHTML += `
+                                <li class="dependencia-item">
+                                    <strong>${getIconeByTipo(detalhe.tipo)} ${detalhe.mensagem}</strong>
+                                    <div class="dependencia-exemplos">
+                                        <ul>
+                                            ${detalhe.exemplos.map(exemplo => `<li>${exemplo}</li>`).join('')}
+                                            ${detalhe.count > 3 ? `<li><em>... e mais ${detalhe.count - 3} registros</em></li>` : ''}
+                                        </ul>
+                                    </div>
+                                </li>
+                            `;
+                        });
+                        
+                        alertHTML += `
+                                </ul>
+                                <p><strong>Ação necessária:</strong> Remova ou transfira os dados vinculados antes de excluir a escola.</p>
+                            </div>
+                        `;
+                        
+                        alertContainer.innerHTML = alertHTML;
+                        alertContainer.style.display = 'block';
+                        document.getElementById('confirmDeleteEscolaBtn').disabled = true;
+                    }
+                } else {
+                    showError('Erro', data.error || 'Erro ao verificar dependências');
+                }
+                
+            } catch (error) {
+                console.error('Erro ao verificar dependências:', error);
+                // Esconder loading
+                document.getElementById('dependencia-loading').style.display = 'none';
+                document.getElementById('dependencia-content').style.display = 'block';
+                
+                showError('Erro', 'Erro ao verificar dependências da escola');
+            }
+        }
+
+        // Função auxiliar para obter ícone por tipo de dependência
+        function getIconeByTipo(tipo) {
+            const icones = {
+                'turmas': '<i class="fas fa-chalkboard-teacher"></i>',
+                'alunos': '<i class="fas fa-user-graduate"></i>',
+                'questoes': '<i class="fas fa-question-circle"></i>',
+                'resultados': '<i class="fas fa-chart-bar"></i>'
+            };
+            return icones[tipo] || '<i class="fas fa-exclamation-circle"></i>';
+        }
+
+        // Função para confirmar exclusão
+        async function confirmarExclusaoEscola() {
+            if (!window.escolaToDelete) return;
+            
+            try {
+                const deleteResponse = await fetch(`/api/escolas/${window.escolaToDelete}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                // Tentar fazer parse da resposta
+                let result;
+                const contentType = deleteResponse.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    result = await deleteResponse.json();
+                } else {
+                    // Se não for JSON, tratar como erro
+                    throw new Error(`Resposta não é JSON. Status: ${deleteResponse.status}`);
+                }
+                
+                if (result.success || deleteResponse.ok) {
+                    closeDeleteEscolaModal();
+                    showSuccess('Sucesso!', 'Escola excluída com sucesso');
+                    carregarEscolas(); // Recarregar lista
+                } else {
+                    showError('Erro', result.error || 'Erro ao excluir escola');
+                }
+                
+            } catch (error) {
+                console.error('Erro ao excluir escola:', error);
+                showError('Erro', 'Erro ao excluir escola. Tente novamente');
+            }
+        }
+    </script>
+{% endblock %}

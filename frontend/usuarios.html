@@ -1,0 +1,766 @@
+{% extends "base.html" %}
+
+{% block title %}Gestão de Usuários{% endblock %}
+
+{% block content %}
+    <div class="usuarios-container">
+        <!-- Header da página -->
+        <header class="page-header">
+            <div class="header-content">
+                <h1><i class="fas fa-users-cog"></i> Gestão de Usuários</h1>
+                <p>Gerencie usuários do sistema e suas permissões</p>
+            </div>
+            <button class="btn btn-primary" onclick="abrirModalNovoUsuario()">
+                <i class="fas fa-plus"></i> Novo Usuário
+            </button>
+        </header>
+
+        <!-- Estatísticas dos usuários -->
+        <section class="stats-section">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-users"></i></div>
+                    <div class="stat-content">
+                        <span class="stat-number" id="total-usuarios">0</span>
+                        <span class="stat-label">Total</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-user-check"></i></div>
+                    <div class="stat-content">
+                        <span class="stat-number" id="usuarios-ativos">0</span>
+                        <span class="stat-label">Ativos</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"><i class="fas fa-user-shield"></i></div>
+                    <div class="stat-content">
+                        <span class="stat-number" id="usuarios-admins">0</span>
+                        <span class="stat-label">Admins</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Filtros -->
+        <section class="filters-section">
+            <div class="filters-container">
+                <div class="filter-group">
+                    <label for="filtro-tipo">Tipo de Usuário:</label>
+                    <select id="filtro-tipo" onchange="filtrarUsuarios()">
+                        <option value="">Todos</option>
+                        <option value="admin">Administradores</option>
+                        <option value="normal">Usuários Normais</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filtro-status">Status:</label>
+                    <select id="filtro-status" onchange="filtrarUsuarios()">
+                        <option value="">Todos</option>
+                        <option value="true">Ativos</option>
+                        <option value="false">Inativos</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label for="filtro-busca">Buscar:</label>
+                    <input type="text" id="filtro-busca" placeholder="Nome ou email..." oninput="filtrarUsuarios()">
+                </div>
+            </div>
+        </section>
+
+        <!-- Tabela de usuários -->
+        <section class="table-section">
+            <div class="table-container">
+                <table class="usuarios-table">
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Email</th>
+                            <th>WhatsApp</th>
+                            <th>Tipo</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usuarios-tbody">
+                        <tr><td colspan="6" class="loading">Carregando...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <!-- Modal Novo/Editar Usuário -->
+    <div id="modal-usuario" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-titulo">Novo Usuário</h2>
+                <button class="modal-close" onclick="fecharModal()">&times;</button>
+            </div>
+            <form id="form-usuario" onsubmit="salvarUsuario(event)">
+                <div class="modal-body">
+                    <input type="hidden" id="usuario-id">
+                    
+                    <div class="form-group">
+                        <label for="usuario-nome">Nome *</label>
+                        <input type="text" id="usuario-nome" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="usuario-email">Email *</label>
+                        <input type="email" id="usuario-email" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="usuario-escola">Escola</label>
+                        <input type="text" id="usuario-escola">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="usuario-whatsapp">
+                            <i class="fab fa-whatsapp" style="color: #25D366; margin-right: 5px;"></i>WhatsApp
+                        </label>
+                        <input type="tel" id="usuario-whatsapp" placeholder="(11) 99999-9999" maxlength="15">
+                        <small>Formato: (DDD) 99999-9999</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="usuario-tipo">Tipo de Usuário *</label>
+                        <select id="usuario-tipo" required>
+                            <option value="">Selecione...</option>
+                            <option value="normal">Usuário Normal</option>
+                            <option value="admin">Administrador</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="usuario-senha">Senha <span id="senha-obrigatoria">*</span></label>
+                        <input type="password" id="usuario-senha">
+                        <small id="senha-info">Deixe em branco para manter a senha atual (apenas edição)</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="usuario-ativo" checked>
+                            <span class="checkmark"></span>
+                            Usuário ativo
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="fecharModal()">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Salvar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmação -->
+    <div id="modal-confirmacao" class="modal">
+        <div class="modal-content small">
+            <div class="modal-header">
+                <h2 id="confirmacao-titulo">Confirmar Ação</h2>
+                <button class="modal-close" onclick="fecharModalConfirmacao()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="confirmacao-mensagem"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="fecharModalConfirmacao()">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="btn-confirmar">
+                    <i class="fas fa-check"></i> Confirmar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .usuarios-container {
+            padding: 0;
+            max-width: 100%;
+        }
+
+        /* Header */
+        .page-header {
+            background: linear-gradient(135deg, #8e44ad 0%, #9b59b6 100%);
+            color: white;
+            padding: 2rem 1.5rem;
+            margin: -1.5rem -1.5rem 2rem -1.5rem;
+            border-radius: 0 0 20px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-content h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 0 0 0.5rem 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .header-content h1 i {
+            margin-right: 1rem;
+        }
+
+        .header-content p {
+            margin: 0;
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        /* Estatísticas */
+        .stats-section {
+            margin-bottom: 2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-card.total .stat-icon { background: #3498db; }
+        .stat-card.active .stat-icon { background: #2ecc71; }
+        .stat-card.admins .stat-icon { background: #8e44ad; }
+        .stat-card.normal .stat-icon { background: #f39c12; }
+
+        .stat-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1.5rem;
+            font-size: 1.8rem;
+            color: white;
+        }
+
+        .stat-number {
+            display: block;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            color: #666;
+            font-weight: 500;
+        }
+
+        /* Filtros */
+        .filters-section {
+            margin-bottom: 2rem;
+        }
+
+        .filters-container {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group label {
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--primary-dark);
+        }
+
+        .filter-group select,
+        .filter-group input {
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        /* Tabela */
+        .table-section {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        .usuarios-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .usuarios-table th,
+        .usuarios-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e1e8ed;
+        }
+
+        .usuarios-table th {
+            background: var(--gray-light);
+            font-weight: 600;
+            color: var(--primary-dark);
+        }
+
+        .usuarios-table tbody tr:hover {
+            background: var(--gray-light);
+        }
+
+        .loading {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            padding: 2rem;
+        }
+
+        /* Status badges */
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-badge.ativo {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-badge.inativo {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .tipo-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .tipo-badge.admin {
+            background: #e8d4f1;
+            color: #8e44ad;
+        }
+
+        .tipo-badge.normal {
+            background: #fef5d4;
+            color: #f39c12;
+        }
+
+        /* Botões de ação */
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-action {
+            padding: 0.5rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-action.edit {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-action.toggle {
+            background: #f39c12;
+            color: white;
+        }
+
+        .btn-action.delete {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .btn-action:hover {
+            opacity: 0.8;
+            transform: translateY(-1px);
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-content.small {
+            max-width: 400px;
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid #e1e8ed;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            color: var(--primary-dark);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .modal-footer {
+            padding: 1.5rem;
+            border-top: 1px solid #e1e8ed;
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--primary-dark);
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .form-group small {
+            color: #666;
+            font-size: 0.85rem;
+            display: none;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            width: auto;
+            margin-right: 0.75rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .header-content h1 {
+                font-size: 2rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            }
+
+            .filters-container {
+                grid-template-columns: 1fr;
+            }
+
+            .usuarios-table {
+                font-size: 0.9rem;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+
+    <style>
+.usuarios-container {
+    padding: 1.5rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.page-header {
+    background: linear-gradient(135deg, #8e44ad 0%, #9b59b6 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 15px;
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-content h1 {
+    font-size: 2.5rem;
+    margin: 0 0 0.5rem 0;
+    display: flex;
+    align-items: center;
+}
+
+.header-content h1 i {
+    margin-right: 1rem;
+}
+
+.header-content p {
+    margin: 0;
+    opacity: 0.9;
+}
+
+.stats-section {
+    margin-bottom: 2rem;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    display: flex;
+    align-items: center;
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.stat-icon {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1.5rem;
+    font-size: 1.8rem;
+    color: white;
+    background: #8e44ad;
+}
+
+.stat-number {
+    display: block;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--primary-dark);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+}
+
+.stat-label {
+    font-size: 1rem;
+    color: #666;
+    font-weight: 500;
+}
+
+.table-section {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+.usuarios-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.usuarios-table th,
+.usuarios-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #e1e8ed;
+}
+
+.usuarios-table th {
+    background: var(--gray-light);
+    font-weight: 600;
+    color: var(--primary-dark);
+}
+
+.usuarios-table tbody tr:hover {
+    background: #f8f9fa;
+}
+
+.loading {
+    text-align: center;
+    color: #666;
+    font-style: italic;
+}
+
+.badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.badge.admin {
+    background: #e8d4f1;
+    color: #8e44ad;
+}
+
+.badge.normal {
+    background: #fef5d4;
+    color: #f39c12;
+}
+
+.badge.active {
+    background: #d4edda;
+    color: #155724;
+}
+
+.badge.inactive {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.badge.current-user {
+    background: #d1ecf1;
+    color: #0c5460;
+    margin-left: 0.5rem;
+}
+
+.btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.btn-primary {
+    background: #007bff;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #0056b3;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.9rem;
+}
+
+.btn-warning {
+    background: #ffc107;
+    color: #212529;
+}
+
+.btn-danger {
+    background: #dc3545;
+    color: white;
+}
+
+.btn-warning:hover {
+    background: #e0a800;
+}
+
+.btn-danger:hover {
+    background: #c82333;
+}
+
+@media (max-width: 768px) {
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .header-content h1 {
+        font-size: 2rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+
+    .usuarios-table {
+        font-size: 0.9rem;
+    }
+}
+</style>
+
+<script src="/js/usuarios.js"></script>
+{% endblock %} 

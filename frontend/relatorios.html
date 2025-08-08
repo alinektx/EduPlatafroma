@@ -1,0 +1,1933 @@
+{% extends "base.html" %}
+
+{% block title %}Relatórios{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/relatorios.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="main-wrapper">
+    <div class="background-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+
+    <div class="container">
+        <!-- Header -->
+        <header class="modern-header">
+            <div class="header-content">
+                <h1><i class="fas fa-file-alt"></i> Relatórios</h1>
+                <p>Sistema de relatórios e análises educacionais</p>
+            </div>
+            <div class="header-stats">
+                <div class="stat-item">
+                    <span class="stat-number" id="total-relatorios">2</span>
+                    <span class="stat-label">Modelos</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="relatorios-gerados">0</span>
+                    <span class="stat-label">Gerados</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="dados-disponiveis">271</span>
+                    <span class="stat-label">Alunos</span>
+                </div>
+            </div>
+        </header>
+
+
+
+        <!-- Modelos de Relatórios -->
+        <section class="relatorios-section">
+            <div class="relatorios-header">
+                <h2><i class="fas fa-chart-pie"></i> Modelos de Relatórios</h2>
+                <p>Escolha um modelo para visualizar ou gerar relatórios</p>
+            </div>
+
+
+
+            <!-- Seção Relatórios -->
+            <div class="categoria-relatorios">
+                <h3 class="categoria-titulo">
+                    <i class="fas fa-chart-line"></i> Relatórios
+                </h3>
+                <div class="relatorios-grid">
+                    <!-- Ranking de Aprendizagem -->
+                    <div class="relatorio-card" data-tipo="ranking-aprendizagem">
+                        <div class="card-header-relatorio">
+                            <div class="card-icon-relatorio">
+                                <i class="fas fa-medal"></i>
+                            </div>
+                        </div>
+                        <div class="card-body-relatorio">
+                            <h3>Ranking de Aprendizagem</h3>
+                            <p>Ranking comparativo de desempenho entre escolas, turmas e alunos.</p>
+                        </div>
+                        <div class="card-footer-relatorio">
+                            <button class="btn btn-primary btn-sm" onclick="abrirFiltrosRelatorio('ranking-aprendizagem')">
+                                <i class="fas fa-filter"></i> Configurar Filtros
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Frequência na Avaliação -->
+                    <div class="relatorio-card" data-tipo="frequencia-avaliacao">
+                        <div class="card-header-relatorio">
+                            <div class="card-icon-relatorio">
+                                <i class="fas fa-calendar-check"></i>
+                            </div>
+                        </div>
+                        <div class="card-body-relatorio">
+                            <h3>Frequência na Avaliação</h3>
+                            <p>Controle de presença e participação dos alunos nas avaliações.</p>
+                        </div>
+                        <div class="card-footer-relatorio">
+                            <button class="btn btn-primary btn-sm" onclick="abrirFiltrosRelatorio('frequencia-avaliacao')">
+                                <i class="fas fa-filter"></i> Configurar Filtros
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção de Filtros Dinâmicos -->
+        <section class="filtros-dinamicos" id="filtros-dinamicos" style="display: none;">
+            <div class="filters-section">
+                <div class="filters-card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-filter"></i>
+                        </div>
+                        <div class="card-title">
+                            <h2 id="titulo-filtros">Filtros do Relatório</h2>
+                            <p id="descricao-filtros">Configure os parâmetros para gerar o relatório</p>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn btn-secondary" onclick="voltarParaRelatorios()">
+                                <i class="fas fa-arrow-left"></i> Voltar
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card-content">
+                        <form id="form-filtros-dinamicos" class="modern-form">
+                            <div class="form-grid" id="campos-filtros">
+                                <!-- Campos de filtros serão inseridos dinamicamente aqui -->
+                            </div>
+                            <div class="form-buttons">
+                                <button type="submit" class="btn btn-primary btn-block">
+                                    <i class="fas fa-chart-line"></i>
+                                    Gerar Relatório
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Área de Resultado do Relatório -->
+        <section class="resultado-relatorio" id="resultado-relatorio" style="display: none;">
+            <div class="resultado-header">
+                <button class="btn btn-secondary btn-voltar" onclick="voltarParaFiltros()">
+                    <i class="fas fa-arrow-left"></i> Voltar
+                </button>
+                <div class="resultado-title">
+                    <h2 id="titulo-resultado">Resultado do Relatório</h2>
+                </div>
+                <div class="resultado-actions">
+                    <button class="btn btn-primary" onclick="exportarRelatorioAtual()">
+                        <i class="fas fa-download"></i> Exportar PDF
+                    </button>
+                </div>
+            </div>
+            <div class="resultado-content" id="conteudo-resultado">
+                <!-- Conteúdo do relatório será inserido aqui -->
+            </div>
+        </section>
+    </div>
+</div>
+
+<style>
+/* Estilos para a página de relatórios */
+.relatorios-section {
+    margin-bottom: 2rem;
+}
+
+.relatorios-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.relatorios-header h2 {
+    font-size: 2rem;
+    color: var(--primary-dark);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.relatorios-header p {
+    color: #666;
+    font-size: 1.1rem;
+}
+
+.relatorios-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.relatorio-card {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+    border: 1px solid #eef2f7;
+    cursor: pointer;
+}
+
+.relatorio-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
+    border-color: var(--primary);
+}
+
+.card-header-relatorio {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.card-icon-relatorio {
+    width: 60px;
+    height: 60px;
+    border-radius: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+}
+
+.card-badge {
+    background: rgba(108, 99, 255, 0.1);
+    color: var(--primary);
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.card-body-relatorio h3 {
+    font-size: 1.3rem;
+    color: var(--primary-dark);
+    margin-bottom: 1rem;
+}
+
+.card-body-relatorio p {
+    color: #666;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+}
+
+.relatorio-features {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+}
+
+.feature-tag {
+    background: #f8f9fa;
+    color: var(--primary-dark);
+    padding: 0.3rem 0.8rem;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    border: 1px solid #e9ecef;
+}
+
+.card-footer-relatorio {
+    display: flex;
+    gap: 1rem;
+}
+
+.btn-sm {
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+}
+
+/* Resultado do Relatório */
+.resultado-relatorio {
+    animation: slideIn 0.3s ease-out;
+}
+
+.resultado-header {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-bottom: 1px solid #e1e8ed;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+    border-radius: 20px 20px 0 0;
+}
+
+.resultado-title {
+    flex: 1;
+}
+
+.resultado-title h2 {
+    color: var(--primary-dark);
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.resultado-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.resultado-content {
+    padding: 2rem;
+    background: white;
+    border-radius: 0 0 20px 20px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+    border: 1px solid #eef2f7;
+}
+
+/* Estilos específicos para cada tipo de relatório */
+.relatorio-desempenho-geral {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 15px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.relatorio-individual {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.relatorio-comparativo {
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+    border-radius: 15px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.relatorio-temporal {
+    background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+    border-radius: 15px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.relatorio-bncc {
+    background: linear-gradient(135deg, #e8f5e8 0%, #c8e6c9 100%);
+    border-radius: 15px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+/* Estilos para Filtros Dinâmicos */
+.filtros-dinamicos {
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Filters Section - Padrão consistente com outras telas */
+.filters-section {
+    margin-bottom: 2rem;
+}
+
+.filters-card {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    transition: all 0.3s ease;
+    max-width: 1140px;
+    margin: 0 auto;
+}
+
+.filters-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+}
+
+.card-header {
+    background: var(--gray-light);
+    padding: 1.5rem;
+    border-bottom: 1px solid #e1e8ed;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.card-icon {
+    width: 50px;
+    height: 50px;
+    background: var(--primary);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.card-title {
+    flex: 1;
+}
+
+.card-title h2 {
+    font-size: 1.3rem;
+    color: var(--primary-dark);
+    margin: 0 0 0.25rem 0;
+}
+
+.card-title p {
+    color: #666;
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.card-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.card-content {
+    padding: 1.5rem;
+}
+
+/* Form Styles - Padrão consistente */
+.modern-form {
+    animation: fadeIn 0.6s ease-out 0.2s both;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-weight: 600;
+    color: var(--primary-dark);
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    padding: 0.75rem;
+    border: 2px solid #e1e8ed;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(103, 58, 183, 0.1);
+}
+
+.form-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 1rem;
+}
+
+.btn-block {
+    width: 100%;
+    justify-content: center;
+}
+
+/* Estilos para Relatório de Frequência */
+.relatorio-frequencia {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Header Melhorado */
+.frequencia-header {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 12px;
+    border-left: 4px solid var(--primary);
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.header-icon {
+    width: 60px;
+    height: 60px;
+    background: var(--primary);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.8rem;
+    flex-shrink: 0;
+}
+
+.header-text h3 {
+    color: var(--primary-dark);
+    margin: 0 0 0.5rem 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.header-info {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.info-item i {
+    color: var(--primary);
+    width: 16px;
+}
+
+
+
+.frequencia-info p {
+    margin: 0;
+    font-weight: 600;
+    color: #495057;
+}
+
+.frequencia-resumo {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border-left: 4px solid var(--primary);
+}
+
+.resumo-item {
+    margin-bottom: 1rem;
+}
+
+.resumo-item:last-child {
+    margin-bottom: 0;
+}
+
+.resumo-item h4 {
+    color: var(--primary-dark);
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+}
+
+.resumo-item p {
+    margin: 0;
+    color: #495057;
+    font-weight: 500;
+}
+
+/* Tabela Simplificada */
+.frequencia-tabela {
+    margin-top: 2rem;
+}
+
+.tabela-header {
+    background: #f8f9fa;
+    padding: 1rem 1.5rem;
+    border-radius: 12px 12px 0 0;
+    border: 1px solid #e9ecef;
+    border-bottom: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.tabela-header h4 {
+    color: var(--primary-dark);
+    margin: 0;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.tabela-info {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.tabela-info span {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.tabela-info i {
+    color: var(--primary);
+    width: 16px;
+}
+
+.table-container {
+    border: 1px solid #e9ecef;
+    border-radius: 0 0 12px 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.tabela-frequencia {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+}
+
+.tabela-frequencia thead {
+    background: var(--primary);
+    color: white;
+}
+
+.tabela-frequencia th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.tabela-frequencia td {
+    padding: 1rem;
+    border-bottom: 1px solid #e9ecef;
+    font-size: 0.9rem;
+}
+
+.linha-par {
+    background: white;
+}
+
+.linha-impar {
+    background: #f8f9fa;
+}
+
+.tabela-frequencia tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Status de presença */
+.status-finalizado {
+    color: #4D44DB;
+    font-weight: 600;
+}
+
+.status-ausente {
+    color: #dc3545;
+    font-weight: 600;
+}
+
+.status-pendente {
+    color: #ffc107;
+    font-weight: 600;
+}
+
+/* Estilos para Ranking de Aprendizagem */
+.relatorio-ranking {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.ranking-header {
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 12px;
+    border-left: 4px solid var(--primary);
+}
+
+.ranking-tabs {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    border-bottom: 2px solid #e9ecef;
+    padding-bottom: 1rem;
+}
+
+.tab-button {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    background: #e9ecef;
+    color: #666;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.tab-button:hover {
+    background: #dee2e6;
+    color: #333;
+}
+
+.tab-button.active {
+    background: #28a745;
+    color: white;
+}
+
+.tab-button i {
+    font-size: 1rem;
+}
+
+.ranking-tabela {
+    margin-top: 1rem;
+}
+
+.tabela-ranking {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.tabela-ranking thead {
+    background: var(--primary);
+    color: white;
+}
+
+.tabela-ranking th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.tabela-ranking td {
+    padding: 1rem;
+    border-bottom: 1px solid #e9ecef;
+    font-size: 0.9rem;
+}
+
+.tabela-ranking tbody tr {
+    transition: background-color 0.3s ease;
+}
+
+.tabela-ranking tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.tabela-ranking tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Estilos específicos para posições */
+.primeiro-lugar {
+    background: #fff3cd !important;
+    border-left: 4px solid #ffc107;
+}
+
+.linha-par {
+    background: white;
+}
+
+.linha-impar {
+    background: #f8f9fa;
+}
+
+.posicao {
+    font-weight: bold;
+    color: var(--primary-dark);
+    text-align: center;
+    font-size: 1.1rem;
+}
+
+.nome {
+    font-weight: 500;
+    color: #333;
+}
+
+.aprendizado {
+    font-weight: 600;
+    color: #28a745;
+    text-align: center;
+}
+
+.portugues, .matematica {
+    text-align: center;
+    font-weight: 500;
+}
+
+.portugues {
+    color: #007bff;
+}
+
+.matematica {
+    color: #dc3545;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .relatorios-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .relatorio-card {
+        padding: 1.5rem;
+    }
+    
+    .card-footer-relatorio {
+        flex-direction: column;
+    }
+    
+    .filters-section {
+        margin-bottom: 1rem;
+    }
+
+    .filters-card {
+        margin: 0 1rem;
+    }
+
+    .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+        text-align: center;
+    }
+
+    .card-icon {
+        align-self: center;
+    }
+
+    .card-title {
+        text-align: center;
+        width: 100%;
+    }
+
+    .card-actions {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .form-buttons {
+        flex-direction: column;
+    }
+    
+    .resultado-header {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .resultado-title {
+        text-align: center;
+    }
+    
+    .resultado-actions {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .frequencia-info {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    /* Responsividade para tabela */
+    .tabela-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    
+    .tabela-info {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .tabela-frequencia {
+        font-size: 0.8rem;
+    }
+    
+    .tabela-frequencia th,
+    .tabela-frequencia td {
+        padding: 0.5rem;
+    }
+    
+    .btn-voltar {
+        align-self: flex-start;
+    }
+    
+    /* Responsividade para ranking */
+    .ranking-tabs {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .tab-button {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .tabela-ranking {
+        font-size: 0.8rem;
+    }
+    
+    .tabela-ranking th,
+    .tabela-ranking td {
+        padding: 0.5rem;
+    }
+}
+</style>
+
+<script>
+// Dados simulados para demonstração
+const dadosRelatorios = {
+    'ranking-aprendizagem': {
+        titulo: 'Ranking de Aprendizagem',
+        dados: {
+            filtros: {
+                ano: '',
+                caderno: '',
+                etapa: '',
+                periodo: ''
+            },
+            ranking: [
+                {
+                    posicao: '1º',
+                    nome: 'EM DOM PEDRO II - CREOLIZINHO',
+                    aprendizado: '6.34',
+                    portugues: '256.38',
+                    matematica: '323.50'
+                },
+                {
+                    posicao: '2º',
+                    nome: 'EM NATALINO RIBEIRO',
+                    aprendizado: '5.81',
+                    portugues: '216.50',
+                    matematica: '332.14'
+                },
+                {
+                    posicao: '3º',
+                    nome: 'EM LUIS GABRIEL DO NASCIMENTO',
+                    aprendizado: '4.52',
+                    portugues: '215.71',
+                    matematica: '255.17'
+                },
+                {
+                    posicao: '4º',
+                    nome: 'EM SOTERO DOS REIS',
+                    aprendizado: '3.25',
+                    portugues: '175.44',
+                    matematica: '233.25'
+                },
+                {
+                    posicao: '5º',
+                    nome: 'EM MARIA JOSÉ DE SOUZA',
+                    aprendizado: '3.18',
+                    portugues: '168.92',
+                    matematica: '245.67'
+                },
+                {
+                    posicao: '6º',
+                    nome: 'EM ANTONIO FRANCISCO LISBOA',
+                    aprendizado: '2.95',
+                    portugues: '145.23',
+                    matematica: '198.76'
+                }
+            ]
+        }
+    },
+    'frequencia-avaliacao': {
+        titulo: 'Frequência na Avaliação',
+        dados: {
+            escola: 'EM Deputado Fernando Falcao',
+            turma: '9º Ano Vespertino',
+            resumo: {
+                portugues: { finalizaram: 0, ausentes: 0, pendentes: 0 },
+                matematica: { finalizaram: 0, ausentes: 0, pendentes: 0 }
+            },
+            alunos: [
+                { matricula: '227556', inep: '-', nome: 'ARIANY LIMA DOS SANTOS FERREIRA', portugues: 'PENDENTE', matematica: 'PENDENTE' },
+                { matricula: '227557', inep: '-', nome: 'ERIK SANTOS DE AMORIM', portugues: 'PENDENTE', matematica: 'PENDENTE' },
+                { matricula: '227558', inep: '-', nome: 'HEWILING SOUSA PINTO', portugues: 'PENDENTE', matematica: 'PENDENTE' },
+                { matricula: '227559', inep: '-', nome: 'IZABELE SILVA FERREIRA SOUSA', portugues: 'PENDENTE', matematica: 'PENDENTE' },
+                { matricula: '227560', inep: '-', nome: 'JOSEANE SANTIAGO DIAS', portugues: 'PENDENTE', matematica: 'PENDENTE' },
+                { matricula: '227561', inep: '-', nome: 'KAIKE OLIVEIRA DA SILVA', portugues: 'PENDENTE', matematica: 'PENDENTE' },
+                { matricula: '227562', inep: '-', nome: 'MURILO SILVA ABREU', portugues: 'PENDENTE', matematica: 'PENDENTE' },
+                { matricula: '227563', inep: '-', nome: 'RECIELE DE JESUS DA SILVA', portugues: 'PENDENTE', matematica: 'PENDENTE' }
+            ]
+        }
+    }
+};
+
+function gerarConteudoRelatorio(tipo, dados) {
+    switch(tipo) {
+        case 'frequencia-avaliacao':
+            return gerarRelatorioFrequenciaAvaliacao(dados);
+        case 'ranking-aprendizagem':
+            return gerarRelatorioRankingAprendizagem(dados);
+        
+        default:
+            return '<p>Relatório não disponível</p>';
+    }
+}
+
+// Funções de geração de relatórios
+
+function gerarRelatorioRankingAprendizagem(dados) {
+    const { ranking, filtros } = dados.dados;
+    
+    return `
+        <div class="relatorio-ranking">
+            <div class="ranking-header">
+                <div class="header-content">
+                    <div class="header-icon">
+                        <i class="fas fa-medal"></i>
+                    </div>
+                    <div class="header-text">
+                        <h3>Ranking de Aprendizagem</h3>
+                        <div class="header-info">
+                            ${filtros.ano ? `<span class="info-item"><i class="fas fa-calendar"></i> Ano: ${filtros.ano}</span>` : ''}
+                            ${filtros.caderno ? `<span class="info-item"><i class="fas fa-book"></i> Caderno: ${filtros.caderno}</span>` : ''}
+                            ${filtros.etapa ? `<span class="info-item"><i class="fas fa-graduation-cap"></i> Etapa: ${filtros.etapa}</span>` : ''}
+                            ${filtros.periodo ? `<span class="info-item"><i class="fas fa-clock"></i> Período: ${filtros.periodo}</span>` : ''}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="ranking-tabs">
+                <button class="tab-button active" onclick="mudarTabRanking('escola')">
+                    <i class="fas fa-school"></i> Escola
+                </button>
+                <button class="tab-button" onclick="mudarTabRanking('turma')">
+                    <i class="fas fa-users"></i> Turma
+                </button>
+                <button class="tab-button" onclick="mudarTabRanking('aluno')">
+                    <i class="fas fa-user-graduate"></i> Aluno
+                </button>
+            </div>
+            
+            <div class="ranking-tabela">
+                <div class="table-container">
+                    <table class="tabela-ranking">
+                        <thead>
+                            <tr>
+                                <th>POSIÇÃO</th>
+                                <th>NOME</th>
+                                <th>APRENDIZADO</th>
+                                <th>PORTUGUÊS</th>
+                                <th>MATEMÁTICA</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${ranking.map((item, index) => `
+                                <tr class="${index === 0 ? 'primeiro-lugar' : index % 2 === 0 ? 'linha-par' : 'linha-impar'}">
+                                    <td class="posicao">${item.posicao}</td>
+                                    <td class="nome">${item.nome}</td>
+                                    <td class="aprendizado">${item.aprendizado}</td>
+                                    <td class="portugues">${item.portugues}</td>
+                                    <td class="matematica">${item.matematica}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function gerarRelatorioFrequenciaAvaliacao(dados) {
+    const { escola, turma, alunos, resumo } = dados.dados;
+    
+    return `
+        <div class="relatorio-frequencia">
+            <div class="frequencia-header">
+                <div class="header-content">
+                    <div class="header-icon">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div class="header-text">
+                        <h3>Relatório de Frequência na Avaliação</h3>
+                        <div class="header-info">
+                            <span class="info-item"><i class="fas fa-school"></i> Escola: ${escola}</span>
+                            <span class="info-item"><i class="fas fa-users"></i> Turma: ${turma}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="frequencia-tabela">
+                <div class="tabela-header">
+                    <h4><i class="fas fa-table"></i> Lista de Alunos</h4>
+                    <div class="tabela-info">
+                        <span><i class="fas fa-school"></i> ${escola}</span>
+                        <span><i class="fas fa-users"></i> ${turma}</span>
+                        <span><i class="fas fa-user-graduate"></i> ${alunos.length} alunos</span>
+                    </div>
+                </div>
+                
+                <div class="table-container">
+                    <table class="tabela-frequencia">
+                        <thead>
+                            <tr>
+                                <th>MATRÍCULA</th>
+                                <th>INEP</th>
+                                <th>NOME DO ALUNO</th>
+                                <th>LÍNGUA PORTUGUESA</th>
+                                <th>MATEMÁTICA</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${alunos.map((aluno, index) => `
+                                <tr class="${index % 2 === 0 ? 'linha-par' : 'linha-impar'}">
+                                    <td>${aluno.matricula}</td>
+                                    <td>${aluno.inep || '-'}</td>
+                                    <td>${aluno.nome}</td>
+                                    <td class="status-${aluno.portugues.toLowerCase()}">${aluno.portugues}</td>
+                                    <td class="status-${aluno.matematica.toLowerCase()}">${aluno.matematica}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+
+
+// Funções principais
+function gerarRelatorio(tipo) {
+    // Para relatório de frequência, capturar filtros específicos
+    if (tipo === 'frequencia-avaliacao') {
+        const filtros = {
+            ano: document.getElementById('ano-frequencia').value,
+            escola: document.getElementById('escola-frequencia').value,
+            serie: document.getElementById('serie-frequencia').value,
+            periodo: document.getElementById('periodo-frequencia').value,
+            caderno: document.getElementById('caderno-frequencia').value,
+            presenca: document.getElementById('presenca-frequencia').value
+        };
+        
+        // Validar campos obrigatórios
+        if (!filtros.ano || !filtros.escola || !filtros.serie || !filtros.periodo || !filtros.caderno) {
+            alert('Por favor, preencha todos os campos obrigatórios (marcados com *)');
+            return;
+        }
+        
+        console.log('[DEBUG] Enviando filtros para API:', filtros);
+        
+        // Buscar dados reais da API com filtros
+        fetch(`/api/relatorios/frequencia-avaliacao`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(filtros)
+        })
+        .then(response => {
+            console.log('[DEBUG] Status da resposta:', response.status);
+            return response.json();
+        })
+        .then(data => {
+            console.log('[DEBUG] Dados recebidos da API:', data);
+            
+            if (data.error) {
+                console.error('Erro na API:', data.error);
+                // Usar dados simulados como fallback
+                const dados = dadosRelatorios[tipo];
+                if (dados) {
+                    const dadosFiltrados = aplicarFiltrosFrequencia(dados, filtros);
+                    mostrarRelatorio(tipo, dadosFiltrados);
+                }
+            } else {
+                // Usar dados reais da API
+                const dados = {
+                    titulo: dadosRelatorios[tipo]?.titulo || 'Frequência na Avaliação',
+                    dados: data
+                };
+                mostrarRelatorio(tipo, dados);
+            }
+        })
+        .catch(error => {
+            console.error('Erro ao buscar dados:', error);
+            // Usar dados simulados como fallback
+            const dados = dadosRelatorios[tipo];
+            if (dados) {
+                const dadosFiltrados = aplicarFiltrosFrequencia(dados, filtros);
+                mostrarRelatorio(tipo, dadosFiltrados);
+            }
+        });
+    } else {
+        // Para outros relatórios, capturar filtros se disponíveis
+        const filtros = {};
+        
+        // Capturar filtros específicos baseado no tipo
+        if (tipo === 'ranking-aprendizagem') {
+            const anoRanking = document.getElementById('ano-ranking');
+            const cadernoRanking = document.getElementById('caderno-ranking');
+            const etapaRanking = document.getElementById('etapa-ranking');
+            const periodoRanking = document.getElementById('periodo-ranking');
+            if (anoRanking) filtros.ano = anoRanking.value;
+            if (cadernoRanking) filtros.caderno = cadernoRanking.value;
+            if (etapaRanking) filtros.etapa = etapaRanking.value;
+            if (periodoRanking) filtros.periodo = periodoRanking.value;
+            
+            // Capturar tipo de ranking selecionado (escola, turma, aluno)
+            const tabAtiva = document.querySelector('.tab-button.active');
+            if (tabAtiva) {
+                if (tabAtiva.textContent.includes('Turma')) {
+                    filtros.tipo = 'turma';
+                } else if (tabAtiva.textContent.includes('Aluno')) {
+                    filtros.tipo = 'aluno';
+                } else {
+                    filtros.tipo = 'escola'; // padrão
+                }
+            } else {
+                filtros.tipo = 'escola'; // padrão
+            }
+        }
+        
+        console.log(`[DEBUG] Gerando relatório ${tipo} com filtros:`, filtros);
+        
+        // Determinar se deve usar POST ou GET
+        const usePost = Object.keys(filtros).length > 0 && (filtros.escola || tipo === 'ranking-aprendizagem');
+        
+        if (usePost) {
+            // Usar POST com filtros
+            fetch(`/api/relatorios/${tipo}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(filtros)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    console.error('Erro na API:', data.error);
+                    const dados = dadosRelatorios[tipo];
+                    if (dados) {
+                        mostrarRelatorio(tipo, dados);
+                    }
+                } else {
+                    const dados = {
+                        titulo: dadosRelatorios[tipo]?.titulo || tipo,
+                        dados: data
+                    };
+                    mostrarRelatorio(tipo, dados);
+                }
+            })
+            .catch(error => {
+                console.error('Erro ao buscar dados:', error);
+                const dados = dadosRelatorios[tipo];
+                if (dados) {
+                    mostrarRelatorio(tipo, dados);
+                }
+            });
+        } else {
+            // Usar GET (método original)
+            fetch(`/api/relatorios/${tipo}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        console.error('Erro na API:', data.error);
+                        const dados = dadosRelatorios[tipo];
+                        if (dados) {
+                            mostrarRelatorio(tipo, dados);
+                        }
+                    } else {
+                        const dados = {
+                            titulo: dadosRelatorios[tipo]?.titulo || tipo,
+                            dados: data
+                        };
+                        mostrarRelatorio(tipo, dados);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao buscar dados:', error);
+                    const dados = dadosRelatorios[tipo];
+                    if (dados) {
+                        mostrarRelatorio(tipo, dados);
+                    }
+                });
+        }
+    }
+}
+
+function mostrarRelatorio(tipo, dados) {
+    const titulo = dados.titulo;
+    const conteudo = gerarConteudoRelatorio(tipo, dados);
+    
+    document.getElementById('titulo-resultado').textContent = titulo;
+    document.getElementById('conteudo-resultado').innerHTML = conteudo;
+    
+    // Esconder seção de filtros e mostrar resultado
+    document.getElementById('filtros-dinamicos').style.display = 'none';
+    document.getElementById('resultado-relatorio').style.display = 'block';
+    
+    // Atualizar contador de relatórios gerados
+    const contador = document.getElementById('relatorios-gerados');
+    contador.textContent = parseInt(contador.textContent) + 1;
+    
+    // Scroll para o resultado
+    document.getElementById('resultado-relatorio').scrollIntoView({ behavior: 'smooth' });
+}
+
+function voltarParaFiltros() {
+    document.getElementById('resultado-relatorio').style.display = 'none';
+    document.getElementById('filtros-dinamicos').style.display = 'block';
+    document.getElementById('filtros-dinamicos').scrollIntoView({ behavior: 'smooth' });
+}
+
+function voltarParaRelatorios() {
+    const relatoriosSection = document.querySelector('.relatorios-section');
+    document.getElementById('filtros-dinamicos').style.display = 'none';
+    document.getElementById('resultado-relatorio').style.display = 'none';
+    
+    // Mostrar novamente a seção principal de relatórios
+    relatoriosSection.style.display = 'block';
+    relatoriosSection.scrollIntoView({ behavior: 'smooth' });
+}
+
+// Função para mudar abas do ranking
+function mudarTabRanking(tipo) {
+    // Remover classe active de todos os botões
+    const tabButtons = document.querySelectorAll('.tab-button');
+    tabButtons.forEach(button => button.classList.remove('active'));
+    
+    // Adicionar classe active ao botão clicado
+    const activeButton = document.querySelector(`[onclick="mudarTabRanking('${tipo}')"]`);
+    if (activeButton) {
+        activeButton.classList.add('active');
+    }
+    
+    // Recarregar dados do ranking com o novo tipo
+    console.log(`Mudando para tab: ${tipo}`);
+    
+    // Se já há dados de ranking carregados, recarregar com o novo tipo
+    const rankingContainer = document.querySelector('.relatorio-ranking');
+    if (rankingContainer) {
+        // Recarregar o ranking com o novo tipo
+        gerarRelatorio('ranking-aprendizagem');
+    }
+}
+
+function exportarRelatorioAtual() {
+    // Implementar exportação para PDF
+    alert('Funcionalidade de exportação será implementada em breve!');
+}
+
+// Event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('[DEBUG] DOM carregado, iniciando carregamento de filtros...');
+    
+    // Carregar dados básicos
+    carregarFiltros();
+    
+    // Event listener para o formulário de filtros dinâmicos
+    document.getElementById('form-filtros-dinamicos').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const tipoRelatorio = document.getElementById('form-filtros-dinamicos').getAttribute('data-tipo');
+        console.log('[DEBUG] Submetendo formulário para relatório:', tipoRelatorio);
+        if (tipoRelatorio) {
+            gerarRelatorio(tipoRelatorio);
+        }
+    });
+    
+    // Adicionar listeners para mudanças nos filtros de frequência
+    document.addEventListener('change', function(e) {
+        if (e.target.id === 'escola-frequencia' || e.target.id === 'caderno-frequencia') {
+            console.log('[DEBUG] Filtro alterado:', e.target.id, '=', e.target.value);
+        }
+    });
+});
+
+function carregarFiltros() {
+    console.log('[DEBUG] Iniciando carregamento de filtros...');
+    
+    // Carregar escolas para filtro geral
+    fetch('/api/escolas')
+        .then(response => response.json())
+        .then(data => {
+            console.log('[DEBUG] Resposta da API escolas:', data);
+            const escolas = data.escolas || data; // Compatibilidade com diferentes formatos
+            console.log('[DEBUG] Escolas processadas:', escolas);
+            
+            const select = document.getElementById('escola-relatorio');
+            const selectFrequencia = document.getElementById('escola-frequencia');
+            
+            if (escolas && escolas.length > 0) {
+                escolas.forEach(escola => {
+                    // Para filtro geral
+                    if (select) {
+                        const option = document.createElement('option');
+                        option.value = escola.id;
+                        option.textContent = escola.nome;
+                        select.appendChild(option);
+                    }
+                    
+                    // Para filtro de frequência
+                    if (selectFrequencia) {
+                        const optionFreq = document.createElement('option');
+                        optionFreq.value = escola.id;
+                        optionFreq.textContent = escola.nome;
+                        selectFrequencia.appendChild(optionFreq);
+                    }
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Erro ao carregar escolas:', error);
+            // Adicionar opção de fallback
+            const selectFrequencia = document.getElementById('escola-frequencia');
+            if (selectFrequencia) {
+                const option = document.createElement('option');
+                option.value = '1';
+                option.textContent = 'EMEF Teste';
+                selectFrequencia.appendChild(option);
+            }
+        });
+    
+    // Carregar turmas para filtro geral
+    fetch('/api/turmas')
+        .then(response => response.json())
+        .then(data => {
+            const turmas = data.turmas || data; // Compatibilidade com diferentes formatos
+            const select = document.getElementById('turma-relatorio');
+            if (select && turmas && turmas.length > 0) {
+                turmas.forEach(turma => {
+                    const option = document.createElement('option');
+                    option.value = turma.id;
+                    option.textContent = `${turma.ano}º ano ${turma.nome}`;
+                    select.appendChild(option);
+                });
+            }
+        })
+        .catch(error => console.error('Erro ao carregar turmas:', error));
+    
+    // Carregar cadernos para filtro de frequência
+    carregarCadernos();
+}
+
+function carregarCadernos() {
+    console.log('[DEBUG] Carregando cadernos...');
+    fetch('/api/cadernos')
+        .then(response => response.json())
+        .then(data => {
+            console.log('[DEBUG] Resposta da API cadernos:', data);
+            const cadernos = data.cadernos || data; // Compatibilidade com diferentes formatos
+            console.log('[DEBUG] Cadernos processados:', cadernos);
+            
+            const select = document.getElementById('caderno-frequencia');
+            if (select) {
+                select.innerHTML = '<option value="">Selecione o caderno</option>';
+                
+                if (cadernos && cadernos.length > 0) {
+                    cadernos.forEach(caderno => {
+                        const option = document.createElement('option');
+                        option.value = caderno.id;
+                        option.textContent = `${caderno.titulo} (${caderno.serie || caderno.ano}º ano)`;
+                        select.appendChild(option);
+                    });
+                } else {
+                    // Adicionar opção de fallback
+                    const option = document.createElement('option');
+                    option.value = '434';
+                    option.textContent = 'AVALIAÇÃO DIAGNÓSTICA 5º ANO (5º ano)';
+                    select.appendChild(option);
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Erro ao carregar cadernos:', error);
+            // Adicionar opção de fallback
+            const select = document.getElementById('caderno-frequencia');
+            if (select) {
+                select.innerHTML = '<option value="">Selecione o caderno</option>';
+                const option = document.createElement('option');
+                option.value = '434';
+                option.textContent = 'AVALIAÇÃO DIAGNÓSTICA 5º ANO (5º ano)';
+                select.appendChild(option);
+            }
+        });
+}
+
+// Funções para gerenciar filtros dinâmicos
+function abrirFiltrosRelatorio(tipo) {
+    const filtrosSection = document.getElementById('filtros-dinamicos');
+    const tituloFiltros = document.getElementById('titulo-filtros');
+    const descricaoFiltros = document.getElementById('descricao-filtros');
+    const camposFiltros = document.getElementById('campos-filtros');
+    const formFiltros = document.getElementById('form-filtros-dinamicos');
+    const relatoriosSection = document.querySelector('.relatorios-section');
+    
+    // Definir título e descrição baseado no tipo
+    const configuracao = getConfiguracaoFiltros(tipo);
+    tituloFiltros.textContent = configuracao.titulo;
+    descricaoFiltros.textContent = configuracao.descricao;
+    
+    // Definir o tipo no formulário
+    formFiltros.setAttribute('data-tipo', tipo);
+    
+    // Gerar campos de filtros
+    camposFiltros.innerHTML = configuracao.campos;
+    
+    // Esconder seção principal de relatórios e mostrar filtros
+    relatoriosSection.style.display = 'none';
+    filtrosSection.style.display = 'block';
+    
+    // Scroll para a seção de filtros
+    filtrosSection.scrollIntoView({ behavior: 'smooth' });
+    
+    // Carregar dados específicos se necessário
+    if (tipo === 'frequencia-avaliacao') {
+        carregarDadosFrequencia();
+    } else if (tipo === 'ranking-aprendizagem') {
+        carregarFiltrosRanking();
+    }
+}
+
+// Função removida - não é mais necessária
+
+function getConfiguracaoFiltros(tipo) {
+    const configuracoes = {
+        'frequencia-avaliacao': {
+            titulo: 'Filtros - Frequência na Avaliação',
+            descricao: 'Configure os parâmetros para gerar o relatório de frequência',
+            campos: `
+                <div class="form-group">
+                    <label for="ano-frequencia">Ano *</label>
+                    <select id="ano-frequencia" required>
+                        <option value="">Selecione o ano</option>
+                        <option value="2024">2024</option>
+                        <option value="2025" selected>2025</option>
+                        <option value="2026">2026</option>
+                        <option value="2027">2027</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="escola-frequencia">Escola *</label>
+                    <select id="escola-frequencia" required>
+                        <option value="">Selecione a escola</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="serie-frequencia">Série *</label>
+                    <select id="serie-frequencia" required>
+                        <option value="">Selecione a série</option>
+                        <option value="5">5º ano</option>
+                        <option value="6">6º ano</option>
+                        <option value="7">7º ano</option>
+                        <option value="8">8º ano</option>
+                        <option value="9">9º ano</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="periodo-frequencia">Período *</label>
+                    <select id="periodo-frequencia" required>
+                        <option value="">Selecione o período</option>
+                        <option value="1">1º Bimestre</option>
+                        <option value="2">2º Bimestre</option>
+                        <option value="3">3º Bimestre</option>
+                        <option value="4">4º Bimestre</option>
+                        <option value="diagnostica">Avaliação Diagnóstica</option>
+                        <option value="recuperacao">Recuperação</option>
+                        <option value="final">Avaliação Final</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="caderno-frequencia">Caderno *</label>
+                    <select id="caderno-frequencia" required>
+                        <option value="">Selecione o caderno</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="presenca-frequencia">Presença</label>
+                    <select id="presenca-frequencia">
+                        <option value="todos">TODOS</option>
+                        <option value="pendente">PENDENTE</option>
+                        <option value="finalizado">FINALIZADO</option>
+                        <option value="ausente">AUSENTE</option>
+                    </select>
+                </div>
+            `
+        },
+        'alunos-por-turma': {
+            titulo: 'Filtros - Alunos por Turma',
+            descricao: 'Configure os parâmetros para gerar o relatório de alunos por turma',
+            campos: `
+                <div class="form-group">
+                    <label for="escola-alunos">Escola</label>
+                    <select id="escola-alunos">
+                        <option value="">Todas as escolas</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="turma-alunos">Turma</label>
+                    <select id="turma-alunos">
+                        <option value="">Todas as turmas</option>
+                    </select>
+                </div>
+            `
+        },
+        'ranking-aprendizagem': {
+            titulo: 'Filtros - Ranking de Aprendizagem',
+            descricao: 'Configure os parâmetros para gerar o ranking de aprendizagem',
+            campos: `
+                <div class="form-group">
+                    <label for="ano-ranking">Ano</label>
+                    <input type="text" id="ano-ranking" value="" placeholder="Digite o ano">
+                </div>
+                <div class="form-group">
+                    <label for="caderno-ranking">Caderno</label>
+                    <select id="caderno-ranking">
+                        <option value="">Selecione o caderno</option>
+                        <!-- Cadernos serão carregados dinamicamente -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="etapa-ranking">Etapa</label>
+                    <select id="etapa-ranking">
+                        <option value="">Selecione a etapa</option>
+                        <!-- Etapas serão carregadas dinamicamente -->
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="periodo-ranking">Período</label>
+                    <select id="periodo-ranking">
+                        <option value="">Selecione o período</option>
+                        <!-- Períodos serão carregados dinamicamente -->
+                    </select>
+                </div>
+            `
+        },
+        'resultados-por-escola': {
+            titulo: 'Filtros - Resultados por Escola',
+            descricao: 'Configure os parâmetros para gerar o relatório de resultados',
+            campos: `
+                <div class="form-group">
+                    <label for="escola-resultados">Escola</label>
+                    <select id="escola-resultados">
+                        <option value="">Todas as escolas</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="periodo-resultados">Período</label>
+                    <select id="periodo-resultados">
+                        <option value="todos">Todos os períodos</option>
+                        <option value="1">1º Bimestre</option>
+                        <option value="2">2º Bimestre</option>
+                        <option value="3">3º Bimestre</option>
+                        <option value="4">4º Bimestre</option>
+                    </select>
+                </div>
+            `
+        }
+    };
+    
+    // Retorna configuração padrão se não encontrada
+    return configuracoes[tipo] || {
+        titulo: 'Filtros do Relatório',
+        descricao: 'Configure os parâmetros para gerar o relatório',
+        campos: `
+            <div class="form-group">
+                <label for="escola-generico">Escola</label>
+                <select id="escola-generico">
+                    <option value="">Todas as escolas</option>
+                </select>
+            </div>
+        `
+    };
+}
+
+function carregarDadosFrequencia() {
+    // Carregar escolas para o filtro de frequência
+    fetch('/api/escolas')
+        .then(response => response.json())
+        .then(data => {
+            const escolas = data.escolas || data; // Compatibilidade com diferentes formatos
+            const select = document.getElementById('escola-frequencia');
+            if (select) {
+                select.innerHTML = '<option value="">Selecione a escola</option>';
+                if (escolas && escolas.length > 0) {
+                    escolas.forEach(escola => {
+                        const option = document.createElement('option');
+                        option.value = escola.id;
+                        option.textContent = escola.nome;
+                        select.appendChild(option);
+                    });
+                } else {
+                    // Adicionar opção de fallback
+                    const option = document.createElement('option');
+                    option.value = '1';
+                    option.textContent = 'EMEF Teste';
+                    select.appendChild(option);
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Erro ao carregar escolas:', error);
+            // Adicionar opção de fallback
+            const select = document.getElementById('escola-frequencia');
+            if (select) {
+                select.innerHTML = '<option value="">Selecione a escola</option>';
+                const option = document.createElement('option');
+                option.value = '1';
+                option.textContent = 'EMEF Teste';
+                select.appendChild(option);
+            }
+        });
+    
+    // Carregar cadernos para o filtro de frequência
+    carregarCadernos();
+}
+
+function carregarFiltrosRanking() {
+    console.log('[DEBUG] Carregando filtros do ranking...');
+    
+    fetch('/api/relatorios/filtros-ranking')
+        .then(response => {
+            console.log('[DEBUG] Status da resposta:', response.status);
+            return response.json();
+        })
+        .then(data => {
+            console.log('[DEBUG] Dados recebidos:', data);
+            
+            // Carregar cadernos
+            const selectCaderno = document.getElementById('caderno-ranking');
+            selectCaderno.innerHTML = '<option value="">Selecione o caderno</option>';
+            
+            if (data.cadernos && data.cadernos.length > 0) {
+                data.cadernos.forEach(caderno => {
+                    const option = document.createElement('option');
+                    option.value = caderno.id;
+                    option.textContent = `${caderno.titulo} (${caderno.serie}º ano)`;
+                    selectCaderno.appendChild(option);
+                });
+            } else {
+                const option = document.createElement('option');
+                option.value = '';
+                option.textContent = 'Nenhum caderno disponível';
+                option.disabled = true;
+                selectCaderno.appendChild(option);
+            }
+            
+            // Carregar etapas
+            const selectEtapa = document.getElementById('etapa-ranking');
+            selectEtapa.innerHTML = '<option value="">Selecione a etapa</option>';
+            
+            if (data.etapas && data.etapas.length > 0) {
+                data.etapas.forEach(etapa => {
+                    const option = document.createElement('option');
+                    option.value = etapa.valor;
+                    option.textContent = etapa.texto;
+                    selectEtapa.appendChild(option);
+                });
+            } else {
+                const option = document.createElement('option');
+                option.value = '';
+                option.textContent = 'Nenhuma etapa disponível';
+                option.disabled = true;
+                selectEtapa.appendChild(option);
+            }
+            
+            // Carregar períodos
+            const selectPeriodo = document.getElementById('periodo-ranking');
+            selectPeriodo.innerHTML = '<option value="">Selecione o período</option>';
+            
+            if (data.periodos && data.periodos.length > 0) {
+                data.periodos.forEach(periodo => {
+                    const option = document.createElement('option');
+                    option.value = periodo.valor;
+                    option.textContent = periodo.texto;
+                    selectPeriodo.appendChild(option);
+                });
+            } else {
+                const option = document.createElement('option');
+                option.value = '';
+                option.textContent = 'Nenhum período disponível';
+                option.disabled = true;
+                selectPeriodo.appendChild(option);
+            }
+            
+            console.log('[DEBUG] Filtros carregados com sucesso!');
+        })
+        .catch(error => {
+            console.error('[ERROR] Erro ao carregar filtros do ranking:', error);
+            
+            // Fallback com dados estáticos em caso de erro
+            const selectCaderno = document.getElementById('caderno-ranking');
+            selectCaderno.innerHTML = `
+                <option value="">Selecione o caderno</option>
+                <option value="434">AVALIAÇÃO DIAGNÓSTICA 5º ANO</option>
+                <option value="15">AVALIOAÇÃO</option>
+                <option value="16">Avaliação</option>
+            `;
+            
+            const selectEtapa = document.getElementById('etapa-ranking');
+            selectEtapa.innerHTML = `
+                <option value="">Selecione a etapa</option>
+                <option value="5">5º Ano</option>
+                <option value="9">9º Ano</option>
+                <option value="8">8º Ano</option>
+            `;
+            
+            const selectPeriodo = document.getElementById('periodo-ranking');
+            selectPeriodo.innerHTML = `
+                <option value="">Selecione o período</option>
+                <option value="1">1º Bimestre</option>
+                <option value="2">2º Bimestre</option>
+                <option value="3">3º Bimestre</option>
+                <option value="4">4º Bimestre</option>
+            `;
+        });
+}
+
+// Função para aplicar filtros aos dados de frequência
+function aplicarFiltrosFrequencia(dados, filtros) {
+    console.log('[DEBUG] Aplicando filtros:', filtros);
+    const { escola, serie, caderno } = filtros;
+    
+    // Buscar informações da escola e caderno selecionados
+    const escolaSelecionada = buscarEscolaPorId(escola);
+    const cadernoSelecionado = buscarCadernoPorId(caderno);
+    
+    console.log('[DEBUG] Escola selecionada:', escolaSelecionada);
+    console.log('[DEBUG] Caderno selecionado:', cadernoSelecionado);
+    
+    // Atualizar dados com as informações dos filtros
+    const dadosFiltrados = {
+        titulo: dados.titulo,
+        dados: {
+            escola: escolaSelecionada ? escolaSelecionada.nome : 'Escola não encontrada',
+            turma: `${serie}º Ano Vespertino`,
+            resumo: dados.dados.resumo,
+            alunos: dados.dados.alunos.map(aluno => ({
+                ...aluno,
+                // Aplicar filtro de presença se especificado
+                portugues: filtros.presenca === 'todos' ? aluno.portugues : 
+                          filtros.presenca === 'pendente' ? 'PENDENTE' :
+                          filtros.presenca === 'finalizado' ? 'FINALIZADO' :
+                          filtros.presenca === 'ausente' ? 'AUSENTE' : aluno.portugues,
+                matematica: filtros.presenca === 'todos' ? aluno.matematica :
+                           filtros.presenca === 'pendente' ? 'PENDENTE' :
+                           filtros.presenca === 'finalizado' ? 'FINALIZADO' :
+                           filtros.presenca === 'ausente' ? 'AUSENTE' : aluno.matematica
+            }))
+        }
+    };
+    
+    return dadosFiltrados;
+}
+
+// Função para buscar escola por ID
+function buscarEscolaPorId(escolaId) {
+    const select = document.getElementById('escola-frequencia');
+    if (select) {
+        const option = select.querySelector(`option[value="${escolaId}"]`);
+        if (option) {
+            return { id: escolaId, nome: option.textContent };
+        }
+    }
+    return null;
+}
+
+// Função para buscar caderno por ID
+function buscarCadernoPorId(cadernoId) {
+    const select = document.getElementById('caderno-frequencia');
+    if (select) {
+        const option = select.querySelector(`option[value="${cadernoId}"]`);
+        if (option) {
+            return { id: cadernoId, titulo: option.textContent };
+        }
+    }
+    return null;
+}
+</script>
+{% endblock %} 

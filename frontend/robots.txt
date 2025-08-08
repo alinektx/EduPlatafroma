@@ -1,0 +1,28 @@
+User-agent: *
+Allow: /
+
+# Páginas principais que devem ser indexadas
+Allow: /login
+Allow: /dashboard
+Allow: /alunos
+Allow: /cadernos
+Allow: /questoes
+Allow: /correcao-automatica
+Allow: /relatorios
+Allow: /escolas
+Allow: /turmas
+Allow: /habilidades
+Allow: /plano-aula
+
+# Páginas que NÃO devem ser indexadas (áreas privadas)
+Disallow: /api/
+Disallow: /admin/
+Disallow: /private/
+Disallow: /temp/
+Disallow: /uploads/
+
+# Sitemap
+Sitemap: https://educ.eduplataforma.work/sitemap.xml
+
+# Crawl-delay (opcional - para não sobrecarregar o servidor)
+Crawl-delay: 1 

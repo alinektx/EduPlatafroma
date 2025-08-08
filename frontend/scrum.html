@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minha Rotina de Segunda-feira</title>
+    <!-- Inclui Tailwind CSS para estilização rápida e responsiva -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Define a fonte Inter como padrão para o corpo do documento */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5; /* Cor de fundo suave e moderna */
+            background-image: linear-gradient(135deg, #f0f2f5 25%, #e9edf2 100%); /* Gradiente sutil */
+        }
+        /* Estilos para arrastar e soltar: Adiciona um efeito visual quando o cartão está sendo arrastado */
+        .dragging {
+            opacity: 0.6; /* Reduz a opacidade do cartão que está sendo arrastado */
+            border: 2px dashed #6b7280; /* Borda tracejada para indicar que está sendo arrastado */
+            transform: scale(0.98); /* Pequena redução de escala */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); /* Sombra mais acentuada */
+        }
+        /* Estilos para o contêiner de arrastar sobre: Adiciona um feedback visual quando você pode soltar um cartão */
+        .drop-target {
+            border: 2px dashed #3b82f6; /* Borda azul tracejada para indicar um alvo de soltar */
+            background-color: #e0f2fe; /* Fundo azul claro para o alvo de soltar */
+        }
+        /* Estilo para o modal de confirmação */
+        .modal {
+            display: none; /* Escondido por padrão */
+            position: fixed; /* Fixado na tela */
+            z-index: 1000; /* Acima de outros elementos */
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto; /* Habilita rolagem se necessário */
+            background-color: rgba(0,0,0,0.6); /* Fundo semi-transparente escuro */
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 2rem;
+            border-radius: 0.75rem; /* rounded-xl */
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.08); /* Sombra mais forte */
+            width: 90%;
+            max-width: 450px; /* Um pouco maior */
+            text-align: center;
+            animation: fadeIn 0.3s ease-out; /* Animação de entrada */
+        }
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        /* Animação para o modal */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* Animação para cards ao serem adicionados */
+        .card-enter-active {
+            animation: cardEnter 0.3s ease-out;
+        }
+        @keyframes cardEnter {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+    <!-- Importações do Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import {
+            getAuth,
+            signInAnonymously,
+            signInWithCustomToken,
+            onAuthStateChanged,
+            signInWithEmailAndPassword,
+            createUserWithEmailAndPassword,
+            signOut
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc, onSnapshot, query, where, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Variáveis globais fornecidas pelo ambiente Canvas
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let db;
+        let auth;
+        let userId = null; // Começa como null, será atualizado após a autenticação
+        let tasksCollectionRef;
+        let authReadyCallback = null; // Callback para quando a autenticação estiver pronta
+
+        // Exporta as variáveis e funções necessárias para serem acessadas pelo script principal
+        window.firebaseApp = null;
+        window.db = null;
+        window.auth = null;
+        window.getUserId = () => userId;
+        window.getTasksCollectionRef = () => tasksCollectionRef;
+
+        window.updateTaskInDb = async (taskId, newData) => {
+            if (!db || !userId || !tasksCollectionRef) {
+                console.error("Firestore não inicializado, userId ou tasksCollectionRef não disponível.");
+                return;
+            }
+            try {
+                await updateDoc(doc(tasksCollectionRef, taskId), newData);
+                console.log("Tarefa atualizada no Firestore:", taskId);
+            } catch (error) {
+                console.error("Erro ao atualizar tarefa no Firestore:", error);
+            }
+        };
+        window.deleteTaskFromDb = async (taskId) => {
+            if (!db || !userId || !tasksCollectionRef) {
+                console.error("Firestore não inicializado, userId ou tasksCollectionRef não disponível.");
+                return;
+            }
+            try {
+                await deleteDoc(doc(tasksCollectionRef, taskId));
+                console.log("Tarefa deletada do Firestore:", taskId);
+            } catch (error) {
+                console.error("Erro ao deletar tarefa do Firestore:", error);
+            }
+        };
+        window.addTaskToDb = async (taskText, status, priority) => {
+            if (!db || !userId || !tasksCollectionRef) {
+                console.error("Firestore não inicializado, userId ou tasksCollectionRef não disponível.");
+                return null;
+            }
+            try {
+                const newTask = {
+                    text: taskText,
+                    status: status,
+                    priority: priority,
+                    timestamp: new Date().toISOString(),
+                    userId: userId
+                };
+                const docRef = await addDoc(tasksCollectionRef, newTask);
+                console.log("Tarefa adicionada ao Firestore com ID:", docRef.id);
+                return { id: docRef.id, ...newTask };
+            } catch (error) {
+                console.error("Erro ao adicionar tarefa ao Firestore:", error);
+                return null;
+            }
+        };
+        window.setupFirestoreListener = (callback) => {
+            if (!db || !userId || !tasksCollectionRef) {
+                console.error("Firestore não inicializado, userId ou tasksCollectionRef não disponível para o listener.");
+                return;
+            }
+            // Importante: Adiciona filtro para o userId para garantir que cada usuário veja apenas suas próprias tarefas
+            const q = query(tasksCollectionRef, where("userId", "==", userId));
+            onSnapshot(q, (snapshot) => {
+                const tasks = [];
+                snapshot.forEach(doc => {
+                    tasks.push({ id: doc.id, ...doc.data() });
+                });
+                callback(tasks);
+            }, (error) => {
+                console.error("Erro ao escutar tarefas no Firestore:", error);
+            });
+        };
+
+        window.clearColumnFromDb = async (statusToClear) => {
+            if (!db || !userId || !tasksCollectionRef) {
+                console.error("Firestore não inicializado, userId ou tasksCollectionRef não disponível para limpar coluna.");
+                return;
+            }
+            try {
+                const q = query(tasksCollectionRef, where("status", "==", statusToClear), where("userId", "==", userId));
+                const querySnapshot = await getDocs(q);
+                const batch = writeBatch(db);
+
+                querySnapshot.forEach((docRef) => {
+                    batch.delete(docRef.ref);
+                });
+
+                await batch.commit();
+                console.log(`Todas as tarefas com status '${statusToClear}' deletadas do Firestore.`);
+            } catch (error) {
+                console.error("Erro ao limpar coluna no Firestore:", error);
+            }
+        };
+
+        // --- Funções de Autenticação Firebase ---
+        window.loginUser = async (email, password) => {
+            try {
+                await signInWithEmailAndPassword(auth, email, password);
+                return { success: true };
+            } catch (error) {
+                return { success: false, message: error.message };
+            }
+        };
+
+        window.signupUser = async (email, password) => {
+            try {
+                await createUserWithEmailAndPassword(auth, email, password);
+                return { success: true };
+            } catch (error) {
+                return { success: false, message: error.message };
+            }
+        };
+
+        window.logoutUser = async () => {
+            try {
+                await signOut(auth);
+                return { success: true };
+            } catch (error) {
+                return { success: false, message: error.message };
+            }
+        };
+
+        // Inicialização do Firebase e autenticação
+        window.addEventListener('load', async () => {
+            try {
+                window.firebaseApp = initializeApp(firebaseConfig);
+                db = getFirestore(window.firebaseApp);
+                auth = getAuth(window.firebaseApp);
+                window.db = db; // Disponibiliza db globalmente
+                window.auth = auth; // Disponibiliza auth globalmente
+
+                // Tenta autenticar com token personalizado se disponível, caso contrário, anonimamente
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                // Observa mudanças no estado de autenticação
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        userId = user.uid; // Atualiza o userId
+                        document.getElementById('userIdDisplay').textContent = `ID do Usuário: ${userId}`;
+                        // Define a coleção de tarefas para o usuário logado
+                        tasksCollectionRef = collection(db, `artifacts/${appId}/users/${userId}/tasks`);
+                        window.tasksCollectionRef = tasksCollectionRef; // Disponibiliza globalmente
+                        console.log("Firebase inicializado e usuário autenticado. User ID:", userId);
+
+                        if (window.toggleAuthScreens) window.toggleAuthScreens(true); // Mostra o board
+                        if (window.initializeBoardWithTasks) {
+                            window.setupFirestoreListener((tasks) => {
+                                window.initializeBoardWithTasks(tasks);
+                            });
+                        }
+                    } else {
+                        // Usuário deslogado ou autenticação falhou
+                        userId = null; // Reinicia userId
+                        document.getElementById('userIdDisplay').textContent = `ID do Usuário: (Não autenticado)`;
+                        console.log("Usuário não autenticado ou deslogado.");
+                        if (window.toggleAuthScreens) window.toggleAuthScreens(false); // Mostra a tela de login
+                    }
+                     // Notifica que a autenticação está pronta
+                     if (authReadyCallback) {
+                        authReadyCallback(user !== null);
+                        authReadyCallback = null; // Reseta para evitar chamadas duplicadas
+                    }
+                });
+
+            } catch (e) {
+                console.error("Erro ao inicializar Firebase:", e);
+                document.getElementById('userIdDisplay').textContent = `Erro Firebase: ${e.message}`;
+                // Notifica que a autenticação falhou
+                if (authReadyCallback) {
+                    authReadyCallback(false);
+                    authReadyCallback = null;
+                }
+            }
+        });
+
+         // Função para aguardar o estado de autenticação antes de fazer qualquer coisa
+         window.waitForAuth = (callback) => {
+            if (auth && auth.currentUser !== undefined) { // Já temos um estado de auth definido
+                callback(auth.currentUser !== null);
+            } else { // Ainda esperando o onAuthStateChanged
+                authReadyCallback = callback;
+            }
+        };
+    </script>
+</head>
+<body class="bg-gray-100 flex flex-col items-center justify-center min-h-screen p-4">
+
+    <!-- Tela de Login/Cadastro (Visível por padrão) -->
+    <div id="authScreen" class="bg-white p-8 rounded-xl shadow-lg w-full max-w-md border-t-8 border-purple-600">
+        <h2 class="text-3xl font-extrabold text-gray-800 mb-6 text-center bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-indigo-600">
+            Bem-vindo!
+        </h2>
+        <div class="mb-4">
+            <label for="authEmail" class="block text-gray-700 text-sm font-bold mb-2">Email:</label>
+            <input
+                type="email"
+                id="authEmail"
+                placeholder="seuemail@exemplo.com"
+                class="shadow appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+        </div>
+        <div class="mb-6">
+            <label for="authPassword" class="block text-gray-700 text-sm font-bold mb-2">Senha:</label>
+            <input
+                type="password"
+                id="authPassword"
+                placeholder="********"
+                class="shadow appearance-none border rounded-lg w-full py-3 px-4 text-gray-700 mb-3 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+        </div>
+        <p id="authError" class="text-red-500 text-sm mb-4 text-center"></p>
+        <div class="flex flex-col space-y-4">
+            <button
+                id="loginBtn"
+                class="bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105"
+            >
+                Entrar
+            </button>
+            <button
+                id="signupBtn"
+                class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105"
+            >
+                Criar Conta
+            </button>
+        </div>
+    </div>
+
+    <!-- Conteúdo Principal do Quadro Scrum (Escondido por padrão) -->
+    <div id="mainBoard" class="container mx-auto p-6 bg-white rounded-xl shadow-lg w-full max-w-4xl border-t-8 border-purple-600 hidden">
+        <div class="flex justify-between items-center mb-8">
+            <h1 class="text-4xl font-extrabold text-gray-800 bg-clip-text text-transparent bg-gradient-to-r from-purple-600 to-indigo-600">
+                Minha Rotina de Segunda-feira
+            </h1>
+            <button
+                id="logoutBtn"
+                class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105"
+            >
+                Sair
+            </button>
+        </div>
+
+        <!-- Exibe o ID do Usuário -->
+        <p id="userIdDisplay" class="text-sm text-gray-500 text-center mb-6">Carregando ID do Usuário...</p>
+
+        <!-- Seção para adicionar nova tarefa com Prioridade -->
+        <div class="mb-8 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg shadow-xl flex flex-col md:flex-row items-center space-y-4 md:space-y-0 md:space-x-4">
+            <input
+                type="text"
+                id="taskInput"
+                placeholder="Adicionar nova tarefa..."
+                class="flex-grow p-4 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 text-lg w-full bg-white text-gray-800 placeholder-gray-500"
+            />
+            <select id="prioritySelect" class="p-4 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600 text-lg bg-white text-gray-800 w-full md:w-auto shadow-sm" aria-label="Selecionar prioridade da atividade">
+                <option value="low">Baixa Prioridade</option>
+                <option value="medium" selected>Média Prioridade</option>
+                <option value="high">Alta Prioridade</option>
+            </select>
+            <button
+                id="addTaskBtn"
+                class="bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800 text-white font-semibold py-3 px-6 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:scale-105 w-full md:w-auto flex items-center justify-center space-x-2"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                <span>Adicionar Tarefa</span>
+            </button>
+        </div>
+
+        <!-- Quadro Scrum -->
+        <div id="board" class="flex flex-col md:flex-row md:space-x-6 space-y-6 md:space-y-0 justify-center">
+            <!-- Coluna "A Fazer" -->
+            <div id="todo" class="column flex-1 bg-gradient-to-br from-gray-50 to-gray-100 p-6 rounded-lg shadow-xl min-h-[300px] border-t-4 border-blue-500 transition-all duration-200 ease-in-out flex flex-col">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-2xl font-bold text-gray-700 text-center flex-grow">A Fazer</h2>
+                    <button class="clear-column-btn text-gray-400 hover:text-gray-600 focus:outline-none p-1 rounded-full hover:bg-gray-200" data-status="todo">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        <span class="sr-only">Limpar A Fazer</span>
+                    </button>
+                </div>
+                <div class="space-y-4 flex-grow">
+                    <!-- Cartões de tarefas serão adicionados aqui -->
+                </div>
+            </div>
+
+            <!-- Coluna "Fazendo" -->
+            <div id="doing" class="column flex-1 bg-gradient-to-br from-gray-50 to-gray-100 p-6 rounded-lg shadow-xl min-h-[300px] border-t-4 border-yellow-500 transition-all duration-200 ease-in-out flex flex-col">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-2xl font-bold text-gray-700 text-center flex-grow">Fazendo</h2>
+                    <button class="clear-column-btn text-gray-400 hover:text-gray-600 focus:outline-none p-1 rounded-full hover:bg-gray-200" data-status="doing">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        <span class="sr-only">Limpar Fazendo</span>
+                    </button>
+                </div>
+                <div class="space-y-4 flex-grow"></div>
+            </div>
+
+            <!-- Coluna "Concluído" -->
+            <div id="done" class="column flex-1 bg-gradient-to-br from-gray-50 to-gray-100 p-6 rounded-lg shadow-xl min-h-[300px] border-t-4 border-green-500 transition-all duration-200 ease-in-out flex flex-col">
+                <div class="flex items-center justify-between mb-6">
+                    <h2 class="text-2xl font-bold text-gray-700 text-center flex-grow">Concluído</h2>
+                    <button class="clear-column-btn text-gray-400 hover:text-gray-600 focus:outline-none p-1 rounded-full hover:bg-gray-200" data-status="done">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        <span class="sr-only">Limpar Concluído</span>
+                    </button>
+                </div>
+                <div class="space-y-4 flex-grow"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmação para Exclusão -->
+    <div id="confirmationModal" class="modal">
+        <div class="modal-content">
+            <h3 class="text-xl font-bold mb-4 text-gray-800">Confirmar Exclusão</h3>
+            <p class="text-gray-700">Tem certeza que deseja excluir esta tarefa?</p>
+            <div class="modal-buttons">
+                <button id="confirmDeleteBtn" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 ease-in-out transform hover:scale-105">
+                    Excluir
+                </button>
+                <button id="cancelDeleteBtn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-lg transition duration-300 ease-in-out transform hover:scale-105">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmação para Limpar Coluna -->
+    <div id="clearColumnConfirmationModal" class="modal">
+        <div class="modal-content">
+            <h3 class="text-xl font-bold mb-4 text-gray-800">Confirmar Limpar Coluna</h3>
+            <p class="text-gray-700">Tem certeza que deseja <strong id="clearColumnStatusText">todas as tarefas</strong> desta coluna?</p>
+            <div class="modal-buttons">
+                <button id="confirmClearColumnBtn" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-300 ease-in-out transform hover:scale-105">
+                    Limpar
+                </button>
+                <button id="cancelClearColumnBtn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded-lg transition duration-300 ease-in-out transform hover:scale-105">
+                    Cancelar
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <script type="text/javascript">
+        window.onload = function() {
+            // Referências aos elementos da tela de autenticação
+            const authScreen = document.getElementById('authScreen');
+            const authEmailInput = document.getElementById('authEmail');
+            const authPasswordInput = document.getElementById('authPassword');
+            const loginBtn = document.getElementById('loginBtn');
+            const signupBtn = document.getElementById('signupBtn');
+            const authErrorDisplay = document.getElementById('authError');
+
+            // Referências aos elementos do quadro principal
+            const mainBoard = document.getElementById('mainBoard');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const taskInput = document.getElementById('taskInput');
+            const prioritySelect = document.getElementById('prioritySelect');
+            const addTaskBtn = document.getElementById('addTaskBtn');
+            const todoColumn = document.getElementById('todo').querySelector('div.space-y-4');
+            const doingColumn = document.getElementById('doing').querySelector('div.space-y-4');
+            const doneColumn = document.getElementById('done').querySelector('div.space-y-4');
+
+            const confirmationModal = document.getElementById('confirmationModal');
+            const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+            const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+            let taskToDeleteId = null;
+
+            const clearColumnConfirmationModal = document.getElementById('clearColumnConfirmationModal');
+            const clearColumnStatusText = document.getElementById('clearColumnStatusText');
+            const confirmClearColumnBtn = document.getElementById('confirmClearColumnBtn');
+            const cancelClearColumnBtn = document.getElementById('cancelClearColumnBtn');
+            let columnToClearStatus = null;
+
+            let draggedItem = null;
+
+            // Objeto para mapear prioridades a classes Tailwind CSS
+            const priorityClasses = {
+                'low': 'bg-gray-200 text-gray-700',
+                'medium': 'bg-blue-200 text-blue-700',
+                'high': 'bg-red-200 text-red-700'
+            };
+
+            // Função para alternar a visibilidade entre as telas de autenticação e do quadro principal
+            window.toggleAuthScreens = (isAuthenticated) => {
+                if (isAuthenticated) {
+                    authScreen.classList.add('hidden');
+                    mainBoard.classList.remove('hidden');
+                } else {
+                    authScreen.classList.remove('hidden');
+                    mainBoard.classList.add('hidden');
+                    authEmailInput.value = ''; // Limpa os campos de login ao deslogar
+                    authPasswordInput.value = '';
+                    authErrorDisplay.textContent = '';
+                }
+            };
+
+            // --- Gerenciamento de Autenticação ---
+            loginBtn.addEventListener('click', async () => {
+                const email = authEmailInput.value;
+                const password = authPasswordInput.value;
+                authErrorDisplay.textContent = 'Entrando...';
+                const result = await window.loginUser(email, password);
+                if (!result.success) {
+                    authErrorDisplay.textContent = result.message;
+                }
+            });
+
+            signupBtn.addEventListener('click', async () => {
+                const email = authEmailInput.value;
+                const password = authPasswordInput.value;
+                authErrorDisplay.textContent = 'Criando conta...';
+                const result = await window.signupUser(email, password);
+                if (!result.success) {
+                    authErrorDisplay.textContent = result.message;
+                }
+            });
+
+            logoutBtn.addEventListener('click', async () => {
+                const result = await window.logoutUser();
+                if (!result.success) {
+                    // Podemos exibir um erro aqui se o logout falhar (raro)
+                    console.error("Erro ao fazer logout:", result.message);
+                }
+            });
+
+            // Função para atualizar a visibilidade e o comportamento dos botões de mover status
+            function updateCardButtons(card, currentColumnId) {
+                const moveNextBtn = card.querySelector('.move-next-btn');
+                const movePrevBtn = card.querySelector('.move-prev-btn');
+
+                moveNextBtn.style.display = 'none';
+                movePrevBtn.style.display = 'none';
+
+                moveNextBtn.onclick = null;
+                movePrevBtn.onclick = null;
+
+                if (currentColumnId === 'todo') {
+                    moveNextBtn.style.display = 'flex';
+                    moveNextBtn.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
+                        <span class="sr-only">Mover para Fazendo</span>
+                    `;
+                    moveNextBtn.onclick = async () => {
+                        await window.updateTaskInDb(card.dataset.id, { status: 'doing' });
+                    };
+                } else if (currentColumnId === 'doing') {
+                    movePrevBtn.style.display = 'flex';
+                    movePrevBtn.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                        <span class="sr-only">Mover para A Fazer</span>
+                    `;
+                    movePrevBtn.onclick = async () => {
+                        await window.updateTaskInDb(card.dataset.id, { status: 'todo' });
+                    };
+
+                    moveNextBtn.style.display = 'flex';
+                    moveNextBtn.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span class="sr-only">Mover para Concluído</span>
+                    `;
+                    moveNextBtn.onclick = async () => {
+                        await window.updateTaskInDb(card.dataset.id, { status: 'done' });
+                    };
+                } else if (currentColumnId === 'done') {
+                    movePrevBtn.style.display = 'flex';
+                    movePrevBtn.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                        <span class="sr-only">Mover para Fazendo</span>
+                    `;
+                    movePrevBtn.onclick = async () => {
+                        await window.updateTaskInDb(card.dataset.id, { status: 'doing' });
+                    };
+                }
+            }
+
+            // Função para criar um novo cartão de tarefa ou carregar um existente
+            function createTaskCard(taskData) {
+                const card = document.createElement('div');
+                card.draggable = true;
+                card.dataset.id = taskData.id;
+                card.classList.add(
+                    'bg-white', 'p-4', 'rounded-lg', 'shadow-md', 'flex', 'flex-col', 'gap-2',
+                    'text-gray-700', 'text-lg', 'font-medium', 'cursor-grab',
+                    'hover:shadow-lg', 'transition-all', 'duration-200', 'ease-in-out',
+                    'card-enter-active'
+                );
+
+                const priorityColorClass = priorityClasses[taskData.priority] || 'bg-gray-200 text-gray-700';
+
+                const taskContentHtml = `
+                    <div class="flex items-center justify-between w-full">
+                        <span class="task-text flex-grow cursor-pointer">${taskData.text}</span>
+                        <span class="priority-tag ${priorityColorClass} text-xs font-semibold px-2 py-1 rounded-full ml-2 capitalize">${taskData.priority}</span>
+                        <div class="flex space-x-1 ml-auto">
+                            <button class="edit-btn text-gray-500 hover:text-gray-700 focus:outline-none p-1 rounded-full hover:bg-gray-100">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                                <span class="sr-only">Editar</span>
+                            </button>
+                            <button class="move-prev-btn text-blue-500 hover:text-blue-700 focus:outline-none p-1 rounded-full hover:bg-blue-100 flex items-center justify-center"></button>
+                            <button class="move-next-btn text-green-500 hover:text-green-700 focus:outline-none p-1 rounded-full hover:bg-green-100 flex items-center justify-center"></button>
+                            <button class="delete-btn text-red-500 hover:text-red-700 focus:outline-none p-1 rounded-full hover:bg-red-100">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                                <span class="sr-only">Excluir</span>
+                            </button>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-400 w-full text-right">Criado em: ${new Date(taskData.timestamp).toLocaleString('pt-BR')}</p>
+                `;
+                card.innerHTML = taskContentHtml;
+
+                const taskTextSpan = card.querySelector('.task-text');
+                const editBtn = card.querySelector('.edit-btn');
+                const deleteBtn = card.querySelector('.delete-btn');
+
+                taskTextSpan.addEventListener('click', () => {
+                    taskTextSpan.contentEditable = true;
+                    taskTextSpan.focus();
+                    taskTextSpan.classList.add('bg-blue-100', 'rounded-md', 'px-2');
+                });
+
+                taskTextSpan.addEventListener('blur', async () => {
+                    taskTextSpan.contentEditable = false;
+                    taskTextSpan.classList.remove('bg-blue-100', 'rounded-md', 'px-2');
+                    const newText = taskTextSpan.textContent.trim();
+                    if (newText && newText !== taskData.text) {
+                        await window.updateTaskInDb(taskData.id, { text: newText });
+                        taskData.text = newText;
+                    } else {
+                        taskTextSpan.textContent = taskData.text;
+                    }
+                });
+
+                editBtn.addEventListener('click', () => {
+                    taskTextSpan.click();
+                });
+
+                deleteBtn.addEventListener('click', () => {
+                    taskToDeleteId = taskData.id;
+                    confirmationModal.style.display = 'flex';
+                });
+
+                card.addEventListener('dragstart', (e) => {
+                    draggedItem = card;
+                    setTimeout(() => {
+                        card.classList.add('dragging');
+                    }, 0);
+                });
+
+                card.addEventListener('dragend', () => {
+                    if (draggedItem) {
+                        draggedItem.classList.remove('dragging');
+                    }
+                    draggedItem = null;
+                });
+
+                updateCardButtons(card, taskData.status);
+
+                return card;
+            }
+
+            // Lógica do Modal de Confirmação de Exclusão de Tarefa
+            confirmDeleteBtn.addEventListener('click', async () => {
+                if (taskToDeleteId) {
+                    await window.deleteTaskFromDb(taskToDeleteId);
+                    taskToDeleteId = null;
+                    confirmationModal.style.display = 'none';
+                }
+            });
+
+            cancelDeleteBtn.addEventListener('click', () => {
+                taskToDeleteId = null;
+                confirmationModal.style.display = 'none';
+            });
+
+            // Lógica do Modal de Confirmação de Limpar Coluna
+            confirmClearColumnBtn.addEventListener('click', async () => {
+                if (columnToClearStatus) {
+                    await window.clearColumnFromDb(columnToClearStatus);
+                    columnToClearStatus = null;
+                    clearColumnConfirmationModal.style.display = 'none';
+                }
+            });
+
+            cancelClearColumnBtn.addEventListener('click', () => {
+                columnToClearStatus = null;
+                clearColumnConfirmationModal.style.display = 'none';
+            });
+
+            // Adiciona a funcionalidade de adicionar tarefa ao botão
+            addTaskBtn.addEventListener('click', async () => {
+                const taskText = taskInput.value.trim();
+                const taskPriority = prioritySelect.value;
+                if (taskText) {
+                    // Adiciona a tarefa ao Firestore. O listener de snapshot irá adicioná-la ao DOM.
+                    await window.addTaskToDb(taskText, 'todo', taskPriority);
+                    taskInput.value = '';
+                    prioritySelect.value = 'medium';
+                }
+            });
+
+            // Permite adicionar tarefa pressionando Enter no input
+            taskInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    addTaskBtn.click();
+                }
+            });
+
+            // --- Configuração de Arrastar e Soltar para as Colunas ---
+            const columnsDivs = document.querySelectorAll('.column > div.space-y-4');
+
+            columnsDivs.forEach(column => {
+                column.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    column.classList.add('drop-target');
+                });
+
+                column.addEventListener('dragleave', () => {
+                    column.classList.remove('drop-target');
+                });
+
+                column.addEventListener('drop', async (e) => {
+                    e.preventDefault();
+                    column.classList.remove('drop-target');
+                    if (draggedItem) {
+                        const newStatus = column.parentNode.id;
+                        await window.updateTaskInDb(draggedItem.dataset.id, { status: newStatus });
+                    }
+                });
+            });
+
+            // Adiciona event listeners para os botões de limpar coluna
+            document.querySelectorAll('.clear-column-btn').forEach(button => {
+                button.addEventListener('click', () => {
+                    columnToClearStatus = button.dataset.status;
+                    let statusName = '';
+                    switch (columnToClearStatus) {
+                        case 'todo': statusName = 'A Fazer'; break;
+                        case 'doing': statusName = 'Fazendo'; break;
+                        case 'done': statusName = 'Concluído'; break;
+                    }
+                    clearColumnStatusText.textContent = `todas as tarefas da coluna "${statusName}"`;
+                    clearColumnConfirmationModal.style.display = 'flex';
+                });
+            });
+
+            // Função para inicializar o quadro com tarefas vindas do Firestore
+            window.initializeBoardWithTasks = (tasks) => {
+                // Limpa todas as colunas para evitar duplicação antes de renderizar do Firestore
+                todoColumn.innerHTML = '';
+                doingColumn.innerHTML = '';
+                doneColumn.innerHTML = '';
+
+                // Agrupa as tarefas por status
+                const tasksByStatus = {
+                    todo: [],
+                    doing: [],
+                    done: []
+                };
+
+                tasks.forEach(task => {
+                    if (tasksByStatus[task.status]) {
+                        tasksByStatus[task.status].push(task);
+                    } else {
+                        console.warn(`Status desconhecido para a tarefa: ${task.status}. Tarefa:`, task);
+                    }
+                });
+
+                // Adiciona as tarefas a cada coluna, garantindo que estejam na ordem do timestamp mais recente primeiro
+                tasksByStatus.todo.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).forEach(task => {
+                    todoColumn.appendChild(createTaskCard(task));
+                });
+                tasksByStatus.doing.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).forEach(task => {
+                    doingColumn.appendChild(createTaskCard(task));
+                });
+                tasksByStatus.done.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)).forEach(task => {
+                    doneColumn.appendChild(createTaskCard(task));
+                });
+            };
+
+            // Certifica-se de que a tela correta é exibida ao carregar
+            window.waitForAuth((isAuthenticated) => {
+                window.toggleAuthScreens(isAuthenticated);
+            });
+        };
+    </script>
+</body>
+</html>

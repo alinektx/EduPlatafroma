@@ -1,0 +1,20 @@
+FAVICON EDU PLATAFORMA
+
+Para criar o favicon.ico:
+
+1. Use o arquivo favicon.svg como base
+2. Converta para ICO usando:
+   - Online: https://convertio.co/svg-ico/
+   - Ou use ferramentas como ImageMagick
+   - Tamanho recomendado: 32x32 pixels
+
+3. Salve como: favicon.ico na pasta static/img/
+
+4. O favicon deve ter:
+   - Chapéu de formatura roxo (#6C63FF)
+   - Borla dourada (#FFD700)
+   - Fundo transparente
+   - Tamanho 32x32 pixels
+
+5. Atualize o HTML para incluir:
+   <link rel="icon" type="image/x-icon" href="/static/img/favicon.ico"> 

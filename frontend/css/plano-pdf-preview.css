@@ -1,0 +1,520 @@
+/* Definição de variáveis CSS para cores, facilitando a consistência e futuras alterações */
+:root {
+    --primary-color: #1e3a8a; /* Azul profissional para documentos acadêmicos */
+    --secondary-color: #1e40af; /* Azul secundário */
+    --accent-color: #3b82f6; /* Azul de destaque */
+    --light-background: #f8fafc; /* Fundo muito claro */
+    --white: #ffffff; /* Cor branca */
+    --text-color: #1f2937; /* Cor de texto principal */
+    --light-text-color: #6b7280; /* Cor de texto mais clara */
+    --border-color: #e5e7eb; /* Cor de bordas */
+    --success-color: #10b981; /* Verde para elementos positivos */
+    --warning-color: #f59e0b; /* Amarelo para avisos */
+}
+
+/* Estilos globais para o corpo da página */
+body {
+    background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%);
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--text-color);
+    margin: 0;
+    padding: 20px;
+    line-height: 1.6; /* Espaçamento entre linhas ajustado para melhor legibilidade na impressão */
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+/* Contêiner principal do PDF - ajustado para A4 exato */
+.pdf-container {
+    width: 210mm; /* Largura A4 */
+    min-height: 297mm; /* Altura A4 mínima para permitir conteúdo dinâmico */
+    background: var(--white);
+    margin: 0 auto;
+    padding: 20mm; /* Margens internas de 2cm para o conteúdo */
+    border-radius: 8px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    overflow: hidden; /* Garante que o conteúdo não vaze */
+    font-size: 10.5pt; /* Tamanho padrão para documentos acadêmicos, bom para A4 */
+    box-sizing: border-box; /* Inclui padding na largura e altura total */
+    display: flex;
+    flex-direction: column;
+}
+
+/* Cabeçalho com logos posicionadas */
+.pdf-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 0; /* Ajustado para estar dentro da margem geral */
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    color: white;
+    position: relative;
+    margin-top: -20mm; /* Compensar a margem superior do pdf-container */
+    margin-left: -20mm; /* Compensar a margem esquerda */
+    margin-right: -20mm; /* Compensar a margem direita */
+    padding-left: 20mm; /* Adicionar o padding de volta ao conteúdo do header */
+    padding-right: 20mm; /* Adicionar o padding de volta ao conteúdo do header */
+}
+
+.logo-left, .logo-right {
+    flex: 0 0 70px; /* Reduzido um pouco */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.logo-adm, .logo-uemasul {
+    max-width: 55px; /* Reduzido um pouco */
+    max-height: 55px; /* Reduzido um pouco */
+    object-fit: contain;
+    background: white;
+    border-radius: 6px; /* Ajuste no border-radius */
+    padding: 6px; /* Ajuste no padding */
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); /* Sombra mais suave */
+}
+
+.header-center {
+    flex: 1;
+    text-align: center;
+    padding: 0 15px; /* Ajustado */
+}
+
+.pdf-title {
+    font-size: 22pt; /* Ligeiramente reduzido */
+    font-weight: 700;
+    margin: 0 0 4px 0; /* Ajustado */
+    letter-spacing: 0.8px; /* Ajustado */
+    text-transform: uppercase;
+}
+
+.pdf-subtitle {
+    font-size: 11pt; /* Ajustado */
+    font-weight: 400;
+    margin: 0 0 6px 0; /* Ajustado */
+    opacity: 0.9;
+}
+
+.pdf-prof {
+    font-size: 10pt; /* Ajustado */
+    font-weight: 500;
+    margin: 0;
+    opacity: 0.8;
+}
+
+/* Linha separadora */
+.pdf-separator {
+    border: none;
+    border-top: 1px solid var(--border-color); /* Linha mais fina */
+    margin: 0;
+    margin-left: -20mm; /* Compensar a margem esquerda */
+    margin-right: -20mm; /* Compensar a margem direita */
+}
+
+/* Seção de informações gerais */
+.pdf-info-section {
+    background: var(--light-background);
+    padding: 10px 0; /* Ajustado para estar dentro da margem geral */
+    border-bottom: 1px solid var(--border-color);
+    margin-left: -20mm; /* Compensar a margem esquerda */
+    margin-right: -20mm; /* Compensar a margem direita */
+    padding-left: 20mm; /* Adicionar o padding de volta ao conteúdo */
+    padding-right: 20mm; /* Adicionar o padding de volta ao conteúdo */
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Mais flexível */
+    gap: 10px; /* Reduzido */
+}
+
+.info-item {
+    display: flex;
+    align-items: center;
+    gap: 6px; /* Reduzido */
+}
+
+.info-label {
+    font-weight: 600;
+    color: var(--primary-color);
+    font-size: 9.5pt; /* Ajustado */
+}
+
+.info-value {
+    font-weight: 500;
+    color: var(--text-color);
+    font-size: 9.5pt; /* Ajustado */
+}
+
+/* Cards de conteúdo */
+.pdf-card {
+    margin: 15px 0; /* Margens ajustadas para o layout A4 */
+    padding: 15px; /* Padding ajustado */
+    background: var(--white);
+    border: 1px solid var(--border-color);
+    border-radius: 6px; /* Reduzido */
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.04); /* Sombra mais sutil */
+    line-height: 1.5;
+}
+
+/* Título principal do plano */
+.titulo-card {
+    background: linear-gradient(135deg, var(--accent-color) 0%, var(--primary-color) 100%);
+    color: white;
+    text-align: center;
+    border: none;
+    padding: 18px; /* Ajustado */
+}
+
+.plano-titulo-principal {
+    margin: 0;
+    font-size: 16pt; /* Ajustado */
+    font-weight: 700;
+    line-height: 1.4;
+}
+
+/* Títulos de seção */
+.section-title {
+    margin: 0 0 12px 0; /* Ajustado */
+    font-size: 13pt; /* Ajustado */
+    font-weight: 700;
+    color: var(--primary-color);
+    border-bottom: 2px solid var(--accent-color);
+    padding-bottom: 6px; /* Ajustado */
+    display: flex;
+    align-items: center;
+    gap: 6px; /* Ajustado */
+}
+
+/* Card BNCC */
+.bncc-card {
+    background: linear-gradient(135deg, #fefce8 0%, #fffbeb 100%); /* Cor mais suave */
+    border-left: 4px solid var(--warning-color);
+}
+
+.bncc-content {
+    margin-top: 8px; /* Ajustado */
+}
+
+.competencia-item {
+    background: white;
+    padding: 10px; /* Ajustado */
+    border-radius: 4px; /* Ajustado */
+    border-left: 3px solid var(--warning-color);
+}
+
+.bncc-codigo {
+    display: inline-block;
+    background: var(--warning-color);
+    color: white;
+    padding: 3px 7px; /* Ajustado */
+    border-radius: 3px; /* Ajustado */
+    font-weight: 700;
+    font-size: 8.5pt; /* Ajustado */
+    margin-bottom: 6px; /* Ajustado */
+}
+
+.bncc-descricao {
+    margin: 0;
+    font-style: italic;
+    line-height: 1.5;
+}
+
+/* Card de objetivos */
+.objetivos-card {
+    background: linear-gradient(135deg, #f0fdf4 0%, #f0fdf4 100%); /* Cor mais suave */
+    border-left: 4px solid var(--success-color);
+}
+
+.objetivos-list {
+    list-style: none;
+    padding: 0;
+    margin: 8px 0 0 0; /* Ajustado */
+}
+
+.objetivos-list li {
+    padding: 6px 0 6px 22px; /* Ajustado */
+    position: relative;
+    line-height: 1.5;
+}
+
+.objetivos-list li:before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: var(--success-color);
+    font-weight: bold;
+    font-size: 11pt; /* Ajustado */
+}
+
+/* Card de materiais */
+.materiais-card {
+    background: linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%); /* Cor mais suave */
+    border-left: 4px solid var(--accent-color);
+}
+
+.materiais-list {
+    list-style: none;
+    padding: 0;
+    margin: 8px 0 0 0; /* Ajustado */
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Mais flexível */
+    gap: 6px; /* Reduzido */
+}
+
+.materiais-list li {
+    padding: 5px 0; /* Ajustado */
+    line-height: 1.4;
+    font-size: 9.5pt; /* Ajustado */
+}
+
+/* Card de desenvolvimento */
+.desenvolvimento-card {
+    background: linear-gradient(135deg, #f6faff 0%, #f0f5ff 100%); /* Cor mais suave */
+    border-left: 4px solid var(--primary-color);
+}
+
+.momento-aula {
+    margin: 15px 0; /* Ajustado */
+    padding: 12px; /* Ajustado */
+    background: white;
+    border-radius: 4px; /* Ajustado */
+    border-left: 3px solid var(--primary-color);
+}
+
+.momento-titulo {
+    margin: 0 0 8px 0; /* Ajustado */
+    font-size: 11.5pt; /* Ajustado */
+    font-weight: 700;
+    color: var(--primary-color);
+}
+
+.momento-content {
+    line-height: 1.5;
+}
+
+.momento-content p {
+    margin: 6px 0; /* Ajustado */
+    line-height: 1.5;
+}
+
+.atividade {
+    margin: 12px 0; /* Ajustado */
+    padding: 8px; /* Ajustado */
+    background: var(--light-background);
+    border-radius: 3px; /* Ajustado */
+}
+
+.atividade-titulo {
+    margin: 0 0 6px 0; /* Ajustado */
+    font-size: 10.5pt; /* Ajustado */
+    font-weight: 600;
+    color: var(--secondary-color);
+}
+
+/* Card de avaliação */
+.avaliacao-card {
+    background: linear-gradient(135deg, #fdf4ff 0%, #fae8ff 100%);
+    border-left: 4px solid #a855f7;
+}
+
+.avaliacao-content {
+    margin-top: 8px; /* Ajustado */
+}
+
+.avaliacao-item {
+    margin: 12px 0; /* Ajustado */
+    padding: 10px; /* Ajustado */
+    background: white;
+    border-radius: 4px; /* Ajustado */
+    border-left: 3px solid #a855f7;
+}
+
+.avaliacao-item h4 {
+    margin: 0 0 6px 0; /* Ajustado */
+    font-size: 10.5pt; /* Ajustado */
+    font-weight: 600;
+    color: #a855f7;
+}
+
+.avaliacao-item p {
+    margin: 0;
+    line-height: 1.5;
+}
+
+.avaliacao-item ul {
+    list-style: none;
+    padding: 0;
+    margin: 6px 0 0 0; /* Ajustado */
+}
+
+.avaliacao-item li {
+    padding: 3px 0 3px 18px; /* Ajustado */
+    position: relative;
+    line-height: 1.5;
+}
+
+.avaliacao-item li:before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: #a855f7;
+    font-weight: bold;
+}
+
+/* Rodapé */
+.pdf-footer {
+    text-align: center;
+    padding: 15px 0; /* Ajustado para estar dentro da margem geral */
+    background: var(--light-background);
+    color: var(--light-text-color);
+    font-size: 8.5pt; /* Ajustado */
+    font-style: italic;
+    border-top: 1px solid var(--border-color);
+    margin-top: auto; /* Empurra o rodapé para o final do contêiner */
+    margin-left: -20mm; /* Compensar a margem esquerda */
+    margin-right: -20mm; /* Compensar a margem direita */
+    padding-left: 20mm; /* Adicionar o padding de volta ao conteúdo */
+    padding-right: 20mm; /* Adicionar o padding de volta ao conteúdo */
+}
+
+/* Estilos gerais para listas */
+ul, ol {
+    line-height: 1.5;
+    margin-bottom: 8px; /* Espaçamento entre listas */
+}
+
+li {
+    line-height: 1.5;
+    margin-bottom: 2px; /* Espaçamento menor entre itens de lista */
+}
+
+/* Parágrafos */
+p {
+    line-height: 1.5;
+    margin: 6px 0; /* Espaçamento ajustado */
+}
+
+/* Textos em negrito */
+strong {
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+/* --- Impressão A4 --- */
+@page {
+    size: A4;
+    margin: 20mm; /* Margens padrão de 2cm para impressão */
+}
+
+@media print {
+    body {
+        background: white !important; /* Força fundo branco */
+        padding: 0 !important; /* Remove padding do body */
+        display: block !important; /* Garante fluxo normal para impressão */
+        margin: 0;
+    }
+    
+    .pdf-container {
+        width: 100%; /* Ocupa a largura total da página A4 após margens @page */
+        min-height: auto; /* Remove altura mínima para permitir que o conteúdo flua */
+        box-shadow: none !important; /* Remove sombra */
+        border-radius: 0 !important; /* Remove borda arredondada */
+        border: none !important; /* Remove bordas */
+        padding: 0; /* O padding agora é controlado pelo @page margin */
+        margin: 0; /* Remove margem automática */
+        overflow: visible; /* Garante que nada seja cortado */
+    }
+
+    .pdf-header, .pdf-info-section, .pdf-separator, .pdf-footer {
+        margin-left: -20mm !important; /* Alinha com a borda da página */
+        margin-right: -20mm !important; /* Alinha com a borda da página */
+        padding-left: 20mm !important;
+        padding-right: 20mm !important;
+    }
+
+    .pdf-card {
+        page-break-inside: avoid; /* Evita que o card seja quebrado no meio */
+        margin: 10mm 0; /* Margens em mm para impressão */
+        box-shadow: none !important;
+        border: 1px solid var(--border-color) !important;
+    }
+    
+    .momento-aula {
+        page-break-inside: avoid; /* Evita que um momento de aula seja quebrado */
+        margin: 8mm 0; /* Ajuste para impressão */
+    }
+
+    /* Outros ajustes finos para impressão */
+    h1, h2, h3, h4, h5, h6 {
+        page-break-after: avoid; /* Evita que um título fique no final da página sozinho */
+        page-break-before: avoid; /* Evita que um título fique no início da página sozinho */
+    }
+    
+    ul, ol {
+        page-break-inside: avoid; /* Tenta manter listas juntas */
+    }
+
+    p {
+        orphans: 3; /* Número mínimo de linhas de um parágrafo que devem ficar na parte inferior de uma página */
+        widows: 3; /* Número mínimo de linhas de um parágrafo que devem ficar na parte superior de uma página */
+    }
+}
+
+/* --- Responsividade para telas pequenas (manter para visualização em navegador) --- */
+@media (max-width: 768px) {
+    body {
+        padding: 10px;
+    }
+    
+    .pdf-container {
+        max-width: 100%;
+        padding: 15px; /* Reduz o padding para telas menores */
+        margin: 0 auto;
+    }
+    
+    .pdf-header {
+        flex-direction: column;
+        text-align: center;
+        padding: 10px;
+        margin-left: -15px; /* Ajusta a margem para caber no novo padding */
+        margin-right: -15px;
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+    
+    .logo-left, .logo-right {
+        flex: none;
+        margin: 8px 0;
+    }
+    
+    .header-center {
+        padding: 8px 0;
+    }
+    
+    .pdf-title {
+        font-size: 18pt;
+    }
+    
+    .info-grid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+    
+    .materiais-list {
+        grid-template-columns: 1fr;
+    }
+    
+    .pdf-card {
+        margin: 10px 0;
+        padding: 12px;
+    }
+
+    .pdf-info-section, .pdf-footer {
+        margin-left: -15px;
+        margin-right: -15px;
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+}

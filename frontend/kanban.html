@@ -1,0 +1,2936 @@
+{% extends "base.html" %}
+
+{% block title %}Gestão de Atividades - Kanban{% endblock %}
+
+{% block content %}
+<div class="kanban-container">
+    <!-- Sistema de Notificações Toast -->
+    <div id="toast-container" class="toast-container"></div>
+    
+    <!-- Header da página -->
+    <header class="page-header">
+        <div class="header-content">
+            <h1><i class="fas fa-tasks"></i> Gestão de Atividades</h1>
+            <p>Gerencie as atividades da plataforma de forma visual e eficiente</p>
+        </div>
+        <div class="header-stats">
+            <div class="stat-item">
+                <span class="stat-number" id="total-atividades">0</span>
+                <span class="stat-label">Total</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" id="fazendo-count">0</span>
+                <span class="stat-label">Fazendo</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number" id="concluidas-count">0</span>
+                <span class="stat-label">Concluídas</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Seção de Nova Atividade -->
+    <section class="actions-section">
+        <div class="actions-grid">
+            <!-- Card de Cadastro -->
+            <div class="action-card form-card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-plus-circle"></i>
+                    </div>
+                    <div class="card-title">
+                        <h2>Nova Atividade</h2>
+                        <p>Cadastre uma nova atividade no sistema</p>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <form id="atividade-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="titulo">Título da Atividade *</label>
+                                <input type="text" id="titulo" name="titulo" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="prioridade">Prioridade *</label>
+                                <select id="prioridade" name="prioridade" required>
+                                    <option value="">Selecione...</option>
+                                    <option value="lowest">Muito Baixa</option>
+                                    <option value="low">Baixa</option>
+                                    <option value="medium">Média</option>
+                                    <option value="high">Alta</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="responsavel">Responsável</label>
+                                <select id="responsavel" name="responsavel">
+                                    <option value="">Selecione o usuário...</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="deadline">Data Máxima de Entrega</label>
+                                <input type="datetime-local" id="deadline" name="deadline" min="">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="descricao">Descrição da Atividade</label>
+                            <textarea id="descricao" name="descricao" rows="3" placeholder="Descreva os detalhes da atividade"></textarea>
+                        </div>
+                        <div class="form-buttons">
+                            <button type="submit" class="btn btn-primary btn-block">
+                                <i class="fas fa-save"></i>
+                                Criar Atividade
+                            </button>
+                            <button type="button" id="btn-cancelar-edicao" class="btn btn-secondary btn-block" style="display: none;" onclick="cancelarEdicao()">
+                                <i class="fas fa-times"></i>
+                                Cancelar Edição
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <style>
+/* Kanban Styles - Seguindo padrão do Dashboard */
+.kanban-container {
+    padding: 0;
+    max-width: 100%;
+}
+
+.page-header {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white;
+    padding: 2rem 1.5rem;
+    margin: -1.5rem -1.5rem 2rem -1.5rem;
+    border-radius: 0 0 20px 20px;
+}
+
+.header-content {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.header-actions {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 2rem;
+}
+
+/* Estilos removidos - botão movido para o cabeçalho do Board Kanban */
+
+.page-header h1 {
+    font-size: 2.5rem;
+    font-weight:700;
+    margin: 0 0 0.5rem 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.page-header p {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin: 0;
+}
+
+.header-stats {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.stat-item {
+    text-align: center;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 1rem 1.5rem;
+    min-width: 120px;
+}
+
+.stat-number {
+    display: block;
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    opacity: 0.8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Actions Section */
+.actions-section {
+    margin-bottom: 2rem;
+}
+
+.actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+    gap: 2rem;
+    width: 100%;
+    padding: 0 1.5rem;
+}
+
+.action-card {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.action-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+}
+
+.card-header {
+    background: var(--gray-light);
+    padding: 1.5rem;
+    border-bottom: 1px solid #e1e8ed;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.card-icon {
+    width: 50px;
+    height: 50px;
+    background: var(--primary);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.card-title {
+    flex: 1;
+    min-width: 200px;
+}
+
+.card-title h2 {
+    font-size: 1.3rem;
+    color: var(--primary-dark);
+    margin: 0 0 0.25rem 0;
+}
+
+.card-title p {
+    color: #666;
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.card-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-shrink: 0;
+}
+
+.card-content {
+    padding: 1.5rem;
+}
+
+/* Form Styles */
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    font-weight: 600;
+    color: var(--primary-dark);
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    padding: 0.75rem;
+    border: 2px solid #e1e8ed;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.form-group textarea {
+    resize: vertical;
+    font-family: inherit;
+}
+
+/* Buttons */
+.btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+    text-align: center;
+    justify-content: center;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: white;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-block {
+    width: 100%;
+}
+
+.form-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Sistema de Notificações Toast */
+.toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.toast {
+    background: white;
+    border-radius: 12px;
+    padding: 16px 20px;
+    min-width: 300px;
+    max-width: 400px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    border-left: 4px solid;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transform: translateX(100%);
+    opacity: 0;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.toast.show {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.toast.success {
+    border-left-color: #28a745;
+}
+
+.toast.error {
+    border-left-color: #dc3545;
+}
+
+.toast.warning {
+    border-left-color: #ffc107;
+}
+
+.toast.info {
+    border-left-color: #17a2b8;
+}
+
+.toast-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 12px;
+    flex-shrink: 0;
+}
+
+.toast.success .toast-icon {
+    background: #28a745;
+}
+
+.toast.error .toast-icon {
+    background: #dc3545;
+}
+
+.toast.warning .toast-icon {
+    background: #ffc107;
+}
+
+.toast.info .toast-icon {
+    background: #17a2b8;
+}
+
+.toast-content {
+    flex: 1;
+}
+
+.toast-title {
+    font-weight: 600;
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 2px;
+}
+
+.toast-message {
+    font-size: 13px;
+    color: #666;
+    line-height: 1.4;
+}
+
+.toast-close {
+    background: none;
+    border: none;
+    font-size: 18px;
+    color: #999;
+    cursor: pointer;
+    padding: 0;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.toast-close:hover {
+    color: #666;
+}
+
+.toast-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background: rgba(0, 0, 0, 0.1);
+    border-radius: 0 0 12px 12px;
+    animation: toast-progress 4s linear forwards;
+}
+
+@keyframes toast-progress {
+    from { width: 100%; }
+    to { width: 0%; }
+}
+
+/* Board Kanban */
+.board-container {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    width: 100%;
+    margin: 0 0 2rem 0;
+}
+
+.kanban-board {
+    padding: 2rem;
+}
+
+.column {
+    background: #f8f9fa;
+    border-radius: 10px;
+    min-height: 400px;
+    border-top: 4px solid;
+    transition: all 0.3s ease;
+    padding: 1rem;
+}
+
+.column.todo { border-top-color: #007bff; }
+.column.doing { border-top-color: #ffc107; }
+.column.review { border-top-color: #6f42c1; }
+.column.done { border-top-color: #28a745; }
+
+.task-card {
+    background: white;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    cursor: grab !important;
+    -webkit-user-select: none;
+    user-select: none;
+    transition: all 0.3s ease;
+    border-left: 4px solid;
+}
+
+.task-card:active {
+    cursor: grabbing !important;
+}
+
+.task-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+.task-card.dragging {
+    opacity: 0.8;
+    transform: rotate(3deg) scale(1.05);
+    z-index: 1000;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.priority-high { border-left-color: #dc3545; }
+.priority-medium { border-left-color: #ffc107; }
+.priority-low { border-left-color: #28a745; }
+
+.drop-zone {
+    border: 2px dashed #007bff !important;
+    background-color: rgba(0, 123, 255, 0.1) !important;
+    border-radius: 10px;
+}
+
+.badge-priority {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-weight: 600;
+}
+
+.badge-high { background: #dc3545; color: white; }
+.badge-medium { background: #ffc107; color: #000; }
+.badge-low { background: #28a745; color: white; }
+
+.btn-icon {
+    background: none;
+    border: none;
+    color: #6c757d;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+.btn-icon:hover {
+    background: #e9ecef;
+    color: #495057;
+}
+
+.column-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.task-count {
+    background: #6c757d;
+    color: white;
+    border-radius: 50%;
+    width: 25px;
+    height: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.text-purple { color: #6f42c1; }
+
+/* Search Box */
+.search-box {
+    position: relative;
+    margin-left: auto;
+}
+
+.search-box input {
+    padding: 0.75rem 1rem 0.75rem 2.5rem;
+    border: 2px solid #e1e8ed;
+    border-radius: 25px;
+    width: 250px;
+    font-size: 1rem;
+}
+
+.search-box input:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.search-box i {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #666;
+}
+
+/* List Section */
+.list-section {
+    width: 100%;
+    padding: 0 1.5rem;
+}
+
+.list-card {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
+
+/* Atividades Grid - Estilo Horizontal */
+.atividades-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 1.5rem;
+}
+
+.atividade-card {
+    background: white;
+    border-radius: 15px;
+    border: 2px solid #e1e8ed;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.atividade-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    border-color: var(--primary);
+}
+
+.atividade-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.atividade-titulo {
+    flex: 1;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--primary-dark);
+    margin-bottom: 0.5rem;
+}
+
+.atividade-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.action-btn {
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+}
+
+.view-btn {
+    background: rgba(23, 162, 184, 0.1);
+    color: #17a2b8;
+    border: 1px solid rgba(23, 162, 184, 0.2);
+}
+
+.edit-btn {
+    background: rgba(52, 168, 83, 0.1);
+    color: #34a853;
+    border: 1px solid rgba(52, 168, 83, 0.2);
+}
+
+.delete-btn {
+    background: rgba(234, 67, 53, 0.1);
+    color: #ea4335;
+    border: 1px solid rgba(234, 67, 53, 0.2);
+}
+
+.action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.view-btn:hover {
+    background: #17a2b8;
+    color: white;
+    border-color: #17a2b8;
+}
+
+.edit-btn:hover {
+    background: #34a853;
+    color: white;
+    border-color: #34a853;
+}
+
+.delete-btn:hover {
+    background: #ea4335;
+    color: white;
+    border-color: #ea4335;
+}
+
+.atividade-meta {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #666;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.meta-item i {
+    color: var(--primary);
+    width: 16px;
+}
+
+.atividade-description {
+    color: #333;
+    line-height: 1.6;
+    font-size: 0.95rem;
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 10px;
+    border-left: 4px solid var(--primary);
+    margin-bottom: 1rem;
+}
+
+.status-badge {
+    background: linear-gradient(135deg, var(--primary), #457d97);
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 25px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-block;
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: #666;
+}
+
+.empty-icon {
+    width: 80px;
+    height: 80px;
+    background: var(--gray-light);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    color: var(--primary);
+    font-size: 2rem;
+}
+
+.empty-state h3 {
+    font-size: 1.5rem;
+    margin: 0 0 0.5rem 0;
+    color: var(--primary-dark);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .page-header {
+        padding: 1.5rem 1rem;
+        margin: -1rem -1rem 1.5rem -1rem;
+    }
+
+    .page-header h1 {
+        font-size: 2rem;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .header-actions {
+        margin-bottom: 1.5rem;
+    }
+
+    .btn-download {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.9rem;
+    }
+
+    .header-stats {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .actions-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .card-title {
+        min-width: auto;
+        width: 100%;
+    }
+
+    .card-actions {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .btn-download-board {
+        width: 100%;
+        justify-content: center;
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+    }
+
+    .search-box {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .search-box input {
+        width: 100%;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .atividades-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .atividade-card {
+        padding: 1rem;
+    }
+}
+
+/* Modal Overlay Animado */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(30, 41, 59, 0.8); /* Overlay mais escuro */
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.modal-overlay.active {
+    display: flex !important;
+    opacity: 1;
+}
+
+.modal-container {
+    background: white;
+    border-radius: 18px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    width: 95%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 0;
+    transform: translateY(-50px) scale(0.9);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.modal-overlay.active .modal-container {
+    transform: translateY(0) scale(1);
+}
+
+.modal-header {
+    background: linear-gradient(135deg, var(--primary), #457d97);
+    color: white;
+    padding: 1.5rem 2rem;
+    border-radius: 18px 18px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 1.4rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.modal-content {
+    padding: 2rem;
+}
+
+.modal-footer {
+    padding: 1.5rem 2rem;
+    border-top: 1px solid #e1e8ed;
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+}
+
+.modern-form .form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.modern-form .form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.modern-form .form-group label {
+    font-weight: 600;
+    color: var(--primary-dark);
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+    display: block;
+}
+
+.modern-form .form-group input,
+.modern-form .form-group select,
+.modern-form .form-group textarea {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    border: 2px solid #e1e8ed;
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: #fafbfc;
+}
+
+.modern-form .form-group input:focus,
+.modern-form .form-group select:focus,
+.modern-form .form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: white;
+    box-shadow: 0 0 0 3px rgba(52, 122, 226, 0.1);
+}
+
+/* Botão de fechar mais visível */
+.modal-close {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    font-size: 1.5rem;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-close:hover { 
+    background: rgba(255,255,255,0.3);
+    transform: scale(1.1);
+}
+
+/* Back Section */
+.back-section {
+    text-align: center;
+    margin-top: 2rem;
+}
+
+.btn-back {
+    background: var(--gray-light);
+    color: var(--primary-dark);
+    border: 1px solid #e1e8ed;
+}
+
+/* Board Section */
+.board-section {
+    margin-bottom: 2rem;
+}
+
+/* Botão Próxima Etapa */
+.btn-next-step {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 0.4rem 0.6rem;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    min-width: 32px;
+    height: 28px;
+    justify-content: center;
+}
+
+.btn-next-step:hover {
+    background: linear-gradient(135deg, #218838, #1abc9c);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+}
+
+.btn-next-step:active {
+    transform: translateY(0);
+}
+
+.btn-next-step i {
+    font-size: 0.75rem;
+}
+
+/* Botão Etapa Anterior */
+.btn-prev-step {
+    background: linear-gradient(135deg, #ffc107, #fd7e14);
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 0.4rem 0.6rem;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    min-width: 32px;
+    height: 28px;
+    justify-content: center;
+}
+
+.btn-prev-step:hover {
+    background: linear-gradient(135deg, #e0a800, #dc6545);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(255, 193, 7, 0.3);
+}
+
+.btn-prev-step:active {
+    transform: translateY(0);
+}
+
+.btn-prev-step i {
+    font-size: 0.75rem;
+}
+
+/* Botão Atribuir */
+.btn-assign {
+    background: linear-gradient(135deg, #6f42c1, #495057);
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 0.4rem 0.6rem;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    min-width: 32px;
+    height: 28px;
+    justify-content: center;
+}
+
+.btn-assign:hover {
+    background: linear-gradient(135deg, #5a2d91, #343a40);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(111, 66, 193, 0.3);
+}
+
+.btn-assign:active {
+    transform: translateY(0);
+}
+
+.btn-assign i {
+    font-size: 0.75rem;
+}
+
+/* Novo Design do Card - Padrão Plano de Aula */
+.task-card-new {
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.1);
+    padding: 0;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+    border: 2px solid #f8f9fa;
+    overflow: hidden;
+}
+
+.task-card-new:hover {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+
+.task-card-new.dragging {
+    opacity: 0.5;
+    transform: rotate(3deg) scale(0.95);
+    z-index: 1000;
+}
+
+.task-card-new.priority-high {
+    border-left: 4px solid #dc3545;
+}
+
+.task-card-new.priority-medium {
+    border-left: 4px solid #ffc107;
+}
+
+.task-card-new.priority-low {
+    border-left: 4px solid #28a745;
+}
+
+.task-card-new.priority-lowest {
+    border-left: 4px solid #6c757d;
+}
+
+/* Indicadores de Deadline */
+.task-card-new.deadline-overdue {
+    border-right: 4px solid #dc3545;
+    background: linear-gradient(135deg, #fff 0%, #fff5f5 100%);
+}
+
+.task-card-new.deadline-urgent {
+    border-right: 4px solid #fd7e14;
+    background: linear-gradient(135deg, #fff 0%, #fff8f0 100%);
+}
+
+.task-card-new.deadline-warning {
+    border-right: 4px solid #ffc107;
+    background: linear-gradient(135deg, #fff 0%, #fffbf0 100%);
+}
+
+.deadline-overdue .task-title-new {
+    color: #dc3545 !important;
+}
+
+.deadline-urgent .task-title-new {
+    color: #fd7e14 !important;
+}
+
+.deadline-warning .task-title-new {
+    color: #856404 !important;
+}
+
+/* Melhorar exibição da hora no card */
+.task-meta-item .fa-clock + span {
+    font-weight: 500;
+}
+
+.task-meta-item .fa-clock {
+    color: #dc3545;
+}
+
+.task-header-new {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 15px 15px 10px 15px;
+    background: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.task-id-badge {
+    background: #6c5ce7;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 15px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.task-actions-top {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.action-icon-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    font-size: 14px;
+}
+
+.action-icon-btn.view {
+    background: #74b9ff;
+    color: white;
+}
+
+.action-icon-btn.view:hover {
+    background: #0984e3;
+    transform: scale(1.1);
+}
+
+.action-icon-btn.edit {
+    background: #00cec9;
+    color: white;
+}
+
+.action-icon-btn.edit:hover {
+    background: #00b894;
+    transform: scale(1.1);
+}
+
+.action-icon-btn.delete {
+    background: #fd79a8;
+    color: white;
+}
+
+.action-icon-btn.delete:hover {
+    background: #e84393;
+    transform: scale(1.1);
+}
+
+.action-icon-btn.priority {
+    background: #fdcb6e;
+    color: white;
+}
+
+.action-icon-btn.priority:hover {
+    background: #e17055;
+}
+
+.task-body-new {
+    padding: 15px;
+}
+
+.task-title-new {
+    color: #6c5ce7;
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.task-meta-new {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 10px;
+    font-size: 12px;
+    color: #636e72;
+}
+
+.task-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.task-description-new {
+    color: #636e72;
+    font-size: 13px;
+    line-height: 1.5;
+    margin-bottom: 15px;
+}
+
+.task-footer-new {
+    background: #f8f9fa;
+    padding: 10px 15px;
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.task-assignee-new {
+    color: #636e72;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.task-navigation-new {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+/* Card de Visualização Ampliada */
+.task-card-view {
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    margin: 0;
+    transform: scale(1.05);
+}
+
+.task-card-view .task-header-new {
+    padding: 20px 25px 15px 25px;
+    background: linear-gradient(135deg, #6c5ce7, #74b9ff);
+}
+
+.task-card-view .task-id-badge {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    font-size: 14px;
+    padding: 6px 15px;
+}
+
+.task-card-view .task-actions-top {
+    gap: 10px;
+}
+
+.task-card-view .action-icon-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+    background: rgba(255, 255, 255, 0.2) !important;
+    color: white !important;
+}
+
+.task-card-view .action-icon-btn:hover {
+    background: rgba(255, 255, 255, 0.3) !important;
+    transform: scale(1.2);
+}
+
+.task-card-view .task-body-new {
+    padding: 25px;
+}
+
+.task-card-view .task-title-new {
+    font-size: 24px;
+    margin-bottom: 15px;
+    color: #2d3436;
+}
+
+.task-card-view .task-meta-new {
+    gap: 20px;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+.task-card-view .task-description-new {
+    font-size: 16px;
+    line-height: 1.6;
+    margin-bottom: 20px;
+    color: #636e72;
+}
+
+.task-card-view .task-footer-new {
+    padding: 15px 25px;
+    background: #f1f2f6;
+}
+
+.task-card-view .task-assignee-new {
+    font-size: 16px;
+    font-weight: 600;
+    color: #2d3436;
+}
+
+.task-card-view .task-navigation-new {
+    gap: 12px;
+}
+
+.task-card-view .btn-prev-step,
+.task-card-view .btn-next-step,
+.task-card-view .btn-assign {
+    padding: 8px 12px;
+    font-size: 14px;
+    height: 36px;
+    min-width: 40px;
+}
+
+.btn-download-board {
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    color: white;
+    border: none;
+    padding: 0.875rem 2rem;
+    border-radius: 30px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    box-shadow: 0 6px 20px rgba(220, 53, 69, 0.4);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-download-board::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.btn-download-board:hover::before {
+    left: 100%;
+}
+
+.btn-download-board:hover {
+    background: linear-gradient(135deg, #c82333, #bd2130);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(220, 53, 69, 0.6);
+}
+
+.btn-download-board:active {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 15px rgba(220, 53, 69, 0.4);
+}
+
+.btn-download-board i {
+    font-size: 1.2rem;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+</style>
+
+    <!-- Board Kanban -->
+    <section class="board-section">
+        <div class="board-container">
+            <div class="card-header">
+                <div class="card-icon">
+                    <i class="fas fa-columns"></i>
+                </div>
+                <div class="card-title">
+                    <h2>Board Kanban</h2>
+                    <p>Arraste e solte as atividades entre as colunas</p>
+                </div>
+                <div class="card-actions">
+                    <button class="btn btn-download-board" onclick="kanban.downloadPDF()" title="Baixar relatório completo das atividades em PDF">
+                        <i class="fas fa-file-pdf"></i>
+                        Baixar PDF
+                    </button>
+                </div>
+            </div>
+            <div class="kanban-board">
+                <div class="row g-3">
+                    <!-- Coluna: A Fazer -->
+                    <div class="col-md-3">
+                        <div class="column todo" data-status="todo">
+                            <div class="column-header">
+                                <h5 class="mb-0 text-primary">
+                                    <i class="fas fa-clipboard-list me-2"></i>A Fazer
+                                </h5>
+                                <span class="task-count" id="todoCount">0</span>
+                            </div>
+                            <div class="tasks-container" id="todoTasks">
+                                <!-- Tarefas serão inseridas aqui -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Coluna: Fazendo -->
+                    <div class="col-md-3">
+                        <div class="column doing" data-status="doing">
+                            <div class="column-header">
+                                <h5 class="mb-0 text-warning">
+                                    <i class="fas fa-cogs me-2"></i>Fazendo
+                                </h5>
+                                <span class="task-count" id="doingCount">0</span>
+                            </div>
+                            <div class="tasks-container" id="doingTasks">
+                                <!-- Tarefas serão inseridas aqui -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Coluna: Em Análise -->
+                    <div class="col-md-3">
+                        <div class="column review" data-status="review">
+                            <div class="column-header">
+                                <h5 class="mb-0 text-purple">
+                                    <i class="fas fa-search me-2"></i>Em Análise
+                                </h5>
+                                <span class="task-count" id="reviewCount">0</span>
+                            </div>
+                            <div class="tasks-container" id="reviewTasks">
+                                <!-- Tarefas serão inseridas aqui -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Coluna: Concluído -->
+                    <div class="col-md-3">
+                        <div class="column done" data-status="done">
+                            <div class="column-header">
+                                <h5 class="mb-0 text-success">
+                                    <i class="fas fa-check-circle me-2"></i>Concluído
+                                </h5>
+                                <span class="task-count" id="doneCount">0</span>
+                            </div>
+                            <div class="tasks-container" id="doneTasks">
+                                <!-- Tarefas serão inseridas aqui -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Seção de Atividades Concluídas -->
+    <section class="concluidas-section">
+        <div class="list-card">
+            <div class="card-header">
+                <div class="card-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="card-title">
+                    <h2>Atividades Concluídas</h2>
+                    <p>Histórico de atividades finalizadas</p>
+                </div>
+            </div>
+            <div class="card-content">
+                <div id="concluidas-grid" class="atividades-grid"></div>
+                <div class="empty-state" id="empty-concluidas" style="display: none;">
+                    <div class="empty-icon">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <h3>Nenhuma atividade concluída</h3>
+                    <p>As atividades concluídas aparecerão aqui</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Botão Voltar -->
+    <div class="back-section">
+        <a href="/dashboard" class="btn btn-back">
+            <i class="fas fa-arrow-left"></i>
+            Voltar ao Dashboard
+        </a>
+    </div>
+</div>
+
+<!-- Container de Toasts -->
+<div id="toast-container" class="toast-container"></div>
+
+<!-- Modal de Edição de Tarefa -->
+<div id="editTaskModal" class="modal-overlay" style="display: none;">
+    <div class="modal-container">
+        <div class="modal-header">
+            <h2><i class="fas fa-edit"></i> Editar Atividade</h2>
+            <button class="modal-close" onclick="closeEditModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-content">
+            <form id="editTaskForm" class="modern-form">
+                <input type="hidden" id="editTaskId">
+                <div class="form-row">
+                    <div class="form-group full-width">
+                        <label for="editTaskTitle">Título da Atividade</label>
+                        <input type="text" id="editTaskTitle" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editTaskPriority">Prioridade</label>
+                        <select id="editTaskPriority" required>
+                            <option value="lowest">Muito Baixa</option>
+                            <option value="low">Baixa</option>
+                            <option value="medium">Média</option>
+                            <option value="high">Alta</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editTaskAssignee">Responsável</label>
+                        <select id="editTaskAssignee" required>
+                            <option value="">Selecionar usuário...</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editTaskDeadline">Data Máxima de Entrega</label>
+                        <input type="datetime-local" id="editTaskDeadline" name="editTaskDeadline">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group full-width">
+                        <label for="editTaskDescription">Descrição</label>
+                        <textarea id="editTaskDescription" rows="4" placeholder="Descreva os detalhes da atividade"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeEditModal()">
+                        <i class="fas fa-times"></i>
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        Salvar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Confirmação de Exclusão -->
+<div id="deleteTaskModal" class="modal-overlay" style="display: none;">
+    <div class="modal-container">
+        <div class="modal-header">
+            <h2><i class="fas fa-trash-alt"></i> Confirmar Exclusão</h2>
+            <button class="modal-close" onclick="closeDeleteModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-content">
+            <p class="text-center mb-4">Tem certeza que deseja excluir esta atividade?</p>
+            <p class="text-center text-muted small">Esta ação não pode ser desfeita.</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeDeleteModal()">
+                <i class="fas fa-times"></i>
+                Cancelar
+            </button>
+            <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+                <i class="fas fa-trash"></i>
+                Excluir
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Visualização de Tarefa -->
+<div id="viewTaskModal" class="modal-overlay" style="display: none;">
+    <div class="modal-container" style="max-width: 600px;">
+        <div class="modal-header">
+            <h2><i class="fas fa-eye"></i> Visualizar Atividade</h2>
+            <button class="modal-close" onclick="closeViewModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-content">
+            <!-- Card em tamanho maior será inserido aqui -->
+            <div id="viewTaskCardContainer"></div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeViewModal()">
+                <i class="fas fa-times"></i>
+                Fechar
+            </button>
+            <button type="button" class="btn btn-primary" onclick="kanban.editTaskFromView()">
+                <i class="fas fa-edit"></i>
+                Editar
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+// Variáveis globais do usuário (serão definidas via API)
+window.userId = null;
+window.userIsAdmin = false;
+
+// Sistema de Notificações Toast
+function showToast(type, title, message) {
+    const container = document.getElementById('toast-container');
+    if (!container) return;
+
+    // Criar elemento toast
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    
+    // Definir ícones para cada tipo
+    const icons = {
+        success: '✓',
+        error: '✕',
+        warning: '⚠',
+        info: 'ℹ'
+    };
+
+    toast.innerHTML = `
+        <div class="toast-icon">
+            ${icons[type] || 'ℹ'}
+        </div>
+        <div class="toast-content">
+            <div class="toast-title">${title}</div>
+            <div class="toast-message">${message}</div>
+        </div>
+        <button class="toast-close" onclick="closeToast(this)">×</button>
+        <div class="toast-progress"></div>
+    `;
+
+    // Adicionar ao container
+    container.appendChild(toast);
+
+    // Mostrar toast com animação
+    setTimeout(() => {
+        toast.classList.add('show');
+    }, 100);
+
+    // Auto remover após 4 segundos
+    setTimeout(() => {
+        closeToast(toast);
+    }, 4000);
+}
+
+function closeToast(element) {
+    const toast = element.classList ? element : element.closest('.toast');
+    if (toast) {
+        toast.classList.remove('show');
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.parentNode.removeChild(toast);
+            }
+        }, 300);
+    }
+}
+
+// Funções de conveniência para diferentes tipos de toast
+function showSuccess(title, message = '') {
+    showToast('success', title, message);
+}
+
+function showError(title, message = '') {
+    showToast('error', title, message);
+}
+
+function showWarning(title, message = '') {
+    showToast('warning', title, message);
+}
+
+function showInfo(title, message = '') {
+    showToast('info', title, message);
+}
+
+class KanbanBoard {
+    constructor() {
+        this.tasks = [];
+        this.users = [];
+        this.draggedTask = null;
+        this.atividadeEditando = null;
+        this.init();
+    }
+
+    async init() {
+        await this.loadCurrentUser();
+        await this.loadUsers();
+        await this.loadTasks();
+        this.setupEventListeners();
+        this.setupDragAndDrop();
+        this.carregarEstatisticas();
+        this.configurarBusca();
+        this.configurarDeadline();
+    }
+
+    async loadCurrentUser() {
+        try {
+            const response = await fetch('/api/usuario-atual');
+            if (response.ok) {
+                const userData = await response.json();
+                window.userId = userData.id;
+                window.userIsAdmin = userData.tipo_usuario === 'admin';
+                console.log('Usuário atual:', userData);
+            }
+        } catch (error) {
+            console.error('Erro ao carregar usuário atual:', error);
+            // Valores padrão se não conseguir carregar
+            window.userId = 1;
+            window.userIsAdmin = true;
+        }
+    }
+
+    async loadUsers() {
+        try {
+            const response = await fetch('/api/usuarios');
+            if (response.ok) {
+                const data = await response.json();
+                this.users = data.usuarios || [];
+                this.populateUserSelects();
+            }
+        } catch (error) {
+            console.error('Erro ao carregar usuários:', error);
+        }
+    }
+
+    populateUserSelects() {
+        const selects = ['responsavel', 'editTaskAssignee'];
+        selects.forEach(selectId => {
+            const select = document.getElementById(selectId);
+            if (select) {
+                select.innerHTML = '<option value="">Selecionar usuário...</option>';
+                this.users.forEach(user => {
+                    const option = document.createElement('option');
+                    option.value = user.id;
+                    option.textContent = user.name;
+                    select.appendChild(option);
+                });
+            }
+        });
+    }
+
+    async loadTasks() {
+        try {
+            const response = await fetch('/api/kanban/tasks');
+            if (response.ok) {
+                this.tasks = await response.json();
+                console.log('Tarefas carregadas:', this.tasks.length);
+                this.renderBoard();
+                this.renderConcluidasList();
+            }
+        } catch (error) {
+            console.error('Erro ao carregar tarefas:', error);
+            showError('Erro', 'Erro ao carregar atividades');
+        }
+    }
+
+    renderBoard() {
+        const columns = ['todo', 'doing', 'review', 'done'];
+        columns.forEach(status => {
+            const container = document.getElementById(`${status}Tasks`);
+            if (container) {
+                const tasks = this.tasks.filter(task => task.status === status);
+                
+                container.innerHTML = '';
+                tasks.forEach(task => {
+                    const taskCard = this.createTaskCard(task);
+                    container.appendChild(taskCard);
+                });
+
+                // Atualizar contador
+                const countElement = document.getElementById(`${status}Count`);
+                if (countElement) {
+                    countElement.textContent = tasks.length;
+                }
+                
+                console.log(`Coluna ${status}: ${tasks.length} tarefas`);
+            }
+        });
+        
+        // Reconfigurar drag & drop após renderizar
+        this.setupDragAndDrop();
+    }
+
+    renderConcluidasList() {
+        const grid = document.getElementById('concluidas-grid');
+        const emptyState = document.getElementById('empty-concluidas');
+        if (!grid) return;
+        grid.innerHTML = '';
+        const concluidas = this.tasks.filter(t => t.status === 'done');
+        if (concluidas.length === 0) {
+            if (emptyState) emptyState.style.display = 'block';
+            return;
+        }
+        if (emptyState) emptyState.style.display = 'none';
+        concluidas.forEach(task => {
+            const card = this.createAtividadeCard(task);
+            grid.appendChild(card);
+        });
+    }
+
+    createAtividadeCard(task) {
+        const card = document.createElement('div');
+        card.className = 'atividade-card';
+        
+        const assigneeInfo = task.assignee_id ? 
+            this.users.find(u => u.id == task.assignee_id) : null;
+        
+        const statusLabels = {
+            'todo': 'A Fazer',
+            'doing': 'Fazendo', 
+            'review': 'Em Análise',
+            'done': 'Concluído'
+        };
+        
+        const isAdmin = window.userIsAdmin; // Defina isso no template conforme o usuário logado
+        const isUnassigned = !task.assignee_id;
+        let atribuirBtn = '';
+        if (isAdmin && isUnassigned) {
+            atribuirBtn = `<button class="action-btn edit-btn" onclick="kanban.atribuirParaMim(${task.id})" title="Atribuir para mim">
+                <i class="fas fa-user-plus"></i>
+            </button>`;
+        }
+        
+        card.innerHTML = `
+            <div class="atividade-header">
+                <div class="atividade-titulo">${task.title}</div>
+                <div class="atividade-actions">
+                    <button class="action-btn view-btn" onclick="kanban.viewTask(${task.id})" title="Visualizar">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="action-btn edit-btn" onclick="kanban.editAtividade(${task.id})" title="Editar">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="action-btn delete-btn" onclick="kanban.deleteTask(${task.id})" title="Excluir">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                    ${atribuirBtn}
+                </div>
+            </div>
+            <div class="atividade-meta">
+                <div class="meta-item">
+                    <i class="fas fa-flag"></i>
+                    <span>${this.getPriorityLabel(task.priority)}</span>
+                </div>
+                <div class="meta-item">
+                    <i class="fas fa-user"></i>
+                    <span>${assigneeInfo ? assigneeInfo.name : 'Não atribuído'}</span>
+                </div>
+                <div class="meta-item">
+                    <i class="fas fa-calendar"></i>
+                    <span>${new Date(task.created_at).toLocaleDateString('pt-BR')}</span>
+                </div>
+            </div>
+            ${task.description ? `<div class="atividade-description">${task.description}</div>` : ''}
+            <div class="meta-item">
+                <span class="status-badge">${statusLabels[task.status] || task.status}</span>
+            </div>
+        `;
+        
+        return card;
+    }
+
+    createTaskCard(task) {
+        const card = document.createElement('div');
+        card.className = `task-card-new priority-${task.priority}`;
+        card.draggable = true;
+        card.dataset.taskId = task.id;
+
+        // Adicionar classe para deadline próximo ou vencido
+        if (task.deadline) {
+            const now = new Date();
+            const deadline = new Date(task.deadline);
+            const diffTime = deadline - now;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (diffDays < 0) {
+                card.classList.add('deadline-overdue');
+            } else if (diffDays <= 1) {
+                card.classList.add('deadline-urgent');
+            } else if (diffDays <= 3) {
+                card.classList.add('deadline-warning');
+            }
+        }
+
+        const assigneeInfo = task.assignee_id ? 
+            this.users.find(u => u.id == task.assignee_id) : null;
+
+        // Definir próxima e anterior etapa
+        const statusOrder = ['todo', 'doing', 'review', 'done'];
+        const currentIdx = statusOrder.indexOf(task.status);
+        const nextStatus = statusOrder[currentIdx + 1];
+        const prevStatus = statusOrder[currentIdx - 1];
+        
+        const statusLabels = {
+            'todo': 'A Fazer',
+            'doing': 'Fazendo',
+            'review': 'Em Análise',
+            'done': 'Concluído'
+        };
+
+        // Botão etapa anterior (sempre disponível, exceto para "todo")
+        let prevStepBtn = '';
+        if (task.status !== 'todo') {
+            // Se for "done", permitir voltar para "review"
+            const targetPrevStatus = task.status === 'done' ? 'review' : prevStatus;
+            if (targetPrevStatus) {
+                prevStepBtn = `
+                    <button class="btn-prev-step" onclick="kanban.moveToPrevStep(${task.id})" title="Voltar para: ${statusLabels[targetPrevStatus]}">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                `;
+            }
+        }
+
+        // Botão próxima etapa (sempre disponível, exceto para "done")
+        let nextStepBtn = '';
+        if (task.status !== 'done') {
+            nextStepBtn = `
+                <button class="btn-next-step" onclick="kanban.moveToNextStep(${task.id})" title="Mover para: ${statusLabels[nextStatus]}">
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            `;
+        }
+
+        // Botão atribuir (só se não tiver responsável)
+        let assignBtn = '';
+        if (!task.assignee_id) {
+            assignBtn = `
+                <button class="btn-assign" onclick="kanban.atribuirParaMim(${task.id})" title="Atribuir para mim">
+                    <i class="fas fa-user-plus"></i>
+                </button>
+            `;
+        }
+
+        card.innerHTML = `
+            <!-- Header com ID e Ações -->
+            <div class="task-header-new">
+                <div class="task-id-badge">ID ${task.id}</div>
+                <div class="task-actions-top">
+                    <button class="action-icon-btn view" onclick="kanban.viewTask(${task.id})" title="Visualizar">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="action-icon-btn edit" onclick="kanban.editTask(${task.id})" title="Editar">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="action-icon-btn priority" title="Prioridade: ${this.getPriorityLabel(task.priority)}" style="background: ${this.getPriorityColor(task.priority)} !important;">
+                        <i class="fas fa-flag"></i>
+                    </button>
+                    <button class="action-icon-btn delete" onclick="kanban.deleteTask(${task.id})" title="Excluir">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Corpo do Card -->
+            <div class="task-body-new">
+                <div class="task-title-new">${task.title}</div>
+                <div class="task-meta-new">
+                    <div class="task-meta-item">
+                        <i class="fas fa-calendar"></i>
+                        <span>${new Date(task.created_at).toLocaleDateString('pt-BR')}</span>
+                    </div>
+                    ${task.deadline ? `
+                    <div class="task-meta-item">
+                        <i class="fas fa-clock"></i>
+                        <span>Entrega: ${new Date(task.deadline).toLocaleDateString('pt-BR')} ${new Date(task.deadline).toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'})}</span>
+                    </div>
+                    ` : ''}
+                    <div class="task-meta-item">
+                        <i class="fas fa-tasks"></i>
+                        <span>Atividade</span>
+                    </div>
+                </div>
+                ${task.description ? `<div class="task-description-new">${task.description}</div>` : ''}
+            </div>
+
+            <!-- Footer com Responsável e Navegação -->
+            <div class="task-footer-new">
+                <div class="task-assignee-new">
+                    ${assigneeInfo ? `<i class="fas fa-user me-1"></i>${assigneeInfo.name}` : 'Não atribuído'}
+                </div>
+                <div class="task-navigation-new">
+                    ${prevStepBtn}
+                    ${nextStepBtn}
+                    ${assignBtn}
+                </div>
+            </div>
+        `;
+
+        return card;
+    }
+
+    getPriorityLabel(priority) {
+        const labels = {
+            'lowest': 'Muito Baixa',
+            'low': 'Baixa',
+            'medium': 'Média',
+            'high': 'Alta'
+        };
+        return labels[priority] || priority;
+    }
+
+    getPriorityColor(priority) {
+        const colors = {
+            'lowest': '#6c757d',  // Cinza
+            'low': '#28a745',     // Verde
+            'medium': '#ffc107',  // Amarelo
+            'high': '#dc3545'     // Vermelho
+        };
+        return colors[priority] || '#6c757d';
+    }
+
+    setupEventListeners() {
+        // Formulário de nova atividade
+        const form = document.getElementById('atividade-form');
+        if (form) {
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.salvarAtividade();
+            });
+        }
+
+        // Formulário de edição
+        const editForm = document.getElementById('editTaskForm');
+        if (editForm) {
+            editForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.updateTask();
+            });
+        }
+
+        // Confirmação de exclusão
+        const confirmBtn = document.getElementById('confirmDeleteBtn');
+        if (confirmBtn) {
+            confirmBtn.addEventListener('click', () => {
+                this.confirmDelete();
+            });
+        }
+    }
+
+    carregarEstatisticas() {
+        const totalAtividades = this.tasks.length;
+        const fazendoCount = this.tasks.filter(t => t.status === 'doing').length;
+        const concluidasCount = this.tasks.filter(t => t.status === 'done').length;
+        
+        this.animarContador('total-atividades', totalAtividades);
+        this.animarContador('fazendo-count', fazendoCount);
+        this.animarContador('concluidas-count', concluidasCount);
+    }
+
+    animarContador(elementId, valorFinal) {
+        const elemento = document.getElementById(elementId);
+        if (!elemento) return;
+        
+        const valorInicial = 0;
+        const duracao = 1000;
+        const incremento = valorFinal / (duracao / 16);
+        
+        let valorAtual = valorInicial;
+        
+        const timer = setInterval(() => {
+            valorAtual += incremento;
+            if (valorAtual >= valorFinal) {
+                elemento.textContent = valorFinal;
+                clearInterval(timer);
+            } else {
+                elemento.textContent = Math.floor(valorAtual);
+            }
+        }, 16);
+    }
+
+    configurarBusca() {
+        // Função removida - não há mais busca de atividades cadastradas
+        return;
+    }
+
+    configurarDeadline() {
+        // Configurar data mínima para hoje nos campos de deadline
+        const today = new Date();
+        const localDateTime = today.toISOString().slice(0, 16);
+        
+        const deadlineInputs = ['deadline', 'editTaskDeadline'];
+        deadlineInputs.forEach(inputId => {
+            const input = document.getElementById(inputId);
+            if (input) {
+                input.min = localDateTime;
+            }
+        });
+    }
+
+    async salvarAtividade() {
+        const deadlineValue = document.getElementById('deadline').value;
+        const formData = {
+            title: document.getElementById('titulo').value,
+            description: document.getElementById('descricao').value,
+            priority: document.getElementById('prioridade').value,
+            assignee_id: document.getElementById('responsavel').value || null,
+            deadline: deadlineValue || null,
+            status: 'todo'
+        };
+
+
+
+        try {
+            let response;
+            let mensagemSucesso;
+            
+            if (this.atividadeEditando) {
+                // Modo edição
+                response = await fetch(`/api/kanban/tasks/${this.atividadeEditando}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                mensagemSucesso = 'Atividade atualizada com sucesso!';
+            } else {
+                // Modo criação
+                response = await fetch('/api/kanban/tasks', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                mensagemSucesso = 'Atividade criada com sucesso!';
+            }
+            
+            if (response.ok) {
+                await this.loadTasks();
+                this.carregarEstatisticas();
+                
+                // Resetar formulário
+                document.getElementById('atividade-form').reset();
+                this.cancelarEdicao();
+                
+                showSuccess('Sucesso!', mensagemSucesso);
+            } else {
+                const error = await response.json();
+                throw new Error(error.error || 'Erro ao salvar atividade');
+            }
+        } catch (error) {
+            console.error('Erro:', error);
+            showError('Erro', 'Erro ao salvar atividade: ' + error.message);
+        }
+    }
+
+    editAtividade(taskId) {
+        const task = this.tasks.find(t => t.id == taskId);
+        if (task) {
+            document.getElementById('editTaskId').value = task.id;
+            document.getElementById('editTaskTitle').value = task.title;
+            document.getElementById('editTaskDescription').value = task.description || '';
+            document.getElementById('editTaskPriority').value = task.priority;
+            document.getElementById('editTaskAssignee').value = task.assignee_id || '';
+            
+            // Configurar deadline se existir
+            const deadlineInput = document.getElementById('editTaskDeadline');
+            if (task.deadline) {
+                // Converter para formato datetime-local
+                const deadlineDate = new Date(task.deadline);
+                const localDateTime = deadlineDate.toISOString().slice(0, 16);
+                deadlineInput.value = localDateTime;
+            } else {
+                deadlineInput.value = '';
+            }
+            
+            // Exibir o modal corretamente com animação
+            const modal = document.getElementById('editTaskModal');
+            modal.style.display = 'flex';
+            setTimeout(() => {
+                modal.classList.add('active');
+            }, 10);
+        }
+    }
+
+    cancelarEdicao() {
+        // Resetar estado
+        this.atividadeEditando = null;
+        
+        // Fechar modal se estiver aberto
+        const modal = document.getElementById('editTaskModal');
+        if (modal && modal.classList.contains('active')) {
+            modal.classList.remove('active');
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300);
+        }
+    }
+
+    viewTask(taskId) {
+        const task = this.tasks.find(t => t.id == taskId);
+        if (task) {
+            const assigneeInfo = task.assignee_id ? 
+                this.users.find(u => u.id == task.assignee_id) : null;
+            
+            const statusLabels = {
+                'todo': 'A Fazer',
+                'doing': 'Fazendo', 
+                'review': 'Em Análise',
+                'done': 'Concluído'
+            };
+            
+            let deadlineInfo = '';
+            if (task.deadline) {
+                const now = new Date();
+                const deadline = new Date(task.deadline);
+                const diffTime = deadline - now;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                
+                let statusDeadline = '';
+                if (diffDays < 0) {
+                    statusDeadline = `<span style="color: #dc3545; font-weight: bold;">VENCIDO (${Math.abs(diffDays)} dias atrás)</span>`;
+                } else if (diffDays === 0) {
+                    statusDeadline = `<span style="color: #fd7e14; font-weight: bold;">VENCE HOJE</span>`;
+                } else if (diffDays === 1) {
+                    statusDeadline = `<span style="color: #fd7e14; font-weight: bold;">VENCE AMANHÃ</span>`;
+                } else {
+                    statusDeadline = `<span style="color: #28a745;">Vence em ${diffDays} dias</span>`;
+                }
+                
+                deadlineInfo = `<strong>Data de Entrega:</strong> ${new Date(task.deadline).toLocaleDateString('pt-BR')} às ${new Date(task.deadline).toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'})}<br>
+                               <strong>Status:</strong> ${statusDeadline}<br>`;
+            }
+            
+            showInfo('Detalhes da Atividade', 
+                `<strong>Título:</strong> ${task.title}<br>
+                 <strong>Status:</strong> ${statusLabels[task.status]}<br>
+                 <strong>Prioridade:</strong> ${this.getPriorityLabel(task.priority)}<br>
+                 <strong>Responsável:</strong> ${assigneeInfo ? assigneeInfo.name : 'Não atribuído'}<br>
+                 ${deadlineInfo}
+                 ${task.description ? `<strong>Descrição:</strong> ${task.description}<br>` : ''}
+                 <strong>Criado em:</strong> ${new Date(task.created_at).toLocaleDateString('pt-BR')}`
+            );
+        }
+    }
+
+    setupDragAndDrop() {
+        // Limpar eventos anteriores
+        document.removeEventListener('dragstart', this.handleDragStart);
+        document.removeEventListener('dragend', this.handleDragEnd);
+        
+        // Bind das funções para manter contexto
+        this.handleDragStart = this.handleDragStart.bind(this);
+        this.handleDragEnd = this.handleDragEnd.bind(this);
+        
+        // Eventos globais de drag
+        document.addEventListener('dragstart', this.handleDragStart);
+        document.addEventListener('dragend', this.handleDragEnd);
+
+        // Configurar eventos para cada coluna
+        document.querySelectorAll('.tasks-container').forEach(container => {
+            // Remover listeners anteriores se existirem
+            container.removeEventListener('dragover', container._dragOverHandler);
+            container.removeEventListener('dragleave', container._dragLeaveHandler);
+            container.removeEventListener('drop', container._dropHandler);
+            
+            // Criar handlers com bind
+            container._dragOverHandler = this.handleDragOver.bind(this, container);
+            container._dragLeaveHandler = this.handleDragLeave.bind(this, container);
+            container._dropHandler = this.handleDrop.bind(this, container);
+            
+            // Adicionar novos listeners
+            container.addEventListener('dragover', container._dragOverHandler);
+            container.addEventListener('dragleave', container._dragLeaveHandler);
+            container.addEventListener('drop', container._dropHandler);
+        });
+    }
+    
+    handleDragStart(e) {
+        if (e.target.classList.contains('task-card-new')) {
+            this.draggedTask = e.target;
+            e.target.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', e.target.dataset.taskId);
+            console.log('Drag iniciado:', e.target.dataset.taskId);
+        }
+    }
+    
+    handleDragEnd(e) {
+        if (e.target.classList.contains('task-card-new')) {
+            e.target.classList.remove('dragging');
+            this.draggedTask = null;
+            // Remover todos os drop-zones
+            document.querySelectorAll('.column').forEach(col => {
+                col.classList.remove('drop-zone');
+            });
+            console.log('Drag finalizado');
+        }
+    }
+    
+    handleDragOver(container, e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        container.parentElement.classList.add('drop-zone');
+    }
+    
+    handleDragLeave(container, e) {
+        if (!container.contains(e.relatedTarget)) {
+            container.parentElement.classList.remove('drop-zone');
+        }
+    }
+    
+    handleDrop(container, e) {
+        e.preventDefault();
+        container.parentElement.classList.remove('drop-zone');
+        
+        if (!this.draggedTask) return;
+        
+        const newStatus = container.parentElement.dataset.status;
+        const taskId = this.draggedTask.dataset.taskId;
+        const task = this.tasks.find(t => t.id == taskId);
+        
+        console.log('Drop evento:', { taskId, currentStatus: task?.status, newStatus });
+        
+        if (!task) {
+            console.error('Tarefa não encontrada:', taskId);
+            return;
+        }
+        
+        // Se é a mesma coluna, não fazer nada
+        if (task.status === newStatus) {
+            console.log('Mesma coluna, ignorando');
+            return;
+        }
+        
+        const statusOrder = ['todo', 'doing', 'review', 'done'];
+        const currentIdx = statusOrder.indexOf(task.status);
+        const newIdx = statusOrder.indexOf(newStatus);
+        
+        console.log('Índices:', { currentIdx, newIdx });
+        
+        // Permitir mover para qualquer direção (simplificando a regra)
+        if (newIdx !== currentIdx) {
+            console.log('Movendo tarefa...');
+            this.moveTask(taskId, newStatus);
+        }
+    }
+
+    async moveTask(taskId, newStatus) {
+        console.log('moveTask chamada:', { taskId, newStatus });
+        
+        try {
+            const response = await fetch(`/api/kanban/tasks/${taskId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ status: newStatus })
+            });
+
+            console.log('Response status:', response.status);
+
+            if (response.ok) {
+                const result = await response.json();
+                console.log('Tarefa movida com sucesso:', result);
+                
+                // Recarregar as tarefas
+                await this.loadTasks();
+                
+                // Mostrar mensagem de sucesso
+                const statusLabels = {
+                    'todo': 'A Fazer',
+                    'doing': 'Fazendo',
+                    'review': 'Em Análise',
+                    'done': 'Concluído'
+                };
+                
+                showSuccess('Atividade movida!', `Movida para: ${statusLabels[newStatus]}`);
+            } else {
+                const error = await response.json();
+                console.error('Erro na resposta:', error);
+                throw new Error(error.error || 'Erro ao mover atividade');
+            }
+        } catch (error) {
+            console.error('Erro ao mover tarefa:', error);
+            showError('Erro', 'Erro ao mover atividade: ' + error.message);
+        }
+    }
+
+    editTask(taskId) {
+        const task = this.tasks.find(t => t.id == taskId);
+        if (task) {
+            document.getElementById('editTaskId').value = task.id;
+            document.getElementById('editTaskTitle').value = task.title;
+            document.getElementById('editTaskDescription').value = task.description || '';
+            document.getElementById('editTaskPriority').value = task.priority;
+            document.getElementById('editTaskAssignee').value = task.assignee_id || '';
+            
+            // Configurar deadline se existir
+            const deadlineInput = document.getElementById('editTaskDeadline');
+            if (task.deadline) {
+                // Converter para formato datetime-local
+                const deadlineDate = new Date(task.deadline);
+                const localDateTime = deadlineDate.toISOString().slice(0, 16);
+                deadlineInput.value = localDateTime;
+            } else {
+                deadlineInput.value = '';
+            }
+            
+            // Exibir o modal corretamente com animação
+            const modal = document.getElementById('editTaskModal');
+            modal.style.display = 'flex';
+            setTimeout(() => {
+                modal.classList.add('active');
+            }, 10);
+        }
+    }
+
+    async updateTask() {
+        const taskId = document.getElementById('editTaskId').value;
+        const deadlineValue = document.getElementById('editTaskDeadline').value;
+        const formData = {
+            title: document.getElementById('editTaskTitle').value,
+            description: document.getElementById('editTaskDescription').value,
+            priority: document.getElementById('editTaskPriority').value,
+            assignee_id: document.getElementById('editTaskAssignee').value || null,
+            deadline: deadlineValue || null
+        };
+
+
+
+        try {
+            const response = await fetch(`/api/kanban/tasks/${taskId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            });
+
+            if (response.ok) {
+                this.closeEditModal();
+                await this.loadTasks();
+                this.showAlert('Atividade atualizada com sucesso!', 'success');
+            } else {
+                const error = await response.json();
+                throw new Error(error.error || 'Erro ao atualizar atividade');
+            }
+        } catch (error) {
+            console.error('Erro:', error);
+            this.showAlert('Erro ao atualizar atividade: ' + error.message, 'danger');
+        }
+    }
+
+    deleteTask(taskId) {
+        this.taskToDelete = taskId;
+        const modal = document.getElementById('deleteTaskModal');
+        modal.style.display = 'flex';
+        setTimeout(() => {
+            modal.classList.add('active');
+        }, 10);
+    }
+
+    async confirmDelete() {
+        try {
+            const response = await fetch(`/api/kanban/tasks/${this.taskToDelete}`, {
+                method: 'DELETE'
+            });
+
+            if (response.ok) {
+                this.closeDeleteModal();
+                await this.loadTasks();
+                this.showAlert('Atividade excluída com sucesso!', 'success');
+            } else {
+                const error = await response.json();
+                throw new Error(error.error || 'Erro ao excluir atividade');
+            }
+        } catch (error) {
+            console.error('Erro:', error);
+            this.showAlert('Erro ao excluir atividade: ' + error.message, 'danger');
+        }
+    }
+
+    closeEditModal() {
+        const modal = document.getElementById('editTaskModal');
+        modal.classList.remove('active');
+        setTimeout(() => {
+            modal.style.display = 'none';
+        }, 300);
+    }
+
+    closeDeleteModal() {
+        const modal = document.getElementById('deleteTaskModal');
+        modal.classList.remove('active');
+        setTimeout(() => {
+            modal.style.display = 'none';
+        }, 300);
+        this.taskToDelete = null;
+    }
+
+    viewTask(taskId) {
+        const task = this.tasks.find(t => t.id == taskId);
+        if (!task) {
+            showError('Erro', 'Atividade não encontrada');
+            return;
+        }
+
+        // Criar card de visualização
+        const viewCard = this.createViewCard(task);
+        const container = document.getElementById('viewTaskCardContainer');
+        container.innerHTML = '';
+        container.appendChild(viewCard);
+
+        // Armazenar ID da tarefa para edição
+        this.viewingTaskId = taskId;
+
+        // Exibir modal
+        const modal = document.getElementById('viewTaskModal');
+        modal.style.display = 'flex';
+        setTimeout(() => {
+            modal.classList.add('active');
+        }, 10);
+    }
+
+    createViewCard(task) {
+        const card = document.createElement('div');
+        card.className = `task-card-new task-card-view priority-${task.priority}`;
+
+        const assigneeInfo = task.assignee_id ? 
+            this.users.find(u => u.id == task.assignee_id) : null;
+
+        // Definir próxima e anterior etapa
+        const statusOrder = ['todo', 'doing', 'review', 'done'];
+        const currentIdx = statusOrder.indexOf(task.status);
+        const nextStatus = statusOrder[currentIdx + 1];
+        const prevStatus = statusOrder[currentIdx - 1];
+        
+        const statusLabels = {
+            'todo': 'A Fazer',
+            'doing': 'Fazendo',
+            'review': 'Em Análise',
+            'done': 'Concluído'
+        };
+
+        // Botão etapa anterior (sempre disponível, exceto para "todo")
+        let prevStepBtn = '';
+        if (task.status !== 'todo') {
+            // Se for "done", permitir voltar para "review"
+            const targetPrevStatus = task.status === 'done' ? 'review' : prevStatus;
+            if (targetPrevStatus) {
+                prevStepBtn = `
+                    <button class="btn-prev-step" onclick="kanban.moveToPrevStep(${task.id}); closeViewModal();" title="Voltar para: ${statusLabels[targetPrevStatus]}">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                `;
+            }
+        }
+
+        // Botão próxima etapa (sempre disponível, exceto para "done")
+        let nextStepBtn = '';
+        if (task.status !== 'done') {
+            nextStepBtn = `
+                <button class="btn-next-step" onclick="kanban.moveToNextStep(${task.id}); closeViewModal();" title="Mover para: ${statusLabels[nextStatus]}">
+                    <i class="fas fa-arrow-right"></i>
+                </button>
+            `;
+        }
+
+        // Botão atribuir (só se não tiver responsável)
+        let assignBtn = '';
+        if (!task.assignee_id) {
+            assignBtn = `
+                <button class="btn-assign" onclick="kanban.atribuirParaMim(${task.id}); closeViewModal();" title="Atribuir para mim">
+                    <i class="fas fa-user-plus"></i>
+                </button>
+            `;
+        }
+
+        const creatorInfo = this.users.find(u => u.id == task.created_by);
+
+        card.innerHTML = `
+            <!-- Header com ID e Ações -->
+            <div class="task-header-new">
+                <div class="task-id-badge">ID ${task.id}</div>
+                <div class="task-actions-top">
+                    <button class="action-icon-btn edit" onclick="kanban.editTaskFromView()" title="Editar">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="action-icon-btn priority" title="Prioridade: ${this.getPriorityLabel(task.priority)}" style="background: ${this.getPriorityColor(task.priority)} !important;">
+                        <i class="fas fa-flag"></i>
+                    </button>
+                    <button class="action-icon-btn delete" onclick="kanban.deleteTask(${task.id}); closeViewModal();" title="Excluir">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Corpo do Card -->
+            <div class="task-body-new">
+                <div class="task-title-new">${task.title}</div>
+                <div class="task-meta-new">
+                    <div class="task-meta-item">
+                        <i class="fas fa-calendar"></i>
+                        <span>Criada em ${new Date(task.created_at).toLocaleDateString('pt-BR')}</span>
+                    </div>
+                    ${task.deadline ? `
+                    <div class="task-meta-item">
+                        <i class="fas fa-clock"></i>
+                        <span>Entrega: ${new Date(task.deadline).toLocaleDateString('pt-BR')} às ${new Date(task.deadline).toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'})}</span>
+                    </div>
+                    ` : ''}
+                    <div class="task-meta-item">
+                        <i class="fas fa-tasks"></i>
+                        <span>Status: ${statusLabels[task.status]}</span>
+                    </div>
+                    <div class="task-meta-item">
+                        <i class="fas fa-user-circle"></i>
+                        <span>Por: ${creatorInfo ? creatorInfo.name : 'Sistema'}</span>
+                    </div>
+                </div>
+                ${task.description ? `<div class="task-description-new">${task.description}</div>` : '<div class="task-description-new" style="font-style: italic; color: #a0a0a0;">Nenhuma descrição fornecida</div>'}
+            </div>
+
+            <!-- Footer com Responsável e Navegação -->
+            <div class="task-footer-new">
+                <div class="task-assignee-new">
+                    <i class="fas fa-user me-2"></i>
+                    ${assigneeInfo ? assigneeInfo.name : 'Não atribuído'}
+                </div>
+                <div class="task-navigation-new">
+                    ${prevStepBtn}
+                    ${nextStepBtn}
+                    ${assignBtn}
+                </div>
+            </div>
+        `;
+
+        return card;
+    }
+
+    closeViewModal() {
+        const modal = document.getElementById('viewTaskModal');
+        modal.classList.remove('active');
+        setTimeout(() => {
+            modal.style.display = 'none';
+        }, 300);
+        this.viewingTaskId = null;
+    }
+
+    editTaskFromView() {
+        if (this.viewingTaskId) {
+            this.closeViewModal();
+            setTimeout(() => {
+                this.editTask(this.viewingTaskId);
+            }, 100);
+        }
+    }
+
+    showAlert(message, type = 'info') {
+        // Mapeamento para o novo sistema de toasts
+        const typeMap = {
+            'success': 'success',
+            'danger': 'error',
+            'warning': 'warning',
+            'info': 'info'
+        };
+        
+        const toastType = typeMap[type] || 'info';
+        showToast(toastType, type === 'danger' ? 'Erro' : 'Informação', message);
+    }
+
+    atribuirParaMim(taskId) {
+        fetch(`/api/kanban/tasks/${taskId}/atribuir`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id: window.userId })
+        })
+        .then(resp => resp.json())
+        .then(data => {
+            if (data.success) {
+                showSuccess('Atividade atribuída a você!');
+                this.loadTasks();
+            } else {
+                showError('Erro', data.error || 'Não foi possível atribuir a atividade.');
+            }
+        })
+        .catch(() => showError('Erro', 'Erro ao atribuir atividade.'));
+    }
+
+    moveToNextStep(taskId) {
+        const task = this.tasks.find(t => t.id == taskId);
+        if (!task) {
+            showError('Erro', 'Atividade não encontrada');
+            return;
+        }
+        
+        const statusOrder = ['todo', 'doing', 'review', 'done'];
+        const statusLabels = {
+            'todo': 'A Fazer',
+            'doing': 'Fazendo',
+            'review': 'Em Análise',
+            'done': 'Concluído'
+        };
+        
+        const currentIdx = statusOrder.indexOf(task.status);
+        const nextStatus = statusOrder[currentIdx + 1];
+        
+        if (nextStatus) {
+            console.log(`Movendo tarefa ${taskId} de ${task.status} para ${nextStatus}`);
+            
+            // Mostrar feedback imediato
+            showInfo('Movendo atividade...', `De "${statusLabels[task.status]}" para "${statusLabels[nextStatus]}"`);
+            
+            // Mover para próxima etapa
+            this.moveTask(taskId, nextStatus);
+        } else {
+            showWarning('Atividade já concluída', 'Esta atividade já está na última etapa');
+        }
+    }
+
+    moveToPrevStep(taskId) {
+        const task = this.tasks.find(t => t.id == taskId);
+        if (!task) {
+            showError('Erro', 'Atividade não encontrada');
+            return;
+        }
+        
+        const statusOrder = ['todo', 'doing', 'review', 'done'];
+        const statusLabels = {
+            'todo': 'A Fazer',
+            'doing': 'Fazendo',
+            'review': 'Em Análise',
+            'done': 'Concluído'
+        };
+        
+        let targetStatus;
+        
+        // Lógica especial para voltar de "Concluído"
+        if (task.status === 'done') {
+            targetStatus = 'review'; // De concluído volta para "Em Análise"
+        } else {
+            const currentIdx = statusOrder.indexOf(task.status);
+            targetStatus = statusOrder[currentIdx - 1];
+        }
+        
+        if (targetStatus && task.status !== 'todo') {
+            console.log(`Voltando tarefa ${taskId} de ${task.status} para ${targetStatus}`);
+            
+            // Mostrar feedback imediato
+            showInfo('Voltando atividade...', `De "${statusLabels[task.status]}" para "${statusLabels[targetStatus]}"`);
+            
+            // Mover para etapa anterior
+            this.moveTask(taskId, targetStatus);
+        } else {
+            showWarning('Não é possível voltar', 'Esta atividade já está na primeira etapa');
+        }
+    }
+
+    async downloadPDF() {
+        try {
+            // Verificar se há atividades para gerar o relatório
+            if (!this.tasks || this.tasks.length === 0) {
+                showWarning('Nenhuma atividade', 'Não há atividades para gerar o relatório PDF');
+                return;
+            }
+
+            // Mostrar feedback inicial
+            showInfo('Gerando PDF...', 'Preparando relatório completo das atividades');
+            
+            // Desabilitar botão temporariamente
+            const downloadBtn = document.querySelector('.btn-download-board');
+            if (downloadBtn) {
+                downloadBtn.disabled = true;
+                downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Gerando...';
+            }
+            
+            const response = await fetch('/api/kanban/download-pdf', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    tasks: this.tasks,
+                    users: this.users
+                })
+            });
+
+            if (response.ok) {
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                
+                // Nome do arquivo com data e hora
+                const now = new Date();
+                const timestamp = now.toISOString().slice(0, 19).replace(/:/g, '-');
+                a.download = `relatorio_atividades_kanban_${timestamp}.pdf`;
+                
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                
+                showSuccess('PDF Gerado com Sucesso!', `Relatório com ${this.tasks.length} atividades foi baixado`);
+            } else {
+                const error = await response.json();
+                throw new Error(error.error || 'Erro ao gerar PDF');
+            }
+        } catch (error) {
+            console.error('Erro ao baixar PDF:', error);
+            showError('Erro ao Gerar PDF', 'Não foi possível gerar o relatório. Tente novamente.');
+        } finally {
+            // Reabilitar botão
+            const downloadBtn = document.querySelector('.btn-download-board');
+            if (downloadBtn) {
+                downloadBtn.disabled = false;
+                downloadBtn.innerHTML = '<i class="fas fa-file-pdf"></i> Baixar PDF';
+            }
+        }
+    }
+}
+
+// Funções globais para os modais
+function closeEditModal() {
+    kanban.closeEditModal();
+}
+
+function closeDeleteModal() {
+    kanban.closeDeleteModal();
+}
+
+function closeViewModal() {
+    kanban.closeViewModal();
+}
+
+// Funções globais
+function cancelarEdicao() {
+    if (kanban) {
+        kanban.cancelarEdicao();
+    }
+}
+
+// Inicializar o kanban quando a página carregar
+let kanban;
+document.addEventListener('DOMContentLoaded', function() {
+    kanban = new KanbanBoard();
+    // Forçar as colunas do board lado a lado
+    const row = document.querySelector('.kanban-board .row');
+    if (row) {
+        row.style.display = 'flex';
+        row.style.flexDirection = 'row';
+        row.style.gap = '2rem';
+    }
+    // Ajustar colunas para ocupar a mesma altura
+    document.querySelectorAll('.kanban-board .col-md-3').forEach(col => {
+        col.style.flex = '1 1 0';
+        col.style.display = 'flex';
+        col.style.flexDirection = 'column';
+    });
+});
+</script>
+{% endblock %} 

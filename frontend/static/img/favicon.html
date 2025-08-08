@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Favicon Generator</title>
+    <style>
+        body { margin: 0; padding: 20px; background: #f0f0f0; }
+        .favicon { width: 32px; height: 32px; background: linear-gradient(135deg, #6C63FF, #4D44DB); border-radius: 4px; position: relative; }
+        .hat { width: 24px; height: 12px; background: #4D44DB; border-radius: 12px 12px 0 0; position: absolute; top: 4px; left: 4px; }
+        .tassel { width: 2px; height: 8px; background: #FFD700; position: absolute; top: 16px; left: 15px; }
+        .tassel::after { content: ''; width: 4px; height: 4px; background: #FFD700; border-radius: 50%; position: absolute; top: -2px; left: -1px; }
+    </style>
+</head>
+<body>
+    <div class="favicon">
+        <div class="hat"></div>
+        <div class="tassel"></div>
+    </div>
+    <p>Use esta imagem como favicon.ico</p>
+</body>
+</html> 

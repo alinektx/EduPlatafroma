@@ -1,0 +1,784 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+    <div class="dashboard-container">
+        <!-- Header do Dashboard -->
+        <header class="dashboard-header">
+            <div class="header-content">
+        <h1><i class="fas fa-tachometer-alt"></i> Dashboard</h1>
+                <div class="user-info">
+                    <span class="welcome-text">Bem-vindo, {{ user.user_name }}</span>
+                    <span class="user-email">{{ user.user_email }}</span>
+                </div>
+            </div>
+    </header>
+    
+        <!-- Cards de Estatísticas -->
+        <section class="stats-section">
+            <div class="stats-grid">
+                <div class="stat-card schools">
+                    <div class="stat-icon">
+                        <i class="fas fa-school"></i>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-number" data-count="{{ count_escolas }}">0</span>
+                        <span class="stat-label">Escolas</span>
+                    </div>
+                </div>
+
+                <div class="stat-card classes">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-number" data-count="{{ count_turmas }}">0</span>
+                        <span class="stat-label">Turmas</span>
+                    </div>
+                </div>
+
+                <div class="stat-card students">
+                    <div class="stat-icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-number" data-count="{{ count_alunos }}">0</span>
+                        <span class="stat-label">Alunos</span>
+                    </div>
+                </div>
+
+                <div class="stat-card lessons">
+                    <div class="stat-icon">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-number" data-count="{{ count_planos }}">0</span>
+                        <span class="stat-label">Planos de Aula</span>
+                    </div>
+                </div>
+
+                <div class="stat-card questions">
+                    <div class="stat-icon">
+                        <i class="fas fa-question-circle"></i>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-number" data-count="{{ count_questoes }}">0</span>
+                        <span class="stat-label">Questões</span>
+                    </div>
+                </div>
+
+                <div class="stat-card skills">
+                    <div class="stat-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-number" data-count="{{ count_habilidades }}">0</span>
+                        <span class="stat-label">Habilidades BNCC</span>
+                    </div>
+                </div>
+
+                {% if user.is_admin %}
+                <div class="stat-card users">
+                    <div class="stat-icon">
+                        <i class="fas fa-users-cog"></i>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-number" data-count="{{ count_usuarios }}">0</span>
+                        <span class="stat-label">Usuários</span>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </section>
+
+        <!-- Cards Principais -->
+        <section class="main-cards">
+            <div class="main-cards-grid">
+                <!-- Links Rápidos -->
+                <div class="main-card quick-links">
+                    <div class="card-header">
+                        <h2><i class="fas fa-bolt"></i> Acesso Rápido</h2>
+                    </div>
+                    <div class="card-content">
+                        <div class="quick-links-grid">
+                            <a href="/escolas" class="quick-link">
+                                <i class="fas fa-school"></i>
+                                <span>Gerenciar Escolas</span>
+                            </a>
+                            <a href="/turmas" class="quick-link">
+                                <i class="fas fa-users"></i>
+                                <span>Gerenciar Turmas</span>
+                            </a>
+                            <a href="/kanban" class="quick-link">
+                                <i class="fas fa-calendar"></i>
+                                <span>Gestão de atividades</span>
+                            </a>
+                            <a href="/alunos" class="quick-link">
+                                <i class="fas fa-graduation-cap"></i>
+                                <span>Gerenciar Alunos</span>
+                            </a>
+                            <a href="/plano-aula" class="quick-link">
+                                <i class="fas fa-chalkboard-teacher"></i>
+                                <span>Planos de Aula</span>
+                            </a>
+                            <a href="/questoes" class="quick-link">
+                                <i class="fas fa-question-circle"></i>
+                                <span>Banco de Questões</span>
+                            </a>
+                            <a href="/cadernos" class="quick-link">
+                                <i class="fas fa-book"></i>
+                                <span>Cadernos</span>
+                            </a>
+                            <a href="/usuarios" class="quick-link">
+                                <i class="fas fa-users-cog"></i>
+                                <span>Gerenciar Usuarios</span>
+                            </a>
+                           
+                            </a>
+                            <a href="/habilidades" class="quick-link">
+                                <i class="fas fa-brain"></i>
+                                <span>Habilidades BNCC</span>
+                            </a>
+                            <a href="/lanca-resultado" class="quick-link">
+                                <i class="fas fa-chart-bar"></i>
+                                <span>Resultados</span>
+                            </a>
+                            <a href="/correcao-automatica" class="quick-link">
+                                <i class="fas fa-robot"></i>
+                                <span>Correção Automática</span>
+                            </a>
+
+                </div>
+            </div>
+        </div>
+        
+                <!-- Atividades Recentes -->
+                <div class="main-card recent-activities">
+                    <div class="card-header">
+                        <h2><i class="fas fa-history"></i> Atividades Recentes</h2>
+                    </div>
+                    <div class="card-content">
+                        <div class="activity-list">
+                            <div class="activity-item">
+                                <div class="activity-icon welcome">
+                                    <i class="fas fa-user-check"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-title">Bem-vindo ao Sistema!</div>
+                                    <div class="activity-time">{{ user.get('last_login', 'Primeiro acesso') }}</div>
+        </div>
+                            </div>
+                            
+                            <div class="activity-item">
+                                <div class="activity-icon stats">
+                                    <i class="fas fa-chart-line"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-title">Sistema inicializado</div>
+                                    <div class="activity-description">
+                                        {{ count_escolas }} escolas, {{ count_turmas }} turmas, {{ count_alunos }} alunos cadastrados
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="activity-item">
+                                <div class="activity-icon content">
+                                    <i class="fas fa-book-open"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-title">Conteúdo Disponível</div>
+                                    <div class="activity-description">
+                                        {{ count_planos }} planos de aula e {{ count_questoes }} questões no banco
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="activity-item">
+                                <div class="activity-icon bncc">
+                                    <i class="fas fa-brain"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-title">BNCC Integrada</div>
+                                    <div class="activity-description">
+                                        {{ count_habilidades }} habilidades cadastradas
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Visão Geral do Sistema -->
+                <div class="main-card system-overview">
+                    <div class="card-header">
+                        <h2><i class="fas fa-cogs"></i> Visão Geral do Sistema</h2>
+                    </div>
+                    <div class="card-content">
+                        <div class="overview-items">
+                            <div class="overview-item">
+                                <div class="overview-icon">
+                                    <i class="fas fa-database"></i>
+                                </div>
+                                <div class="overview-content">
+                                    <h3>Base de Dados</h3>
+                                    <p>Sistema integrado com banco de questões, planos de aula e habilidades BNCC para gestão educacional completa.</p>
+                                </div>
+                            </div>
+
+                            <div class="overview-item">
+                                <div class="overview-icon">
+                                    <i class="fas fa-robot"></i>
+                                </div>
+                                <div class="overview-content">
+                                    <h3>IA Integrada</h3>
+                                    <p>Geração automática de planos de aula personalizados utilizando inteligência artificial avançada.</p>
+                                </div>
+                            </div>
+
+                            <div class="overview-item">
+                                <div class="overview-icon">
+                                    <i class="fas fa-chart-bar"></i>
+                                </div>
+                                <div class="overview-content">
+                                    <h3>Relatórios</h3>
+                                    <p>Análise de desempenho e relatórios detalhados para acompanhamento pedagógico.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <style>
+        /* Dashboard Styles */
+        .dashboard-container {
+            padding: 0;
+            max-width: 100%;
+        }
+
+        .dashboard-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 2rem 1.5rem;
+            margin: -1.5rem -1.5rem 2rem -1.5rem;
+            border-radius: 0 0 20px 20px;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .dashboard-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .dashboard-header h1 i {
+            margin-right: 1rem;
+            font-size: 2rem;
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            text-align: right;
+        }
+
+        .welcome-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .user-email {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        /* Stats Section */
+        .stats-section {
+            margin-bottom: 3rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary);
+            opacity: 0.6;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-card.schools::before { background: #3498db; }
+        .stat-card.classes::before { background: #9b59b6; }
+        .stat-card.students::before { background: #e74c3c; }
+        .stat-card.lessons::before { background: #2ecc71; }
+        .stat-card.questions::before { background: #f39c12; }
+        .stat-card.skills::before { background: #1abc9c; }
+        .stat-card.users::before { background: #8e44ad; }
+
+        .stat-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1.5rem;
+            font-size: 2rem;
+            color: white;
+        }
+
+        .stat-card.schools .stat-icon { background: #3498db; }
+        .stat-card.classes .stat-icon { background: #9b59b6; }
+        .stat-card.students .stat-icon { background: #e74c3c; }
+        .stat-card.lessons .stat-icon { background: #2ecc71; }
+        .stat-card.questions .stat-icon { background: #f39c12; }
+        .stat-card.skills .stat-icon { background: #1abc9c; }
+        .stat-card.users .stat-icon { background: #8e44ad; }
+
+        .stat-content {
+            flex: 1;
+        }
+
+        .stat-number {
+            display: block;
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--primary-dark);
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 1.1rem;
+            color: #666;
+            font-weight: 500;
+        }
+
+        /* Main Cards */
+        .main-cards {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .main-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        .main-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .main-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+        }
+
+        .card-header {
+            background: var(--gray-light);
+            padding: 1.5rem;
+            border-bottom: 1px solid #e1e8ed;
+        }
+
+        .card-header h2 {
+            margin: 0;
+            font-size: 1.3rem;
+            color: var(--primary-dark);
+            display: flex;
+            align-items: center;
+        }
+
+        .card-header h2 i {
+            margin-right: 0.75rem;
+            color: var(--primary);
+        }
+
+        .card-content {
+            padding: 1.5rem;
+        }
+
+        /* Quick Links */
+        .quick-links-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        .quick-link {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1.5rem 1rem;
+            border-radius: 10px;
+            background: var(--gray-light);
+            text-decoration: none;
+            color: var(--primary-dark);
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .quick-link:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .quick-link i {
+            font-size: 2rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .quick-link span {
+            font-size: 0.9rem;
+            font-weight: 500;
+            line-height: 1.2;
+        }
+
+        .quick-link.admin-only {
+            border: 2px solid #8e44ad;
+            background: linear-gradient(135deg, #8e44ad 0%, #9b59b6 100%);
+            color: white;
+        }
+
+        .quick-link.admin-only:hover {
+            background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+            transform: translateY(-3px);
+        }
+
+        /* Activity List */
+        .activity-list {
+            space-y: 1rem;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 1rem 0;
+            border-bottom: 1px solid #e1e8ed;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            font-size: 1.2rem;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .activity-icon.welcome { background: #2ecc71; }
+        .activity-icon.stats { background: #3498db; }
+        .activity-icon.content { background: #f39c12; }
+        .activity-icon.bncc { background: #1abc9c; }
+
+        .activity-content {
+            flex: 1;
+        }
+
+        .activity-title {
+            font-weight: 600;
+            color: var(--primary-dark);
+            margin-bottom: 0.25rem;
+        }
+
+        .activity-time {
+            font-size: 0.85rem;
+            color: #666;
+        }
+
+        .activity-description {
+            font-size: 0.9rem;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        /* Overview Items */
+        .overview-items {
+            space-y: 1.5rem;
+        }
+
+        .overview-item {
+            display: flex;
+            align-items: flex-start;
+            padding: 1rem 0;
+            border-bottom: 1px solid #e1e8ed;
+        }
+
+        .overview-item:last-child {
+            border-bottom: none;
+        }
+
+        .overview-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            font-size: 1.5rem;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .overview-content h3 {
+            margin: 0 0 0.5rem 0;
+            color: var(--primary-dark);
+            font-size: 1.1rem;
+        }
+
+        .overview-content p {
+            margin: 0;
+            color: #666;
+            line-height: 1.5;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .dashboard-header {
+                padding: 1.5rem 1rem;
+                margin: -1rem -1rem 1.5rem -1rem;
+            }
+
+            .header-content {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+            }
+
+            .dashboard-header h1 {
+                font-size: 2rem;
+                margin-bottom: 1rem;
+            }
+
+            .user-info {
+                align-items: center;
+                text-align: center;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 1rem;
+            }
+
+            .stat-card {
+                padding: 1rem;
+            }
+
+            .stat-icon {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5rem;
+                margin-right: 1rem;
+            }
+
+            .stat-number {
+                font-size: 2.5rem;
+            }
+
+            .main-cards-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .quick-links-grid {
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            }
+
+            .quick-link {
+                padding: 1rem 0.75rem;
+            }
+
+            .quick-link i {
+                font-size: 1.5rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .quick-link span {
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .quick-links-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+
+    <script>
+        // Animar contadores com efeito suave
+        function animateCounters() {
+            const counters = document.querySelectorAll('.stat-number');
+            const animationDuration = 2000; // 2 segundos
+            const frameRate = 60; // 60 FPS
+            const totalFrames = animationDuration / (1000 / frameRate);
+            
+            counters.forEach(counter => {
+                const target = parseInt(counter.getAttribute('data-count')) || 0;
+                let current = 0;
+                const increment = target / totalFrames;
+                
+                const timer = setInterval(() => {
+                    current += increment;
+                    if (current >= target) {
+                        counter.textContent = target.toLocaleString();
+                        clearInterval(timer);
+                } else {
+                        counter.textContent = Math.floor(current).toLocaleString();
+                    }
+                }, 1000 / frameRate);
+            });
+        }
+
+        // Adicionar efeitos de hover e interatividade
+        function addInteractivity() {
+            // Animação de cards
+            const cards = document.querySelectorAll('.stat-card, .main-card, .quick-link');
+            
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-3px)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+
+            // Efeito de ondulação nos botões
+            const quickLinks = document.querySelectorAll('.quick-link');
+            quickLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    // Criar efeito de ripple
+                    const ripple = document.createElement('span');
+                    const rect = this.getBoundingClientRect();
+                    const size = Math.max(rect.width, rect.height);
+                    const x = e.clientX - rect.left - size / 2;
+                    const y = e.clientY - rect.top - size / 2;
+                    
+                    ripple.style.cssText = `
+                        position: absolute;
+                        border-radius: 50%;
+                        background: rgba(255, 255, 255, 0.6);
+                        transform: scale(0);
+                        animation: ripple 0.6s linear;
+                        width: ${size}px;
+                        height: ${size}px;
+                        left: ${x}px;
+                        top: ${y}px;
+                        pointer-events: none;
+                    `;
+                    
+                    this.style.position = 'relative';
+                    this.style.overflow = 'hidden';
+                    this.appendChild(ripple);
+                    
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 600);
+                });
+            });
+        }
+
+        // Adicionar animação CSS para o ripple
+        function addRippleAnimation() {
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes ripple {
+                    to {
+                        transform: scale(4);
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // Inicializar tudo quando a página carregar
+        document.addEventListener('DOMContentLoaded', function() {
+            // Pequeno delay para melhor efeito visual
+            setTimeout(() => {
+                animateCounters();
+                addInteractivity();
+                addRippleAnimation();
+            }, 300);
+        });
+
+        // Adicionar loading state para os quick links
+        document.querySelectorAll('.quick-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                if (this.href && this.href !== '#') {
+                    // Adicionar indicador de loading
+                    const icon = this.querySelector('i');
+                    const originalClass = icon.className;
+                    icon.className = 'fas fa-spinner fa-spin';
+                    
+                    // Restaurar após um tempo (caso a navegação falhe)
+                    setTimeout(() => {
+                        icon.className = originalClass;
+                    }, 3000);
+                }
+            });
+        });
+    </script>
+{% endblock %}

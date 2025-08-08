@@ -1,0 +1,1882 @@
+{% extends "base.html" %}
+
+{% block title %}Habilidades BNCC{% endblock %}
+
+{% block content %}
+    <div class="habilidades-container">
+        <!-- Sistema de Notificações Toast -->
+        <div id="toast-container" class="toast-container"></div>
+        
+        <!-- Header da página -->
+        <header class="page-header">
+            <div class="header-content">
+                <h1><i class="fas fa-brain"></i> Habilidades BNCC</h1>
+                <p>Gerencie as habilidades da Base Nacional Comum Curricular</p>
+            </div>
+            <div class="header-stats">
+                <div class="stat-item">
+                    <span class="stat-number" id="total-habilidades">{{ habilidades|length }}</span>
+                    <span class="stat-label">Total</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="matematica-count">0</span>
+                    <span class="stat-label">Matemática</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="portugues-count">0</span>
+                    <span class="stat-label">Português</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="ciencias-count">0</span>
+                    <span class="stat-label">Ciências</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Cards de ações -->
+        <section class="actions-section">
+            <div class="actions-grid">
+                <!-- Card de Importação -->
+                <div class="action-card import-card">
+            <div class="card-header">
+                        <div class="card-icon">
+                    <i class="fas fa-file-excel"></i>
+                </div>
+                        <div class="card-title">
+                    <h2>Importar Habilidades</h2>
+                            <p>Upload de arquivo Excel com múltiplas habilidades</p>
+                </div>
+        </div>
+                    <div class="card-content">
+                        <form id="form-importar-excel" enctype="multipart/form-data">
+                            <div class="file-upload-area">
+                                <input type="file" id="arquivo-excel" name="arquivo" accept=".xlsx" required>
+                                <label for="arquivo-excel" class="file-upload-label">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <span>Selecionar arquivo Excel</span>
+                        </label>
+                    </div>
+                    <div class="upload-actions">
+                                <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-upload"></i>
+                            Importar
+                        </button>
+                                <a href="/static/modelo_habilidades.xlsx" class="btn btn-secondary" download>
+                            <i class="fas fa-download"></i>
+                            Baixar Modelo
+                        </a>
+                </div>
+                <div id="import-feedback" class="feedback-message"></div>
+            </form>
+                    </div>
+                </div>
+
+                <!-- Card de Cadastro -->
+                <div class="action-card form-card">
+            <div class="card-header">
+                        <div class="card-icon">
+                    <i class="fas fa-plus-circle"></i>
+                </div>
+                        <div class="card-title">
+                    <h2>Nova Habilidade</h2>
+                            <p>Cadastre manualmente ou busque da BNCC</p>
+                </div>
+                        <button id="btn-buscar-bncc" class="btn btn-outline">
+                    <i class="fas fa-search"></i>
+                    Buscar BNCC
+                </button>
+            </div>
+                    <div class="card-content">
+                        <form id="habilidade-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                            <label for="codigo">Código BNCC *</label>
+                                    <input type="text" id="codigo" name="codigo" required>
+                        </div>
+                                <div class="form-group">
+                                    <label for="componente">Componente *</label>
+                        <select id="componente" name="componente" required>
+                                <option value="">Selecione...</option>
+                            <option value="Matemática">Matemática</option>
+                            <option value="Língua Portuguesa">Língua Portuguesa</option>
+                            <option value="Ciências">Ciências</option>
+                            <option value="História">História</option>
+                            <option value="Geografia">Geografia</option>
+                        </select>
+                    </div>
+                                <div class="form-group">
+                            <label for="ano">Ano *</label>
+                                    <select id="ano" name="ano" required>
+                                        <option value="">Selecione...</option>
+                                        <option value="1">1º ano</option>
+                                        <option value="2">2º ano</option>
+                                        <option value="3">3º ano</option>
+                                        <option value="4">4º ano</option>
+                                        <option value="5">5º ano</option>
+                                        <option value="6">6º ano</option>
+                                        <option value="7">7º ano</option>
+                                        <option value="8">8º ano</option>
+                                        <option value="9">9º ano</option>
+                                    </select>
+                        </div>
+                </div>
+                            <div class="form-group">
+                            <label for="descricao">Descrição da Habilidade *</label>
+                                <textarea id="descricao" name="descricao" rows="3" required></textarea>
+                        </div>
+                            <div class="form-buttons">
+                                <button type="submit" class="btn btn-primary btn-block">
+                        <i class="fas fa-save"></i>
+                        Salvar Habilidade
+                </button>
+                                <button type="button" id="btn-cancelar-edicao" class="btn btn-secondary btn-block" style="display: none;" onclick="cancelarEdicao()">
+                                    <i class="fas fa-times"></i>
+                                    Cancelar Edição
+                                </button>
+                            </div>
+            </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Lista de Habilidades -->
+        <section class="list-section">
+            <div class="list-card">
+            <div class="card-header">
+                    <div class="card-icon">
+                    <i class="fas fa-list"></i>
+                </div>
+                    <div class="card-title">
+                    <h2>Habilidades Cadastradas</h2>
+                    <p>Visualize e gerencie todas as habilidades</p>
+                </div>
+                    <div class="search-box">
+                    <input type="text" id="search-habilidades" placeholder="Buscar habilidade...">
+                    <i class="fas fa-search"></i>
+                </div>
+        </div>
+                <div class="card-content">
+                    <div class="habilidades-grid" id="habilidades-grid">
+                        {% if habilidades and habilidades|length > 0 %}
+                        {% for habilidade in habilidades %}
+                        <div class="habilidade-card">
+                            <div class="habilidade-header">
+                                <div class="habilidade-codigo">
+                                <span class="codigo-badge">{{ habilidade.codigo }}</span>
+                                </div>
+                                <div class="habilidade-actions">
+                                    <button class="action-btn edit-btn" title="Editar habilidade" onclick="editarHabilidadeById('{{ habilidade.id }}')">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="action-btn delete-btn" title="Excluir habilidade" onclick="excluirHabilidadeById('{{ habilidade.id }}')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="habilidade-info">
+                                <div class="habilidade-meta">
+                                    <div class="meta-item">
+                                        <i class="fas fa-book"></i>
+                                        <span>{{ habilidade.componente }}</span>
+                                    </div>
+                                    <div class="meta-item">
+                                        <i class="fas fa-graduation-cap"></i>
+                                        <span>{{ habilidade.ano }}º ANO</span>
+                                    </div>
+                                </div>
+                                
+                                <div class="habilidade-description">
+                                    {{ habilidade.descricao }}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% endif %}
+            </div>
+
+                    <div class="empty-state" id="empty-state" {% if habilidades and habilidades|length > 0 %}style="display: none;"{% endif %}>
+                <div class="empty-icon">
+                            <i class="fas fa-brain"></i>
+        </div>
+                <h3>Nenhuma habilidade cadastrada</h3>
+                <p>Comece cadastrando uma nova habilidade ou importe um arquivo Excel</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+            <!-- Botão Voltar -->
+    <div class="back-section">
+        <a href="/dashboard" class="btn btn-back">
+            <i class="fas fa-arrow-left"></i>
+            Voltar ao Dashboard
+        </a>
+    </div>
+    </div>
+
+<!-- Modal de Edição de Habilidade -->
+<div id="editHabilidadeModal" class="modal-overlay" style="display: none;">
+    <div class="modal-container">
+        <div class="modal-header">
+            <h2><i class="fas fa-edit"></i> Editar Habilidade</h2>
+            <button class="modal-close" onclick="closeEditHabilidadeModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-content">
+            <form id="editHabilidadeForm" class="modern-form">
+                <input type="hidden" id="editHabilidadeId">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editCodigo">Código BNCC *</label>
+                        <input type="text" id="editCodigo" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editComponente">Componente *</label>
+                        <select id="editComponente" required>
+                            <option value="">Selecione...</option>
+                            <option value="Matemática">Matemática</option>
+                            <option value="Língua Portuguesa">Língua Portuguesa</option>
+                            <option value="Ciências">Ciências</option>
+                            <option value="História">História</option>
+                            <option value="Geografia">Geografia</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editAno">Ano *</label>
+                        <select id="editAno" required>
+                            <option value="">Selecione...</option>
+                            <option value="1">1º ano</option>
+                            <option value="2">2º ano</option>
+                            <option value="3">3º ano</option>
+                            <option value="4">4º ano</option>
+                            <option value="5">5º ano</option>
+                            <option value="6">6º ano</option>
+                            <option value="7">7º ano</option>
+                            <option value="8">8º ano</option>
+                            <option value="9">9º ano</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group full-width">
+                        <label for="editDescricao">Descrição da Habilidade *</label>
+                        <textarea id="editDescricao" rows="4" required placeholder="Descreva a habilidade conforme a BNCC"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeEditHabilidadeModal()">
+                        <i class="fas fa-times"></i>
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                        Salvar Alterações
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Confirmação de Exclusão -->
+<div id="deleteHabilidadeModal" class="modal-overlay" style="display: none;">
+    <div class="modal-container">
+        <div class="modal-header">
+            <h2><i class="fas fa-trash-alt"></i> Confirmar Exclusão</h2>
+            <button class="modal-close" onclick="closeDeleteHabilidadeModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="modal-content">
+            <p class="text-center mb-4">Tem certeza que deseja excluir esta habilidade?</p>
+            <p class="text-center text-muted small">Esta ação não pode ser desfeita e pode afetar questões já cadastradas.</p>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" onclick="closeDeleteHabilidadeModal()">
+                <i class="fas fa-times"></i>
+                Cancelar
+            </button>
+            <button type="button" class="btn btn-danger" id="confirmDeleteHabilidadeBtn">
+                <i class="fas fa-trash"></i>
+                Excluir Habilidade
+            </button>
+        </div>
+    </div>
+</div>
+
+    <style>
+        /* Habilidades Styles - Seguindo padrão do Dashboard */
+        .habilidades-container {
+        padding: 0;
+            max-width: 100%;
+        }
+
+        .page-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 2rem 1.5rem;
+            margin: -1.5rem -1.5rem 2rem -1.5rem;
+            border-radius: 0 0 20px 20px;
+    }
+
+    .header-content {
+            text-align: center;
+            margin-bottom: 2rem;
+    }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 0 0 0.5rem 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+            gap: 1rem;
+        }
+
+        .page-header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin: 0;
+        }
+
+        .header-stats {
+        display: flex;
+        justify-content: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+    }
+
+    .stat-item {
+        text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+            padding: 1rem 1.2rem;
+            min-width: 110px;
+    }
+
+    .stat-number {
+        display: block;
+            font-size: 2rem;
+        font-weight: 700;
+        line-height: 1;
+            margin-bottom: 0.25rem;
+    }
+
+    .stat-label {
+        font-size: 0.9rem;
+            opacity: 0.8;
+        text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Actions Section */
+        .actions-section {
+        margin-bottom: 2rem;
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .action-card {
+            background: white;
+        border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+        .action-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+        }
+
+        .card-header {
+            background: var(--gray-light);
+            padding: 1.5rem;
+            border-bottom: 1px solid #e1e8ed;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--primary);
+        border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .card-title {
+            flex: 1;
+        }
+
+        .card-title h2 {
+            font-size: 1.3rem;
+            color: var(--primary-dark);
+            margin: 0 0 0.25rem 0;
+        }
+
+        .card-title p {
+            color: #666;
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        .card-content {
+            padding: 1.5rem;
+        }
+
+        /* File Upload */
+        .file-upload-area {
+            margin-bottom: 1rem;
+        }
+
+        .file-upload-label {
+        display: flex;
+        align-items: center;
+            gap: 0.75rem;
+            background: var(--gray-light);
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            padding: 1.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+            color: var(--primary-dark);
+            font-weight: 500;
+        }
+
+        .file-upload-label:hover {
+            border-color: var(--primary);
+            background: #f8f9fa;
+        }
+
+        .file-upload-label i {
+        font-size: 1.5rem;
+        color: var(--primary);
+    }
+
+        #arquivo-excel {
+            display: none;
+        }
+
+    .upload-actions {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+        /* Form Styles */
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: var(--primary-dark);
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 0.75rem;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            text-align: center;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-outline {
+            background: transparent;
+        color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .btn-back {
+            background: var(--gray-light);
+            color: var(--primary-dark);
+            border: 1px solid #e1e8ed;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-block {
+        width: 100%;
+        }
+
+        /* Form buttons */
+        .form-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+        font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-1px);
+        }
+
+        /* Sistema de Notificações Toast */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            background: white;
+        border-radius: 12px;
+            padding: 16px 20px;
+            min-width: 300px;
+            max-width: 400px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            border-left: 4px solid;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transform: translateX(100%);
+            opacity: 0;
+        transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            border-left-color: #28a745;
+        }
+
+        .toast.error {
+            border-left-color: #dc3545;
+        }
+
+        .toast.warning {
+            border-left-color: #ffc107;
+        }
+
+        .toast.info {
+            border-left-color: #17a2b8;
+        }
+
+        .toast-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+        display: flex;
+        align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        .toast.success .toast-icon {
+            background: #28a745;
+        }
+
+        .toast.error .toast-icon {
+            background: #dc3545;
+        }
+
+        .toast.warning .toast-icon {
+            background: #ffc107;
+        }
+
+        .toast.info .toast-icon {
+            background: #17a2b8;
+        }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-title {
+            font-weight: 600;
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 2px;
+        }
+
+        .toast-message {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            font-size: 18px;
+            color: #999;
+            cursor: pointer;
+            padding: 0;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .toast-close:hover {
+            color: #666;
+        }
+
+        .toast-progress {
+        position: absolute;
+            bottom: 0;
+        left: 0;
+            height: 3px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 0 0 12px 12px;
+            animation: toast-progress 4s linear forwards;
+        }
+
+        @keyframes toast-progress {
+            from { width: 100%; }
+            to { width: 0%; }
+        }
+
+        /* Responsividade dos toasts */
+        @media (max-width: 768px) {
+            .toast-container {
+                top: 10px;
+                right: 10px;
+                left: 10px;
+            }
+
+            .toast {
+                min-width: auto;
+                max-width: none;
+            }
+        }
+
+        /* Search Box */
+        .search-box {
+            position: relative;
+            margin-left: auto;
+        }
+
+        .search-box input {
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            border: 2px solid #e1e8ed;
+            border-radius: 25px;
+            width: 250px;
+            font-size: 1rem;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+        }
+
+        /* List Section */
+        .list-section {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .list-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+                 /* Habilidades Grid */
+         .habilidades-grid {
+             display: grid;
+             grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+             gap: 1.5rem;
+         }
+
+         .habilidade-card {
+             background: white;
+        border-radius: 15px;
+             border: 2px solid #e1e8ed;
+             padding: 1.5rem;
+             transition: all 0.3s ease;
+             position: relative;
+             overflow: hidden;
+         }
+
+         .habilidade-card:hover {
+             transform: translateY(-3px);
+             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+             border-color: var(--primary);
+         }
+
+         .habilidade-header {
+             display: flex;
+             justify-content: space-between;
+             align-items: flex-start;
+             margin-bottom: 1rem;
+         }
+
+         .habilidade-codigo {
+             flex: 1;
+         }
+
+         .codigo-badge {
+             background: linear-gradient(135deg, var(--primary), #457d97);
+             color: white;
+             padding: 0.5rem 1rem;
+             border-radius: 25px;
+        font-size: 0.9rem;
+             font-weight: 700;
+             text-transform: uppercase;
+             letter-spacing: 0.5px;
+             display: inline-block;
+    }
+
+         .habilidade-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+         .action-btn {
+             width: 40px;
+             height: 40px;
+            border: none;
+             border-radius: 10px;
+            cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+             transition: all 0.3s ease;
+             font-size: 1rem;
+    }
+
+    .edit-btn {
+             background: rgba(52, 168, 83, 0.1);
+             color: #34a853;
+             border: 1px solid rgba(52, 168, 83, 0.2);
+        }
+
+    .delete-btn {
+             background: rgba(234, 67, 53, 0.1);
+             color: #ea4335;
+             border: 1px solid rgba(234, 67, 53, 0.2);
+        }
+
+         .action-btn:hover {
+            transform: translateY(-2px);
+             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .edit-btn:hover {
+             background: #34a853;
+        color: white;
+             border-color: #34a853;
+    }
+
+    .delete-btn:hover {
+             background: #ea4335;
+        color: white;
+             border-color: #ea4335;
+         }
+
+         .habilidade-info {
+             space-y: 1rem;
+         }
+
+         .habilidade-meta {
+             display: flex;
+             gap: 1.5rem;
+             margin-bottom: 1rem;
+             flex-wrap: wrap;
+         }
+
+         .meta-item {
+             display: flex;
+             align-items: center;
+             gap: 0.5rem;
+             color: #666;
+             font-size: 0.9rem;
+             font-weight: 500;
+         }
+
+         .meta-item i {
+             color: var(--primary);
+             width: 16px;
+         }
+
+         .habilidade-description {
+             color: #333;
+             line-height: 1.6;
+             font-size: 0.95rem;
+             text-align: justify;
+             background: #f8f9fa;
+             padding: 1rem;
+             border-radius: 10px;
+             border-left: 4px solid var(--primary);
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+             color: #666;
+         }
+         
+         .table-container {
+             min-height: 200px;
+    }
+
+    .empty-icon {
+        width: 80px;
+        height: 80px;
+            background: var(--gray-light);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        color: var(--primary);
+            font-size: 2rem;
+    }
+
+    .empty-state h3 {
+        font-size: 1.5rem;
+            margin: 0 0 0.5rem 0;
+            color: var(--primary-dark);
+    }
+
+        /* Back Section */
+    .back-section {
+        text-align: center;
+        margin-top: 2rem;
+    }
+
+    /* Modal Overlay Animado */
+    .modal-overlay {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(30, 41, 59, 0.8); /* Overlay mais escuro */
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: all 0.3s ease;
+    }
+
+    .modal-overlay.active {
+        display: flex !important;
+        opacity: 1;
+    }
+
+    .modal-container {
+        background: white;
+        border-radius: 18px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        width: 95%;
+        max-width: 600px;
+        max-height: 90vh;
+        overflow-y: auto;
+        padding: 0;
+        transform: translateY(-50px) scale(0.9);
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .modal-overlay.active .modal-container {
+        transform: translateY(0) scale(1);
+    }
+
+    .modal-header {
+        background: linear-gradient(135deg, var(--primary), #457d97);
+        color: white;
+        padding: 1.5rem 2rem;
+        border-radius: 18px 18px 0 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal-header h2 {
+        margin: 0;
+        font-size: 1.4rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .modal-content {
+        padding: 2rem;
+    }
+
+    .modal-footer {
+        padding: 1.5rem 2rem;
+        border-top: 1px solid #e1e8ed;
+        display: flex;
+        gap: 1rem;
+        justify-content: flex-end;
+    }
+
+    .modern-form .form-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .modern-form .form-group.full-width {
+        grid-column: 1 / -1;
+    }
+
+    .modern-form .form-group label {
+        font-weight: 600;
+        color: var(--primary-dark);
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+        display: block;
+    }
+
+    .modern-form .form-group input,
+    .modern-form .form-group select,
+    .modern-form .form-group textarea {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        border: 2px solid #e1e8ed;
+        border-radius: 10px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: #fafbfc;
+    }
+
+    .modern-form .form-group input:focus,
+    .modern-form .form-group select:focus,
+    .modern-form .form-group textarea:focus {
+        outline: none;
+        border-color: var(--primary);
+        background: white;
+        box-shadow: 0 0 0 3px rgba(52, 122, 226, 0.1);
+    }
+
+    /* Botão de fechar mais visível */
+    .modal-close {
+        background: rgba(255,255,255,0.2);
+        border: none;
+        font-size: 1.5rem;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        color: white;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-close:hover { 
+        background: rgba(255,255,255,0.3);
+        transform: scale(1.1);
+    }
+
+    /* Botão de perigo para exclusão */
+    .btn-danger {
+        background: #dc3545;
+        color: white;
+        border: none;
+    }
+
+    .btn-danger:hover {
+        background: #c82333;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+    }
+
+    /* Classes utilitárias */
+    .text-center {
+        text-align: center;
+    }
+
+    .mb-4 {
+        margin-bottom: 1.5rem;
+    }
+
+    .text-muted {
+        color: #6c757d;
+    }
+
+    .small {
+        font-size: 0.875rem;
+    }
+
+    /* Responsividade dos modais */
+    @media (max-width: 768px) {
+        .modal-container {
+            width: 95%;
+            margin: 1rem;
+        }
+
+        .modal-header {
+            padding: 1rem 1.5rem;
+        }
+
+        .modal-content {
+            padding: 1.5rem;
+        }
+
+        .modal-footer {
+            padding: 1rem 1.5rem;
+            flex-direction: column;
+        }
+
+        .modern-form .form-row {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+    }
+
+        /* Feedback Message */
+        .feedback-message {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            border-radius: 6px;
+        font-weight: 500;
+        }
+
+        .feedback-message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback-message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .feedback-message.loading {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+                 /* Responsive Design */
+         @media (max-width: 768px) {
+             .page-header {
+                 padding: 1.5rem 1rem;
+                 margin: -1rem -1rem 1.5rem -1rem;
+             }
+
+             .page-header h1 {
+                 font-size: 2rem;
+                 flex-direction: column;
+                 gap: 0.5rem;
+             }
+
+             .header-stats {
+                 flex-direction: column;
+                 gap: 1rem;
+             }
+
+             .actions-grid {
+                 grid-template-columns: 1fr;
+             }
+
+             .card-header {
+                 flex-direction: column;
+                 align-items: flex-start;
+             }
+
+             .search-box {
+                 margin-left: 0;
+                 width: 100%;
+             }
+
+             .search-box input {
+                 width: 100%;
+             }
+
+             .form-row {
+                 grid-template-columns: 1fr;
+             }
+
+             .upload-actions {
+            flex-direction: column;
+        }
+
+             .habilidades-grid {
+            grid-template-columns: 1fr;
+                 gap: 1rem;
+             }
+
+             .habilidade-card {
+                 padding: 1rem;
+             }
+
+             .habilidade-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+             .habilidade-actions {
+                 align-self: flex-end;
+             }
+
+             .habilidade-meta {
+                 gap: 1rem;
+             }
+         }
+
+         @media (max-width: 480px) {
+             .stat-item {
+                 padding: 0.75rem 0.8rem;
+                 min-width: 90px;
+             }
+
+             .stat-number {
+                 font-size: 1.5rem;
+             }
+
+             .habilidades-grid {
+                 grid-template-columns: 1fr;
+             }
+
+             .codigo-badge {
+                 font-size: 0.8rem;
+                 padding: 0.4rem 0.8rem;
+             }
+
+             .action-btn {
+                 width: 35px;
+                 height: 35px;
+                 font-size: 0.9rem;
+             }
+
+             .meta-item {
+                 font-size: 0.8rem;
+             }
+
+             .habilidade-description {
+                 font-size: 0.9rem;
+                 padding: 0.8rem;
+        }
+        }
+    </style>
+
+    <script src="/js/skills.js"></script>
+    <script>
+        // Sistema de Notificações Toast
+        function showToast(type, title, message) {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+
+            // Criar elemento toast
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            // Definir ícones para cada tipo
+            const icons = {
+                success: '✓',
+                error: '✕',
+                warning: '⚠',
+                info: 'ℹ'
+            };
+
+            toast.innerHTML = `
+                <div class="toast-icon">
+                    ${icons[type] || 'ℹ'}
+                </div>
+                <div class="toast-content">
+                    <div class="toast-title">${title}</div>
+                    <div class="toast-message">${message}</div>
+                </div>
+                <button class="toast-close" onclick="closeToast(this)">×</button>
+                <div class="toast-progress"></div>
+            `;
+
+            // Adicionar ao container
+            container.appendChild(toast);
+
+            // Mostrar toast com animação
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 100);
+
+            // Auto remover após 4 segundos
+            setTimeout(() => {
+                closeToast(toast);
+            }, 4000);
+        }
+
+        function closeToast(element) {
+            const toast = element.classList ? element : element.closest('.toast');
+            if (toast) {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }
+        }
+
+        // Funções de conveniência para diferentes tipos de toast
+        function showSuccess(title, message = '') {
+            showToast('success', title, message);
+        }
+
+        function showError(title, message = '') {
+            showToast('error', title, message);
+        }
+
+        function showWarning(title, message = '') {
+            showToast('warning', title, message);
+        }
+
+        function showInfo(title, message = '') {
+            showToast('info', title, message);
+        }
+
+    // Inicialização da página
+    document.addEventListener('DOMContentLoaded', function() {
+            console.log('Inicializando página de habilidades...');
+            
+            // Verificar se há dados nos cards do template
+            const cards = document.querySelectorAll('.habilidade-card');
+            
+            if (cards.length > 0) {
+                console.log(`${cards.length} habilidades carregadas do template`);
+        carregarEstatisticas();
+            } else {
+                console.log('Nenhuma habilidade encontrada, tentando API...');
+                buscarHabilidadesAPI();
+            }
+            
+            // Configurar funcionalidades da página
+        configurarBusca();
+        configurarFormulario();
+        configurarImportacao();
+    });
+
+        // Função para buscar habilidades via API como fallback
+        async function buscarHabilidadesAPI() {
+            try {
+                console.log('Buscando habilidades via API...');
+                const response = await fetch('/api/habilidades');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.habilidades && data.habilidades.length > 0) {
+                    console.log(`API retornou ${data.habilidades.length} habilidades`);
+                    preencherCards(data.habilidades);
+                    carregarEstatisticas();
+                } else {
+                    console.log('API não retornou habilidades');
+                    mostrarEmptyState();
+                }
+            } catch (error) {
+                console.error('Erro ao buscar habilidades via API:', error);
+                mostrarEmptyState();
+            }
+        }
+
+        // Função para mostrar estado vazio
+        function mostrarEmptyState() {
+            const emptyState = document.querySelector('#empty-state');
+            if (emptyState) {
+                emptyState.style.display = 'block';
+            }
+        }
+
+        // Função para preencher os cards dinamicamente
+        function preencherCards(habilidades) {
+            const grid = document.querySelector('#habilidades-grid');
+            const emptyState = document.querySelector('#empty-state');
+            const container = document.querySelector('.card-content');
+            
+            // Se não existe grid, criar
+            let targetGrid = grid;
+            if (!targetGrid && container) {
+                targetGrid = document.createElement('div');
+                targetGrid.className = 'habilidades-grid';
+                targetGrid.id = 'habilidades-grid';
+                container.appendChild(targetGrid);
+            }
+            
+            if (!targetGrid) {
+                console.error('Não foi possível encontrar ou criar o grid');
+                return;
+            }
+            
+            // Limpar grid
+            targetGrid.innerHTML = '';
+            
+            // Adicionar habilidades
+            habilidades.forEach(habilidade => {
+                const card = document.createElement('div');
+                card.className = 'habilidade-card';
+                card.innerHTML = `
+                    <div class="habilidade-header">
+                        <div class="habilidade-codigo">
+                            <span class="codigo-badge">${habilidade.codigo || 'N/A'}</span>
+                        </div>
+                        <div class="habilidade-actions">
+                            <button class="action-btn edit-btn" title="Editar habilidade" onclick="editarHabilidadeById('${habilidade.id}')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="action-btn delete-btn" title="Excluir habilidade" onclick="excluirHabilidadeById('${habilidade.id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="habilidade-info">
+                        <div class="habilidade-meta">
+                            <div class="meta-item">
+                                <i class="fas fa-book"></i>
+                                <span>${habilidade.componente || 'N/A'}</span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-graduation-cap"></i>
+                                <span>${habilidade.ano || 'N'}º ANO</span>
+                            </div>
+                        </div>
+                        
+                        <div class="habilidade-description">
+                            ${habilidade.descricao || 'Sem descrição'}
+                        </div>
+                    </div>
+                `;
+                targetGrid.appendChild(card);
+            });
+            
+            // Esconder empty state se houver dados
+            if (emptyState && habilidades.length > 0) {
+                emptyState.style.display = 'none';
+            }
+            
+            // Mostrar grid se houver dados
+            if (habilidades.length > 0) {
+                targetGrid.style.display = 'grid';
+            }
+        }
+
+    // Função para carregar estatísticas
+    function carregarEstatisticas() {
+            const habilidades = document.querySelectorAll('.habilidade-card');
+        let matematicaCount = 0;
+        let portuguesCount = 0;
+        let cienciasCount = 0;
+            let totalCount = habilidades.length;
+
+            habilidades.forEach(card => {
+                const metaItems = card.querySelectorAll('.meta-item span');
+                if (metaItems.length > 0) {
+                    const componente = metaItems[0].textContent.trim();
+            if (componente === 'Matemática') {
+                matematicaCount++;
+                    } else if (componente === 'Língua Portuguesa' || componente === 'Português') {
+                portuguesCount++;
+                    } else if (componente === 'Ciências') {
+                cienciasCount++;
+                    }
+            }
+        });
+
+            // Atualizar contadores no header
+            animarContador('total-habilidades', totalCount);
+        animarContador('matematica-count', matematicaCount);
+        animarContador('portugues-count', portuguesCount);
+        animarContador('ciencias-count', cienciasCount);
+    }
+
+    // Função para animar contadores
+    function animarContador(elementId, valorFinal) {
+        const elemento = document.getElementById(elementId);
+        if (!elemento) return;
+        
+        const valorInicial = 0;
+        const duracao = 1000;
+        const incremento = valorFinal / (duracao / 16);
+        
+        let valorAtual = valorInicial;
+        
+        const timer = setInterval(() => {
+            valorAtual += incremento;
+            if (valorAtual >= valorFinal) {
+                elemento.textContent = valorFinal;
+                clearInterval(timer);
+            } else {
+                elemento.textContent = Math.floor(valorAtual);
+            }
+        }, 16);
+    }
+
+    // Configurar busca
+    function configurarBusca() {
+        const searchInput = document.getElementById('search-habilidades');
+        if (searchInput) {
+            searchInput.addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase();
+                    const cards = document.querySelectorAll('.habilidade-card');
+                    
+                    cards.forEach(card => {
+                        const codigo = card.querySelector('.codigo-badge').textContent.toLowerCase();
+                        const componente = card.querySelector('.meta-item span').textContent.toLowerCase();
+                        const descricao = card.querySelector('.habilidade-description').textContent.toLowerCase();
+                    
+                    if (codigo.includes(searchTerm) || 
+                        componente.includes(searchTerm) || 
+                        descricao.includes(searchTerm)) {
+                            card.style.display = '';
+                    } else {
+                            card.style.display = 'none';
+                    }
+                });
+            });
+        }
+    }
+
+    // Configurar formulário
+    function configurarFormulario() {
+        const form = document.getElementById('habilidade-form');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                salvarHabilidade();
+            });
+        }
+    }
+
+    // Configurar importação
+    function configurarImportacao() {
+    const formImportar = document.getElementById('form-importar-excel');
+    const feedbackImport = document.getElementById('import-feedback');
+        
+        if (formImportar) {
+            formImportar.addEventListener('submit', function(e) {
+                e.preventDefault();
+                importarExcel(feedbackImport);
+            });
+        }
+    }
+
+    // Função para importar Excel
+    function importarExcel(feedbackElement) {
+        feedbackElement.innerHTML = '';
+        const arquivo = document.getElementById('arquivo-excel').files[0];
+        
+        if (!arquivo) {
+                mostrarFeedback(feedbackElement, 'Selecione um arquivo Excel', 'error');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('arquivo', arquivo);
+        
+            mostrarFeedback(feedbackElement, 'Processando arquivo...', 'loading');
+        
+        fetch('/api/habilidades/importar', {
+            method: 'POST',
+            body: formData
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                    mostrarFeedback(feedbackElement, data.message, 'success');
+                setTimeout(() => window.location.reload(), 1500);
+            } else {
+                    mostrarFeedback(feedbackElement, data.error || 'Erro ao importar.', 'error');
+            }
+        })
+        .catch(() => {
+                mostrarFeedback(feedbackElement, 'Erro ao processar requisição.', 'error');
+        });
+    }
+    
+    // Busca de Habilidades BNCC
+    const btnBuscarBNCC = document.getElementById('btn-buscar-bncc');
+    if (btnBuscarBNCC) {
+    btnBuscarBNCC.addEventListener('click', async function() {
+        const componente = document.getElementById('componente').value;
+        const ano = document.getElementById('ano').value;
+        
+        if (!componente || !ano) {
+                    showWarning('Atenção', 'Selecione o componente curricular e o ano para buscar as habilidades');
+            return;
+        }
+        
+        try {
+            const response = await fetch(`/api/habilidades/bncc?componente=${encodeURIComponent(componente)}&ano=${ano}`);
+            const data = await response.json();
+            
+            if (data.success && data.habilidades && data.habilidades.length > 0) {
+                mostrarHabilidadesBNCC(data.habilidades, componente, ano);
+            } else {
+                        showInfo('Informação', 'Nenhuma habilidade encontrada para os critérios selecionados');
+            }
+        } catch (error) {
+            console.error('Erro ao buscar habilidades:', error);
+                    showError('Erro', 'Erro ao buscar habilidades da BNCC. Tente novamente mais tarde');
+        }
+    });
+    }
+
+        // Função para salvar habilidade individual (criar ou editar)
+        async function salvarHabilidade() {
+            const formData = new FormData(document.getElementById('habilidade-form'));
+            const habilidade = {
+                codigo: formData.get('codigo'),
+                componente: formData.get('componente'),
+                ano: formData.get('ano'),
+                descricao: formData.get('descricao')
+            };
+
+            try {
+                let response;
+                let mensagemSucesso;
+                
+                // Verificar se estamos editando ou criando
+                if (window.habilidadeEditando) {
+                    // Modo edição - usar PUT
+                    response = await fetch(`/api/habilidades/${window.habilidadeEditando}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(habilidade)
+                    });
+                    mensagemSucesso = 'Habilidade atualizada com sucesso!';
+                } else {
+                    // Modo criação - usar POST
+                    response = await fetch('/api/habilidades', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(habilidade)
+                    });
+                    mensagemSucesso = 'Habilidade criada com sucesso!';
+                }
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showSuccess('Sucesso!', mensagemSucesso);
+                    
+                    // Resetar formulário e estado
+                    document.getElementById('habilidade-form').reset();
+                    window.habilidadeEditando = null;
+                    
+                    // Restaurar texto do botão e esconder cancelar
+                    const submitBtn = document.querySelector('#habilidade-form button[type="submit"]');
+                    if (submitBtn) {
+                        submitBtn.innerHTML = '<i class="fas fa-save"></i> Salvar Habilidade';
+                    }
+                    
+                    const cancelBtn = document.getElementById('btn-cancelar-edicao');
+                    if (cancelBtn) {
+                        cancelBtn.style.display = 'none';
+                    }
+                    
+                    // Recarregar página para mostrar mudanças
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    showError('Erro', data.error || 'Erro ao salvar habilidade');
+                }
+            } catch (error) {
+                console.error('Erro ao salvar habilidade:', error);
+                showError('Erro', 'Erro ao salvar habilidade. Tente novamente');
+            }
+        }
+
+        // Funções antigas removidas - usando agora editarHabilidadeById e excluirHabilidadeById
+
+        // Funções otimizadas que trabalham com ID diretamente
+        async function editarHabilidadeById(habilidadeId) {
+            try {
+                // Primeiro, buscar a habilidade pelo ID
+                const response = await fetch('/api/habilidades');
+                const data = await response.json();
+                
+                if (!data.habilidades) {
+                    showError('Erro', 'Não foi possível buscar as habilidades');
+                    return;
+                }
+                
+                const habilidade = data.habilidades.find(h => h.id == habilidadeId);
+                if (!habilidade) {
+                    showError('Erro', 'Habilidade não encontrada');
+                    return;
+                }
+                
+                // Preencher o modal com os dados da habilidade
+                document.getElementById('editHabilidadeId').value = habilidade.id;
+                document.getElementById('editCodigo').value = habilidade.codigo;
+                document.getElementById('editComponente').value = habilidade.componente;
+                document.getElementById('editAno').value = habilidade.ano;
+                document.getElementById('editDescricao').value = habilidade.descricao;
+                
+                // Exibir o modal com animação
+                const modal = document.getElementById('editHabilidadeModal');
+                modal.style.display = 'flex';
+                setTimeout(() => {
+                    modal.classList.add('active');
+                }, 10);
+                
+            } catch (error) {
+                console.error('Erro ao carregar habilidade para edição:', error);
+                showError('Erro', 'Erro ao carregar dados da habilidade para edição.');
+            }
+        }
+
+        async function excluirHabilidadeById(habilidadeId) {
+            // Armazenar ID da habilidade a ser excluída
+            window.habilidadeToDelete = habilidadeId;
+            
+            // Exibir modal de confirmação
+            const modal = document.getElementById('deleteHabilidadeModal');
+            modal.style.display = 'flex';
+            setTimeout(() => {
+                modal.classList.add('active');
+            }, 10);
+        }
+
+        async function confirmarExclusaoHabilidade() {
+            if (!window.habilidadeToDelete) return;
+            
+            try {
+                // Fazer a requisição DELETE diretamente com o ID
+                const deleteResponse = await fetch(`/api/habilidades/${window.habilidadeToDelete}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const result = await deleteResponse.json();
+                
+                if (result.success) {
+                    closeDeleteHabilidadeModal();
+                    showSuccess('Sucesso!', 'Habilidade excluída com sucesso');
+                    // Recarregar a página para atualizar a lista após um delay
+                    setTimeout(() => window.location.reload(), 1500);
+                } else {
+                    showError('Erro', result.error || 'Erro ao excluir habilidade');
+                }
+                
+            } catch (error) {
+                console.error('Erro ao excluir habilidade:', error);
+                showError('Erro', 'Erro ao excluir habilidade. Tente novamente');
+            }
+        }
+
+        // Função para cancelar edição (mantida para compatibilidade)
+        function cancelarEdicao() {
+            // Resetar formulário principal (apenas para criação)
+            document.getElementById('habilidade-form').reset();
+            
+            // Limpar estado de edição
+            window.habilidadeEditando = null;
+            
+            // Restaurar texto do botão
+            const submitBtn = document.querySelector('#habilidade-form button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.innerHTML = '<i class="fas fa-save"></i> Salvar Habilidade';
+            }
+            
+            // Esconder botão cancelar
+            const cancelBtn = document.getElementById('btn-cancelar-edicao');
+            if (cancelBtn) {
+                cancelBtn.style.display = 'none';
+            }
+        }
+
+        // Função auxiliar para mostrar feedback
+        function mostrarFeedback(elemento, mensagem, tipo) {
+            elemento.className = `feedback-message ${tipo}`;
+            const icone = tipo === 'success' ? 'fas fa-check-circle' : 
+                         tipo === 'error' ? 'fas fa-exclamation-circle' : 
+                         'fas fa-spinner fa-spin';
+            elemento.innerHTML = `<i class="${icone}"></i> ${mensagem}`;
+        }
+
+        // Funções de controle dos modais
+        function closeEditHabilidadeModal() {
+            const modal = document.getElementById('editHabilidadeModal');
+            modal.classList.remove('active');
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300);
+        }
+
+        function closeDeleteHabilidadeModal() {
+            const modal = document.getElementById('deleteHabilidadeModal');
+            modal.classList.remove('active');
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300);
+            window.habilidadeToDelete = null;
+        }
+
+        // Função para salvar habilidade editada no modal
+        async function salvarHabilidadeModal() {
+            const habilidadeId = document.getElementById('editHabilidadeId').value;
+            const habilidade = {
+                codigo: document.getElementById('editCodigo').value,
+                componente: document.getElementById('editComponente').value,
+                ano: document.getElementById('editAno').value,
+                descricao: document.getElementById('editDescricao').value
+            };
+
+            try {
+                const response = await fetch(`/api/habilidades/${habilidadeId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(habilidade)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    closeEditHabilidadeModal();
+                    showSuccess('Sucesso!', 'Habilidade atualizada com sucesso!');
+                    
+                    // Recarregar página para mostrar mudanças
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    showError('Erro', data.error || 'Erro ao atualizar habilidade');
+                }
+            } catch (error) {
+                console.error('Erro ao atualizar habilidade:', error);
+                showError('Erro', 'Erro ao atualizar habilidade. Tente novamente');
+            }
+        }
+
+        // Placeholder para função de mostrar habilidades BNCC
+        function mostrarHabilidadesBNCC(habilidades, componente, ano) {
+            // Esta função seria implementada com um modal mais simples
+            showInfo('Habilidades BNCC', `Encontradas ${habilidades.length} habilidades para ${componente} - ${ano}º ano`);
+        }
+
+        // Configurar eventos dos modais
+        document.addEventListener('DOMContentLoaded', function() {
+            // Event listener para o formulário de edição
+            const editForm = document.getElementById('editHabilidadeForm');
+            if (editForm) {
+                editForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    salvarHabilidadeModal();
+                });
+            }
+
+            // Event listener para confirmar exclusão
+            const confirmDeleteBtn = document.getElementById('confirmDeleteHabilidadeBtn');
+            if (confirmDeleteBtn) {
+                confirmDeleteBtn.addEventListener('click', confirmarExclusaoHabilidade);
+            }
+        });
+    </script>
+{% endblock %}

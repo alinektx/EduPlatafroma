@@ -1,0 +1,1585 @@
+{% extends "base.html" %}
+
+{% block title %}Gestão de Turmas{% endblock %}
+
+{% block content %}
+    <div class="turmas-container">
+        <!-- Sistema de Notificações Toast -->
+        <div id="toast-container" class="toast-container"></div>
+        
+        <!-- Header da página -->
+        <header class="page-header">
+                <div class="header-content">
+                <h1><i class="fas fa-users"></i> Gestão de Turmas</h1>
+                    <p>Sistema inteligente para organizar turmas escolares</p>
+                </div>
+            <div class="header-stats">
+                    <div class="stat-item">
+                        <span class="stat-number" id="total-turmas">0</span>
+                        <span class="stat-label">Turmas</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="total-escolas">0</span>
+                        <span class="stat-label">Escolas</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="total-turnos">0</span>
+                        <span class="stat-label">Turnos</span>
+                    </div>
+                </div>
+            </header>
+
+        <!-- Seções de ações -->
+        <section class="actions-section">
+            <div class="actions-grid">
+                <!-- Card de Cadastro -->
+                <div class="action-card form-card">
+                <div class="card-header">
+                        <div class="card-icon">
+                        <i class="fas fa-plus-circle"></i>
+                    </div>
+                        <div class="card-title">
+                        <h2>Nova Turma</h2>
+                        <p>Adicione uma nova turma ao sistema</p>
+                    </div>
+                </div>
+
+                    <div class="card-content">
+                <form id="form-turma" class="modern-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="nome">Nome da Turma *</label>
+                                    <input type="text" id="nome" name="nome" required placeholder="Digite o nome da turma">
+                            </div>
+                                <div class="form-group">
+                                    <label for="ano">Ano *</label>
+                                    <select id="ano" name="ano" required>
+                                        <option value="">Selecione o ano</option>
+                                        <option value="1">1º ano</option>
+                                        <option value="2">2º ano</option>
+                                        <option value="3">3º ano</option>
+                                        <option value="4">4º ano</option>
+                                        <option value="5">5º ano</option>
+                                        <option value="6">6º ano</option>
+                                        <option value="7">7º ano</option>
+                                        <option value="8">8º ano</option>
+                                        <option value="9">9º ano</option>
+                                    </select>
+                        </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="escola">Escola *</label>
+                                <select id="escola" name="escola" required>
+                                    <option value="">Selecione a escola</option>
+                                </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="turno">Turno *</label>
+                                <select id="turno" name="turno" required>
+                                    <option value="">Selecione o turno</option>
+                                    <option value="Manhã">Manhã</option>
+                                    <option value="Tarde">Tarde</option>
+                                    <option value="Noite">Noite</option>
+                                </select>
+                        </div>
+                    </div>
+
+                            <div class="form-buttons">
+                                <button type="submit" class="btn btn-primary btn-block">
+                            <i class="fas fa-save"></i>
+                            Cadastrar Turma
+                    </button>
+                            </div>
+                </form>
+                    </div>
+                </div>
+            </div>
+            </section>
+
+        <!-- Lista de Turmas -->
+        <section class="list-section">
+            <div class="list-card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-list"></i>
+                    </div>
+                    <div class="card-title">
+                        <h2>Turmas Cadastradas</h2>
+                        <p>Visualize e gerencie todas as turmas</p>
+                    </div>
+                    <div class="search-box">
+                        <input type="text" id="search-turmas" placeholder="Buscar turma...">
+                        <i class="fas fa-search"></i>
+                    </div>
+                </div>
+                <div class="card-content">
+
+                <div class="turmas-grid" id="turmas-container">
+                    <!-- As turmas serão carregadas dinamicamente -->
+                </div>
+
+                <!-- Mensagem quando não há turmas -->
+                <div class="empty-state" id="empty-state" style="display: none;">
+                    <div class="empty-icon">
+                            <i class="fas fa-users"></i>
+                    </div>
+                    <h3>Nenhuma turma cadastrada</h3>
+                    <p>Comece adicionando a primeira turma ao sistema</p>
+                </div>
+                        </div>
+                    </div>
+                </section>
+
+        <!-- Botão Voltar -->
+        <div class="back-section">
+            <a href="/dashboard" class="btn btn-back">
+                <i class="fas fa-arrow-left"></i>
+                Voltar ao Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Modal de Edição de Turma -->
+    <div id="editTurmaModal" class="modal-overlay" style="display: none;">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2><i class="fas fa-edit"></i> Editar Turma</h2>
+                <button class="modal-close" onclick="closeEditTurmaModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-content">
+                <form id="editTurmaForm" class="modern-form">
+                    <input type="hidden" id="editTurmaId">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editNome">Nome da Turma *</label>
+                            <input type="text" id="editNome" required placeholder="Digite o nome da turma">
+                        </div>
+                        <div class="form-group">
+                            <label for="editAno">Ano *</label>
+                            <select id="editAno" required>
+                                <option value="">Selecione o ano</option>
+                                <option value="1">1º ano</option>
+                                <option value="2">2º ano</option>
+                                <option value="3">3º ano</option>
+                                <option value="4">4º ano</option>
+                                <option value="5">5º ano</option>
+                                <option value="6">6º ano</option>
+                                <option value="7">7º ano</option>
+                                <option value="8">8º ano</option>
+                                <option value="9">9º ano</option>
+                            </select>
+                    </div>
+                        </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="editEscola">Escola *</label>
+                            <select id="editEscola" required>
+                                <option value="">Selecione a escola</option>
+                            </select>
+                            </div>
+                        <div class="form-group">
+                            <label for="editTurno">Turno *</label>
+                            <select id="editTurno" required>
+                                <option value="">Selecione o turno</option>
+                                <option value="Manhã">Manhã</option>
+                                <option value="Tarde">Tarde</option>
+                                <option value="Noite">Noite</option>
+                            </select>
+                            </div>
+                        </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" onclick="closeEditTurmaModal()">
+                            <i class="fas fa-times"></i>
+                            Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i>
+                            Salvar Alterações
+                    </button>
+                </div>
+            </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Confirmação de Exclusão -->
+    <div id="deleteTurmaModal" class="modal-overlay" style="display: none;">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2><i class="fas fa-trash-alt"></i> Confirmar Exclusão</h2>
+                <button class="modal-close" onclick="closeDeleteTurmaModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-content">
+                <p class="text-center mb-4">Tem certeza que deseja excluir esta turma?</p>
+                <p class="text-center text-muted small">Esta ação não pode ser desfeita e pode afetar dados relacionados.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeDeleteTurmaModal()">
+                    <i class="fas fa-times"></i>
+                    Cancelar
+                </button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteTurmaBtn">
+                    <i class="fas fa-trash"></i>
+                    Excluir Turma
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6C63FF;
+            --primary-dark: #4D44DB;
+            --secondary: #FFFFFD;
+            --accent: #6C63FF;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --dark: #1a1a2e;
+            --light: #FFFFFD;
+            --glass: rgba(108, 99, 255, 0.25);
+            --glass-border: rgba(108, 99, 255, 0.18);
+            --shadow: 0 8px 32px 0 rgba(108, 99, 255, 0.37);
+            --text-primary: #1a1a2e;
+            --text-secondary: #6c757d;
+            --gray-light: #f8f9fa;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f8f9fa;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .turmas-container {
+            padding: 0;
+            max-width: 100%;
+        }
+
+        /* Header da página */
+        .page-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 2rem 1.5rem;
+            margin: -1.5rem -1.5rem 2rem -1.5rem;
+            border-radius: 0 0 20px 20px;
+        }
+
+        .header-content {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 0 0 0.5rem 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .page-header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin: 0;
+        }
+
+        .header-stats {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 1rem 1.5rem;
+            min-width: 120px;
+        }
+
+        .stat-number {
+            display: block;
+            font-size: 2rem;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Actions Section */
+        .actions-section {
+            margin-bottom: 2rem;
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .action-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .action-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+        }
+
+        .card-header {
+            background: var(--gray-light);
+            padding: 1.5rem;
+            border-bottom: 1px solid #e1e8ed;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--primary);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .card-title {
+            flex: 1;
+        }
+
+        .card-title h2 {
+            font-size: 1.3rem;
+            color: var(--primary-dark);
+            margin: 0 0 0.25rem 0;
+        }
+
+        .card-title p {
+            color: #666;
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        .card-content {
+            padding: 1.5rem;
+        }
+
+        /* Search Box */
+        .search-box {
+            position: relative;
+            margin-left: auto;
+        }
+
+        .search-box input {
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            border: 2px solid #e1e8ed;
+            border-radius: 25px;
+            width: 250px;
+            font-size: 1rem;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+        }
+
+        /* List Section */
+        .list-section {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .list-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        /* Form Styles */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-row.single-column {
+            grid-template-columns: 1fr;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: var(--primary-dark);
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 2px solid #e1e8ed;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #fafbfc;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.1);
+        }
+
+        .form-group select {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.75rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+            min-height: 48px;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            text-align: center;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-back {
+            background: var(--gray-light);
+            color: var(--primary-dark);
+            border: 1px solid #e1e8ed;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-block {
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 12px;
+        }
+
+        .form-buttons {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e1e8ed;
+        }
+
+        .back-section {
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        /* Cards de Turmas */
+        .turmas-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .turma-card {
+            background: white;
+            border-radius: 15px;
+            border: 2px solid #e1e8ed;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .turma-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            border-color: var(--primary);
+        }
+
+        .turma-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .turma-codigo {
+            flex: 1;
+        }
+
+        .codigo-badge {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-block;
+        }
+
+        .turma-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .edit-btn {
+            background: rgba(52, 168, 83, 0.1);
+            color: #34a853;
+            border: 1px solid rgba(52, 168, 83, 0.2);
+        }
+
+        .delete-btn {
+            background: rgba(234, 67, 53, 0.1);
+            color: #ea4335;
+            border: 1px solid rgba(234, 67, 53, 0.2);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .edit-btn:hover {
+            background: #34a853;
+            color: white;
+            border-color: #34a853;
+        }
+
+        .delete-btn:hover {
+            background: #ea4335;
+            color: white;
+            border-color: #ea4335;
+        }
+
+        .turma-info {
+            space-y: 1rem;
+        }
+
+        .turma-meta {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #666;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .meta-item i {
+            color: var(--primary);
+            width: 16px;
+        }
+
+        .turma-description {
+            color: #333;
+            line-height: 1.6;
+            font-size: 0.95rem;
+            text-align: justify;
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 10px;
+            border-left: 4px solid var(--primary);
+            font-weight: 600;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+
+        .empty-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--gray-light);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            color: var(--primary);
+            font-size: 2rem;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin: 0 0 0.5rem 0;
+            color: var(--primary-dark);
+        }
+
+        /* Modal Overlay Animado */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(30, 41, 59, 0.8);
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            display: flex !important;
+            opacity: 1;
+        }
+
+        .modal-container {
+            background: white;
+            border-radius: 18px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            width: 95%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 0;
+            transform: translateY(-50px) scale(0.9);
+            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .modal-overlay.active .modal-container {
+            transform: translateY(0) scale(1);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 1.5rem 2rem;
+            border-radius: 18px 18px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .modal-content {
+            padding: 2rem;
+        }
+
+        .modal-footer {
+            padding: 1.5rem 2rem;
+            border-top: 1px solid #e1e8ed;
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .modal-close {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            font-size: 1.5rem;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover { 
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.1);
+        }
+
+        /* Toast System */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            background: white;
+            border-radius: 12px;
+            padding: 16px 20px;
+            min-width: 300px;
+            max-width: 400px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            border-left: 4px solid;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transform: translateX(100%);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .toast.success { border-left-color: #28a745; }
+        .toast.error { border-left-color: #dc3545; }
+        .toast.warning { border-left-color: #ffc107; }
+        .toast.info { border-left-color: #17a2b8; }
+
+        .toast-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        .toast.success .toast-icon { background: #28a745; }
+        .toast.error .toast-icon { background: #dc3545; }
+        .toast.warning .toast-icon { background: #ffc107; }
+        .toast.info .toast-icon { background: #17a2b8; }
+
+        /* Classes utilitárias */
+        .text-center { text-align: center; }
+        .mb-4 { margin-bottom: 1.5rem; }
+        .text-muted { color: #6c757d; }
+        .small { font-size: 0.875rem; }
+        .mt-3 { margin-top: 1rem; }
+
+        /* Alertas para dependências */
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border: 1px solid transparent;
+        }
+
+        .alert-warning {
+            background: #fff3cd;
+            border-color: #ffeaa7;
+            color: #856404;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+
+        .dependency-item {
+            background: #f8f9fa;
+            padding: 0.75rem;
+            border-radius: 6px;
+            margin: 0.5rem 0;
+            border-left: 3px solid #6c757d;
+        }
+
+        .dependency-check {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .page-header {
+                padding: 1.5rem 1rem;
+                margin: -1rem -1rem 1.5rem -1rem;
+            }
+
+            .page-header h1 {
+                font-size: 2rem;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .header-stats {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .actions-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .card-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .search-box {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .search-box input {
+                width: 100%;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            gap: 1rem;
+            }
+
+            .btn-block {
+                max-width: 100%;
+                padding: 0.875rem 1.5rem;
+            font-size: 1rem;
+            }
+
+            .form-buttons {
+                padding-top: 1rem;
+                margin-top: 1rem;
+            }
+
+            .turmas-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .turma-meta {
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            .turma-card {
+                padding: 1rem;
+            }
+
+            .turma-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .turma-actions {
+                align-self: flex-end;
+            }
+            
+            .toast-container {
+                top: 10px;
+                right: 10px;
+                left: 10px;
+            }
+
+            .toast {
+                min-width: auto;
+                max-width: none;
+            }
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .modern-header h1 {
+                font-size: 2rem;
+            }
+
+            .stats-bar {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .card-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .search-wrapper {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .search-wrapper input {
+                width: 100%;
+            }
+
+            .componentes-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .turmas-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+
+    <!-- Script turma.js integrado inline -->
+    <script>
+        // Variável global para armazenar escolas
+        let escolasGlobal = [];
+
+        // Função para buscar nome da escola pelo ID
+        function getEscolaNome(escolaId) {
+            if (!escolaId) return 'Escola não definida';
+            
+            const escola = escolasGlobal.find(e => e.id == escolaId);
+            return escola ? escola.nome : `Escola ID: ${escolaId}`;
+        }
+
+        // Sistema de Notificações Toast
+        function showToast(type, title, message) {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            const icons = {
+                success: '✓',
+                error: '✕',
+                warning: '⚠',
+                info: 'ℹ'
+            };
+
+            toast.innerHTML = `
+                <div class="toast-icon">
+                    ${icons[type] || 'ℹ'}
+                </div>
+                <div class="toast-content">
+                    <div class="toast-title">${title}</div>
+                    <div class="toast-message">${message}</div>
+                </div>
+                <button class="toast-close" onclick="closeToast(this)">×</button>
+                <div class="toast-progress"></div>
+            `;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 100);
+
+            setTimeout(() => {
+                closeToast(toast);
+            }, 4000);
+        }
+
+        function closeToast(element) {
+            const toast = element.classList ? element : element.closest('.toast');
+            if (toast) {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }
+        }
+
+        function showSuccess(title, message = '') {
+            showToast('success', title, message);
+        }
+
+        function showError(title, message = '') {
+            showToast('error', title, message);
+        }
+
+        function showWarning(title, message = '') {
+            showToast('warning', title, message);
+        }
+
+        function showInfo(title, message = '') {
+            showToast('info', title, message);
+        }
+
+        // Função para abrir modal de edição
+        function openEditModal(id, nome, ano, escola, turno) {
+            document.getElementById('editTurmaId').value = id;
+            document.getElementById('editNome').value = nome;
+            document.getElementById('editAno').value = ano;
+            document.getElementById('editEscola').value = escola;
+            document.getElementById('editTurno').value = turno;
+            
+            const modal = document.getElementById('editTurmaModal');
+            modal.style.display = 'flex';
+            setTimeout(() => {
+                modal.classList.add('active');
+            }, 10);
+        }
+
+        // Função para fechar modal de edição
+        function closeEditTurmaModal() {
+            const modal = document.getElementById('editTurmaModal');
+            modal.classList.remove('active');
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300);
+        }
+
+        // Função para abrir modal de exclusão
+        async function openDeleteModal(id, nome) {
+            window.turmaToDelete = id;
+            
+            // Verificar dependências antes de mostrar o modal
+            try {
+                const response = await fetch(`/api/turmas/${id}/dependencias`);
+                if (response.ok) {
+                    const deps = await response.json();
+                    
+                    let mensagem = `Tem certeza que deseja excluir a turma <strong>${nome}</strong>?`;
+                    
+                    if (!deps.pode_excluir) {
+                        mensagem = `<div class="alert alert-warning">
+                            <strong>⚠️ Atenção!</strong><br>
+                            A turma <strong>${nome}</strong> possui dados vinculados:
+                        </div>`;
+                        
+                        if (deps.alunos.count > 0) {
+                            mensagem += `<div class="dependency-item">
+                                📚 <strong>${deps.alunos.count} aluno(s):</strong><br>
+                                <small>${deps.alunos.exemplos.slice(0, 3).join(', ')}${deps.alunos.count > 3 ? '...' : ''}</small>
+                            </div>`;
+                        }
+                        
+                        if (deps.questoes.count > 0) {
+                            mensagem += `<div class="dependency-item">
+                                ❓ <strong>${deps.questoes.count} questão(ões):</strong><br>
+                                <small>${deps.questoes.exemplos.slice(0, 2).join(', ')}${deps.questoes.count > 2 ? '...' : ''}</small>
+                            </div>`;
+                        }
+                        
+                        mensagem += `<div class="alert alert-danger mt-3">
+                            <strong>❌ Não é possível excluir esta turma!</strong><br>
+                            <small>Remova primeiro os dados vinculados ou transfira-os para outra turma.</small>
+                        </div>`;
+                        
+                        // Desabilitar botão de exclusão
+                        document.getElementById('confirmDeleteTurmaBtn').disabled = true;
+                        document.getElementById('confirmDeleteTurmaBtn').textContent = 'Não é possível excluir';
+                    } else {
+                        mensagem += `<div class="alert alert-success">
+                            <strong>✅ Turma pode ser excluída com segurança!</strong><br>
+                            <small>Não há dados vinculados a esta turma.</small>
+                        </div>`;
+                        
+                        // Habilitar botão de exclusão
+                        document.getElementById('confirmDeleteTurmaBtn').disabled = false;
+                        document.getElementById('confirmDeleteTurmaBtn').innerHTML = '<i class="fas fa-trash"></i> Excluir Turma';
+                    }
+                    
+                    document.querySelector('#deleteTurmaModal .modal-content').innerHTML = `
+                        <div class="dependency-check">
+                            ${mensagem}
+                        </div>
+                    `;
+                } else {
+                    // Fallback se não conseguir verificar dependências
+                    document.querySelector('#deleteTurmaModal .modal-content p').innerHTML = 
+                        `Tem certeza que deseja excluir a turma <strong>${nome}</strong>?`;
+                }
+            } catch (error) {
+                console.error('Erro ao verificar dependências:', error);
+                // Fallback
+                document.querySelector('#deleteTurmaModal .modal-content p').innerHTML = 
+                    `Tem certeza que deseja excluir a turma <strong>${nome}</strong>?`;
+            }
+            
+            const modal = document.getElementById('deleteTurmaModal');
+            modal.style.display = 'flex';
+            setTimeout(() => {
+                modal.classList.add('active');
+            }, 10);
+        }
+
+        // Função para fechar modal de exclusão
+        function closeDeleteTurmaModal() {
+            const modal = document.getElementById('deleteTurmaModal');
+            modal.classList.remove('active');
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300);
+            window.turmaToDelete = null;
+        }
+
+        // Fechar modal clicando fora
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal-overlay')) {
+                if (e.target.id === 'editTurmaModal') {
+                    closeEditTurmaModal();
+                } else if (e.target.id === 'deleteTurmaModal') {
+                    closeDeleteTurmaModal();
+                }
+            }
+        });
+
+        // Função para carregar turmas
+        async function carregarTurmas() {
+            try {
+                const response = await fetch('/api/turmas');
+                if (response.ok) {
+                    let turmas = [];
+                    try {
+                        const responseText = await response.text();
+                        if (responseText && responseText.trim().startsWith('{') || responseText.trim().startsWith('[')) {
+                            const data = JSON.parse(responseText);
+                            turmas = data.turmas || data || [];
+                        }
+                    } catch (jsonError) {
+                        console.error('Erro ao fazer parse da resposta:', jsonError);
+                        showError('Erro', 'Resposta inválida do servidor');
+                        return;
+                    }
+                    renderizarTurmas(turmas);
+                } else {
+                    console.error('Erro ao carregar turmas:', response.status);
+                    showError('Erro', `Não foi possível carregar as turmas (${response.status})`);
+                }
+            } catch (error) {
+                console.error('Erro ao carregar turmas:', error);
+                showError('Erro', 'Erro de conexão ao carregar turmas');
+            }
+        }
+
+        // Função para renderizar turmas
+        function renderizarTurmas(turmas) {
+            console.log('Turmas recebidas:', turmas); // Debug
+            console.log('Escolas disponíveis:', escolasGlobal); // Debug
+            
+            const turmasContainer = document.getElementById('turmas-container');
+            const emptyState = document.getElementById('empty-state');
+            
+            if (!turmas || turmas.length === 0) {
+                turmasContainer.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            turmasContainer.style.display = 'grid';
+            emptyState.style.display = 'none';
+            turmasContainer.innerHTML = '';
+            
+            turmas.forEach(turma => {
+                const turmaCard = document.createElement('div');
+                turmaCard.className = 'turma-card';
+                turmaCard.setAttribute('data-id', turma.id);
+                
+                const turmaCodigo = `TUR${String(turma.id).padStart(3, '0')}`;
+                
+                // Buscar nome da escola pelo ID
+                const escolaNome = getEscolaNome(turma.escola_id || turma.escola);
+                
+                turmaCard.innerHTML = `
+                    <div class="turma-header">
+                        <div class="turma-codigo">
+                            <span class="codigo-badge">${turmaCodigo}</span>
+                        </div>
+                        <div class="turma-actions">
+                            <button class="action-btn edit-btn" onclick="openEditModal(${turma.id}, '${turma.nome}', '${turma.ano}', '${turma.escola_id || turma.escola}', '${turma.turno}')" title="Editar turma">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="action-btn delete-btn" onclick="openDeleteModal(${turma.id}, '${turma.nome}')" title="Excluir turma">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="turma-info">
+                        <div class="turma-meta">
+                            <div class="meta-item">
+                                <i class="fas fa-graduation-cap"></i>
+                                <span>${turma.ano}º ano</span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-school"></i>
+                                <span>${escolaNome}</span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-clock"></i>
+                                <span>${turma.turno}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="turma-description">
+                            ${turma.nome}
+                        </div>
+                    </div>
+                `;
+                
+                turmasContainer.appendChild(turmaCard);
+            });
+        }
+
+        // Função para carregar escolas
+        async function carregarEscolas() {
+            try {
+                const response = await fetch('/api/escolas');
+                if (response.ok) {
+                    const data = await response.json();
+                    const escolas = data.escolas || data || [];
+                    escolasGlobal = escolas; // Armazenar globalmente
+                    preencherSelectEscolas(escolas);
+                }
+            } catch (error) {
+                console.error('Erro ao carregar escolas:', error);
+            }
+        }
+
+        // Função para preencher selects de escola
+        function preencherSelectEscolas(escolas) {
+            const selects = ['escola', 'editEscola'];
+            
+            selects.forEach(selectId => {
+                const select = document.getElementById(selectId);
+                if (select) {
+                    // Limpar opções existentes (exceto a primeira)
+                    while (select.children.length > 1) {
+                        select.removeChild(select.lastChild);
+                    }
+                    
+                    escolas.forEach(escola => {
+                        const option = document.createElement('option');
+                        option.value = escola.id;
+                        option.textContent = escola.nome;
+                        select.appendChild(option);
+                    });
+                }
+            });
+        }
+
+        // Função para salvar nova turma
+        async function salvarTurma() {
+            const turma = {
+                nome: document.getElementById('nome').value,
+                ano: document.getElementById('ano').value,
+                escola_id: document.getElementById('escola').value,
+                turno: document.getElementById('turno').value
+            };
+
+            try {
+                const response = await fetch('/api/turmas', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(turma)
+                });
+                
+                if (response.ok) {
+                    showSuccess('Sucesso!', 'Turma cadastrada com sucesso!');
+                    document.getElementById('form-turma').reset();
+                    carregarTurmas();
+                } else {
+                    // Tentar obter mensagem de erro
+                    let errorMessage = 'Erro ao cadastrar turma';
+                    try {
+                        const responseText = await response.text();
+                        if (responseText && responseText.trim().startsWith('{')) {
+                            const errorData = JSON.parse(responseText);
+                            errorMessage = errorData.error || errorMessage;
+                        } else {
+                            errorMessage = `Erro no servidor (${response.status})`;
+                        }
+                    } catch (jsonError) {
+                        errorMessage = `Erro no servidor (${response.status})`;
+                    }
+                    showError('Erro', errorMessage);
+                }
+            } catch (error) {
+                console.error('Erro ao cadastrar turma:', error);
+                showError('Erro', 'Erro de conexão ao cadastrar turma. Tente novamente');
+            }
+        }
+
+        // Função para salvar turma editada
+        async function salvarTurmaModal() {
+            const turmaId = document.getElementById('editTurmaId').value;
+            const turma = {
+                nome: document.getElementById('editNome').value,
+                ano: document.getElementById('editAno').value,
+                escola_id: document.getElementById('editEscola').value,
+                turno: document.getElementById('editTurno').value
+            };
+
+            try {
+                const response = await fetch(`/api/turmas/${turmaId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(turma)
+                });
+                
+                if (response.ok) {
+                    closeEditTurmaModal();
+                    showSuccess('Sucesso!', 'Turma atualizada com sucesso!');
+                    carregarTurmas();
+                } else {
+                    // Tentar obter mensagem de erro
+                    let errorMessage = 'Erro ao atualizar turma';
+                    try {
+                        const responseText = await response.text();
+                        if (responseText && responseText.trim().startsWith('{')) {
+                            const errorData = JSON.parse(responseText);
+                            errorMessage = errorData.error || errorMessage;
+                        } else {
+                            errorMessage = `Erro no servidor (${response.status})`;
+                        }
+                    } catch (jsonError) {
+                        errorMessage = `Erro no servidor (${response.status})`;
+                    }
+                    showError('Erro', errorMessage);
+                }
+            } catch (error) {
+                console.error('Erro ao atualizar turma:', error);
+                showError('Erro', 'Erro de conexão ao atualizar turma. Tente novamente');
+            }
+        }
+
+        // Função para confirmar exclusão
+        async function confirmarExclusaoTurma() {
+            if (!window.turmaToDelete) return;
+            
+            // Verificar se o botão está habilitado
+            const confirmBtn = document.getElementById('confirmDeleteTurmaBtn');
+            if (confirmBtn.disabled) {
+                showWarning('Operação não permitida', 'Esta turma possui dados vinculados e não pode ser excluída');
+                return;
+            }
+            
+            try {
+                const deleteResponse = await fetch(`/api/turmas/${window.turmaToDelete}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                // Verificar se a resposta é ok primeiro
+                if (deleteResponse.ok) {
+                    // Tentar obter JSON apenas se a resposta for ok
+                    let result = { success: true };
+                    try {
+                        const responseText = await deleteResponse.text();
+                        if (responseText && responseText.trim().startsWith('{')) {
+                            result = JSON.parse(responseText);
+                        }
+                    } catch (jsonError) {
+                        // Se não conseguir fazer parse, considerar como sucesso
+                        console.log('Resposta não é JSON válido, mas status é OK');
+                    }
+                    
+                    closeDeleteTurmaModal();
+                    showSuccess('Sucesso!', 'Turma excluída com sucesso');
+                    carregarTurmas();
+                } else {
+                    // Erro do servidor - tentar obter mensagem de erro
+                    let errorMessage = 'Erro ao excluir turma';
+                    try {
+                        const responseText = await deleteResponse.text();
+                        if (responseText && responseText.trim().startsWith('{')) {
+                            const errorData = JSON.parse(responseText);
+                            errorMessage = errorData.error || errorMessage;
+                        } else {
+                            // Se for HTML, usar mensagem genérica
+                            errorMessage = `Erro no servidor (${deleteResponse.status})`;
+                        }
+                    } catch (jsonError) {
+                        errorMessage = `Erro no servidor (${deleteResponse.status})`;
+                    }
+                    
+                    showError('Erro', errorMessage);
+                }
+                
+            } catch (error) {
+                console.error('Erro ao excluir turma:', error);
+                showError('Erro', 'Erro de conexão ao excluir turma. Tente novamente');
+            }
+        }
+
+        // Função para atualizar estatísticas
+        function updateStats() {
+            const totalTurmas = document.getElementById('total-turmas');
+            const totalEscolas = document.getElementById('total-escolas');
+            const totalTurnos = document.getElementById('total-turnos');
+            
+            if (totalTurmas) totalTurmas.textContent = '0';
+            if (totalEscolas) totalEscolas.textContent = '0';
+            if (totalTurnos) totalTurnos.textContent = '0';
+        }
+
+        // Função para buscar turmas
+        document.getElementById('search-turmas').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const turmaCards = document.querySelectorAll('.turma-card');
+            
+            turmaCards.forEach(card => {
+                const nome = card.querySelector('.turma-description').textContent.toLowerCase();
+                if (nome.includes(searchTerm)) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+
+        // Configurar eventos dos modais
+        document.addEventListener('DOMContentLoaded', async function() {
+            updateStats();
+            await carregarEscolas(); // Carregar escolas primeiro
+            carregarTurmas(); // Depois carregar turmas
+            
+            // Event listener para o formulário principal
+            const form = document.getElementById('form-turma');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    salvarTurma();
+                });
+            }
+            
+            // Event listener para o formulário de edição
+            const editForm = document.getElementById('editTurmaForm');
+            if (editForm) {
+                editForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    salvarTurmaModal();
+                });
+            }
+
+            // Event listener para confirmar exclusão
+            const confirmDeleteBtn = document.getElementById('confirmDeleteTurmaBtn');
+            if (confirmDeleteBtn) {
+                confirmDeleteBtn.addEventListener('click', confirmarExclusaoTurma);
+            }
+        });
+    </script>
+{% endblock %}

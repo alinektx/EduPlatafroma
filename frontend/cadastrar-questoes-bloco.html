@@ -1,0 +1,1470 @@
+{% extends "base.html" %}
+
+{% block title %}Cadastrar Questões do Bloco{% endblock %}
+
+
+
+{% block content %}
+    <div class="questoes-bloco-container">
+        <!-- Sistema de Notificações Toast -->
+        <div id="toast-container" class="toast-container"></div>
+        
+        <!-- Header da página -->
+        <header class="page-header">
+            <div class="header-content">
+                <h1><i class="fas fa-tasks"></i> Selecionar Questões</h1>
+                <p>Configure as questões do bloco de forma inteligente</p>
+            </div>
+            <div class="breadcrumb-section">
+                <div class="breadcrumb">
+                    <span>Caderno: {{ caderno.titulo }} - Bloco: {{ bloco.ordem }} ({{ bloco.componente }})</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Seção de Informações -->
+        <section class="actions-section">
+            <div class="actions-grid">
+                <div class="action-card info-card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-info-circle"></i>
+                        </div>
+                        <div class="card-title">
+                            <h2>Informações do Bloco</h2>
+                            <p>Detalhes e progresso da seleção</p>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <div class="info-icon">
+                                    <i class="fas fa-graduation-cap"></i>
+                                </div>
+                                <div class="info-content">
+                                    <span class="info-label">Série</span>
+                                    <span class="info-value">{{ serie }}º ano</span>
+                                </div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-icon">
+                                    <i class="fas fa-book-open"></i>
+                                </div>
+                                <div class="info-content">
+                                    <span class="info-label">Componente</span>
+                                    <span class="info-value">{{ componente }}</span>
+                                </div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-icon">
+                                    <i class="fas fa-tasks"></i>
+                                </div>
+                                <div class="info-content">
+                                    <span class="info-label">Total necessário</span>
+                                    <span class="info-value">{{ bloco.total_questoes }} questões</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="progress-section">
+                            <div class="progress-label">
+                                <span id="questoes-selecionadas">0</span> / {{ bloco.total_questoes }} questões selecionadas
+                            </div>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar" id="progresso-selecao" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card de Filtros -->
+                <div class="action-card filtros-card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-filter"></i>
+                        </div>
+                        <div class="card-title">
+                            <h2>Filtros</h2>
+                            <p>Refine a busca por questões</p>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <form>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="filtro-habilidade">Habilidade *</label>
+                                    <select id="filtro-habilidade" name="habilidade">
+                                        <option value="">Todas as habilidades</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-buttons">
+                                <button type="button" id="btn-filtrar" class="btn btn-primary btn-block">
+                                    <i class="fas fa-search"></i>
+                                    Filtrar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Lista de questões disponíveis -->
+        <section class="list-section">
+            <div class="list-card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-list"></i>
+                    </div>
+                    <div class="card-title">
+                        <h2>Questões Disponíveis</h2>
+                        <p>Selecione as questões para o bloco</p>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <div class="questoes-container" id="questoes-disponiveis">
+                        <div class="loading">
+                            <i class="fas fa-spinner fa-spin"></i> Carregando questões...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Questões selecionadas -->
+        <section class="list-section">
+            <div class="list-card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="card-title">
+                        <h2>Questões Selecionadas</h2>
+                        <p>Questões que serão adicionadas ao bloco</p>
+                    </div>
+                    <div class="badge-counter">
+                        <span id="badge-selecionadas">0</span>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <div class="questoes-container" id="questoes-selecionadas-container">
+                        <div class="msg-vazio">Nenhuma questão selecionada</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Questões já salvas no bloco -->
+        <section class="list-section" id="card-questoes-salvas">
+            <div class="list-card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-archive"></i>
+                    </div>
+                    <div class="card-title">
+                        <h2>Questões Salvas no Bloco</h2>
+                        <p>Questões já configuradas</p>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <div class="table-container">
+                        <table id="tabela-questoes-salvas" class="modern-table">
+                            <thead>
+                                <tr>
+                                    <th style="width: 60px;">Ordem</th>
+                                    <th>Enunciado</th>
+                                    <th style="width: 80px;">Resposta</th>
+                                    <th style="width: 60px;">Ano</th>
+                                    <th style="width: 120px;">Habilidade</th>
+                                    <th style="width: 150px;">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Preenchido por JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Ações finais -->
+        <div class="acoes-finais">
+            <button id="btn-salvar" class="btn btn-primary" disabled>
+                <i class="fas fa-save"></i>
+                Salvar Seleção
+            </button>
+            <a href="/cadernos" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i>
+                Voltar
+            </a>
+        </div>
+    </div>
+
+<style>
+        /* Questões Bloco Styles - Seguindo padrão do Habilidades */
+        .questoes-bloco-container {
+            padding: 0;
+            max-width: 100%;
+        }
+
+        .page-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 2rem 1.5rem;
+            margin: -1.5rem -1.5rem 2rem -1.5rem;
+            border-radius: 0 0 20px 20px;
+        }
+
+        .header-content {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 0 0 0.5rem 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .page-header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin: 0;
+        }
+
+        .breadcrumb-section {
+            display: flex;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .breadcrumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 0.75rem 1.5rem;
+            color: white;
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        /* Sistema de Notificações Toast */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            background: white;
+            border-radius: 12px;
+            padding: 16px 20px;
+            min-width: 300px;
+            max-width: 400px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            border-left: 4px solid;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transform: translateX(100%);
+            opacity: 0;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            border-left-color: #28a745;
+        }
+
+        .toast.error {
+            border-left-color: #dc3545;
+        }
+
+        .toast.warning {
+            border-left-color: #ffc107;
+        }
+
+        .toast.info {
+            border-left-color: #17a2b8;
+        }
+
+        .toast-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        .toast.success .toast-icon {
+            background: #28a745;
+        }
+
+        .toast.error .toast-icon {
+            background: #dc3545;
+        }
+
+        .toast.warning .toast-icon {
+            background: #ffc107;
+        }
+
+        .toast.info .toast-icon {
+            background: #17a2b8;
+        }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-title {
+            font-weight: 600;
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 2px;
+        }
+
+        .toast-message {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            font-size: 18px;
+            color: #999;
+            cursor: pointer;
+            padding: 0;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .toast-close:hover {
+            color: #666;
+        }
+
+        .toast-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 0 0 12px 12px;
+            animation: toast-progress 4s linear forwards;
+        }
+
+        @keyframes toast-progress {
+            from { width: 100%; }
+            to { width: 0%; }
+        }
+
+        /* Actions Section */
+        .actions-section {
+            margin-bottom: 2rem;
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .action-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .action-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+        }
+
+        .card-header {
+            background: var(--gray-light);
+            padding: 1.5rem;
+            border-bottom: 1px solid #e1e8ed;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--primary);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .card-title {
+            flex: 1;
+        }
+
+        .card-title h2 {
+            font-size: 1.3rem;
+            color: var(--primary-dark);
+            margin: 0 0 0.25rem 0;
+        }
+
+        .card-title p {
+            color: #666;
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        .card-content {
+            padding: 1.5rem;
+        }
+
+        .badge-counter {
+            margin-left: auto;
+            background: var(--primary);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        /* Info Grid */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .info-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: transform 0.3s ease;
+        }
+
+        .info-item:hover {
+            transform: translateY(-2px);
+        }
+
+        .info-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .info-content {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-label {
+            font-size: 0.8rem;
+            color: #666;
+            margin-bottom: 0.1rem;
+        }
+
+        .info-value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--primary-dark);
+        }
+
+        /* Progress Section */
+        .progress-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1rem;
+        }
+
+        .progress-label {
+            text-align: center;
+            margin-bottom: 0.75rem;
+            font-weight: 600;
+            color: var(--primary-dark);
+            font-size: 1rem;
+        }
+
+        .progress-bar-container {
+            background: #e9ecef;
+            border-radius: 10px;
+            height: 15px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.3s ease;
+            position: relative;
+        }
+
+        /* Form Styles */
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: var(--primary-dark);
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 0.75rem;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            text-align: center;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .btn-back {
+            background: var(--gray-light);
+            color: var(--primary-dark);
+            border: 1px solid #e1e8ed;
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-block {
+            width: 100%;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Form buttons */
+        .form-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* List Section */
+        .list-section {
+            max-width: 1200px;
+            margin: 0 auto 2rem auto;
+        }
+
+        .list-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        /* Questões Container */
+        .questoes-container {
+            background: #f8f9fa;
+            border-radius: 10px;
+            min-height: 300px;
+            max-height: 500px;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+
+        .loading, .msg-vazio {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .loading i {
+            margin-right: 10px;
+            font-size: 1.3rem;
+        }
+
+        .questao-item {
+            background: white;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            position: relative;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+            border: 1px solid #e1e8ed;
+        }
+
+        .questao-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .questao-item.selecionada {
+            background: #e8f5e8;
+            border-left-color: var(--primary);
+        }
+
+        .questao-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            align-items: center;
+        }
+
+        .questao-titulo {
+            font-weight: 600;
+            color: var(--primary-dark);
+            font-size: 1rem;
+        }
+
+        .questao-habilidade {
+            color: var(--primary);
+            font-size: 0.8rem;
+            background: rgba(69, 125, 151, 0.1);
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+        }
+
+        .questao-enunciado {
+            margin-bottom: 1rem;
+            color: var(--primary-dark);
+            line-height: 1.6;
+        }
+
+        .questao-alternativas {
+            list-style-type: none;
+            padding-left: 0;
+            margin-bottom: 3rem;
+        }
+
+        .questao-alternativas li {
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border-left: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .questao-alternativas li.correta {
+            background: #d4edda;
+            border-left-color: #28a745;
+        }
+
+        .btn-questao {
+            position: absolute;
+            right: 1rem;
+            bottom: 1rem;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .btn-adicionar {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-remover {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-questao:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Tabela Moderna */
+        .table-container {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #e1e8ed;
+        }
+
+        .modern-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .modern-table th,
+        .modern-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e1e8ed;
+            vertical-align: top;
+        }
+
+        .modern-table th {
+            background: var(--primary);
+            color: white;
+            font-weight: 500;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+        }
+
+        .modern-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .btn-acao {
+            padding: 0.5rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 1rem;
+            margin: 0 2px;
+            background: none;
+        }
+
+        .btn-acao:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-remover-salva { 
+            color: #e74c3c; 
+        }
+        
+        .btn-up, .btn-down { 
+            color: var(--primary); 
+        }
+        
+        .btn-up:hover:not(:disabled) {
+            color: #28a745;
+            transform: translateY(-1px);
+        }
+        
+        .btn-down:hover:not(:disabled) {
+            color: #28a745;
+            transform: translateY(1px);
+        }
+        
+        .btn-remover-salva:hover:not(:disabled) {
+            color: #dc3545;
+        }
+        
+        .acoes-questao {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .resposta-correta {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 25px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        /* Ações Finais */
+        .acoes-finais {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            justify-content: center;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .page-header {
+                padding: 1.5rem 1rem;
+                margin: -1rem -1rem 1.5rem -1rem;
+            }
+
+            .page-header h1 {
+                font-size: 2rem;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .actions-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .card-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .acoes-finais {
+                flex-direction: column;
+            }
+
+            .questao-item {
+                padding-bottom: 4rem;
+            }
+
+            .btn-questao {
+                position: static;
+                margin-top: 1rem;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .questoes-container {
+                min-height: 200px;
+                max-height: 400px;
+            }
+        }
+    </style>
+
+    <script>
+        // Sistema de Notificações Toast
+        function showToast(type, title, message) {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            const icons = {
+                success: '✓',
+                error: '✕',
+                warning: '⚠',
+                info: 'ℹ'
+            };
+
+            toast.innerHTML = `
+                <div class="toast-icon">
+                    ${icons[type] || 'ℹ'}
+                </div>
+                <div class="toast-content">
+                    <div class="toast-title">${title}</div>
+                    <div class="toast-message">${message}</div>
+                </div>
+                <button class="toast-close" onclick="closeToast(this)">×</button>
+                <div class="toast-progress"></div>
+            `;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 100);
+
+            setTimeout(() => {
+                closeToast(toast);
+            }, 4000);
+        }
+
+        function closeToast(element) {
+            const toast = element.classList ? element : element.closest('.toast');
+            if (toast) {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }
+        }
+
+        function showSuccess(title, message = '') {
+            showToast('success', title, message);
+        }
+
+        function showError(title, message = '') {
+            showToast('error', title, message);
+        }
+
+        function showWarning(title, message = '') {
+            showToast('warning', title, message);
+        }
+
+        function showInfo(title, message = '') {
+            showToast('info', title, message);
+        }
+
+        // Aguardar carregamento do DOM
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM carregado, iniciando aplicação...');
+            
+            // Obter dados do template Jinja2
+            const blocoId = {{ bloco.id }};
+            const totalQuestoes = {{ bloco.total_questoes }};
+            
+            if (!blocoId || !totalQuestoes) {
+                console.error('Dados do bloco não encontrados');
+                showError('Erro', 'Dados do bloco não encontrados');
+                return;
+            }
+            
+            console.log('Bloco ID:', blocoId, 'Total questões:', totalQuestoes);
+            
+            // Verificar elementos DOM
+            const elementos = {
+                questoesDisponiveis: document.getElementById('questoes-disponiveis'),
+                questoesSelecionadasContainer: document.getElementById('questoes-selecionadas-container'),
+                badgeSelecionadas: document.getElementById('badge-selecionadas'),
+                questoesSelecionadasCount: document.getElementById('questoes-selecionadas'),
+                btnSalvar: document.getElementById('btn-salvar'),
+                progressoSelecao: document.getElementById('progresso-selecao'),
+                btnFiltrar: document.getElementById('btn-filtrar'),
+                filtroHabilidade: document.getElementById('filtro-habilidade')
+            };
+            
+            // Verificar se todos os elementos existem
+            for (const [nome, elemento] of Object.entries(elementos)) {
+                if (!elemento) {
+                    console.error(`Elemento ${nome} não encontrado`);
+                    showError('Erro', `Elemento ${nome} não encontrado na página`);
+                    return;
+                }
+            }
+            
+            console.log('Todos os elementos DOM encontrados');
+            
+            // Variáveis globais
+            let habilidades = [];
+            let questoes = [];
+            let questoesSelecionadas = [];
+            let questoesSalvasBloco = [];
+            
+            // Inicializar aplicação
+            init();
+            
+            function init() {
+                console.log('Inicializando aplicação...');
+                configurarEventListeners();
+                carregarHabilidades();
+                carregarQuestoesSalvas();
+                carregarQuestoes();
+            }
+            
+            function configurarEventListeners() {
+                elementos.btnFiltrar.addEventListener('click', renderizarQuestoesDisponiveis);
+                elementos.btnSalvar.addEventListener('click', salvarQuestoes);
+            }
+            
+            function carregarQuestoes() {
+                const questoesIds = {{ questoes_ids|tojson }};
+                
+                console.log('Questões IDs:', questoesIds);
+                
+                if (!questoesIds || !questoesIds.length) {
+                    console.log('Nenhuma questão disponível');
+                    elementos.questoesDisponiveis.innerHTML = '<div class="msg-vazio">Nenhuma questão disponível para este componente e série.</div>';
+                    return;
+                }
+                
+                elementos.questoesDisponiveis.innerHTML = '<div class="loading"><i class="fas fa-spinner fa-spin"></i> Carregando questões...</div>';
+                
+                const promises = questoesIds.map(id => 
+                    fetch(`/api/questoes/${id}`)
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error(`Erro ${response.status} ao carregar questão ${id}`);
+                            }
+                            return response.json();
+                        })
+                        .catch(error => {
+                            console.error(`Erro ao carregar questão ${id}:`, error);
+                            return null;
+                        })
+                );
+                
+                Promise.all(promises)
+                    .then(results => {
+                        questoes = results.filter(q => q !== null);
+                        console.log(`${questoes.length} questões carregadas com sucesso`);
+                        renderizarQuestoesDisponiveis();
+                    })
+                    .catch(error => {
+                        console.error('Erro geral ao carregar questões:', error);
+                        elementos.questoesDisponiveis.innerHTML = '<div class="msg-vazio">Erro ao carregar questões. Tente novamente.</div>';
+                    });
+            }
+            
+            function carregarHabilidades() {
+                const componente = '{{ componente }}';
+                const serie = '{{ serie }}';
+                
+                console.log('Carregando habilidades para:', componente, 'série:', serie);
+                
+                fetch(`/api/habilidades?componente=${encodeURIComponent(componente)}&ano=${serie}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        habilidades = data.habilidades || [];
+                        console.log(`${habilidades.length} habilidades carregadas`);
+                        
+                        elementos.filtroHabilidade.innerHTML = '<option value="">Todas as habilidades</option>';
+                        habilidades.forEach(h => {
+                            const option = document.createElement('option');
+                            option.value = h.id;
+                            option.textContent = `${h.codigo} - ${h.descricao.substring(0, 50)}...`;
+                            elementos.filtroHabilidade.appendChild(option);
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Erro ao carregar habilidades:', error);
+                    });
+            }
+            
+            function carregarQuestoesSalvas() {
+                fetch(`/api/cadernos/bloco/${blocoId}/questoes`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`Erro HTTP ${response.status}: ${response.statusText}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        questoesSalvasBloco = data.questoes || [];
+                        console.log(`${questoesSalvasBloco.length} questões já salvas no bloco`);
+                        renderizarTabelaQuestoesSalvas();
+                        atualizarBarraProgresso();
+                    })
+                    .catch(error => {
+                        console.error('Erro ao carregar questões salvas:', error);
+                        showError('Erro', 'Erro ao carregar questões salvas do bloco');
+                    });
+            }
+            
+            function renderizarQuestoesDisponiveis() {
+                if (!questoes.length) {
+                    elementos.questoesDisponiveis.innerHTML = '<div class="msg-vazio">Nenhuma questão disponível para este componente e série.</div>';
+                    return;
+                }
+                
+                const filtroHabilidade = elementos.filtroHabilidade.value;
+                
+                let questoesFiltradas = [...questoes];
+                if (filtroHabilidade) {
+                    questoesFiltradas = questoes.filter(q => q.habilidade_id == filtroHabilidade);
+                }
+                
+                const idsSelecionados = questoesSelecionadas.map(q => q.id);
+                const idsSalvos = questoesSalvasBloco.map(q => q.id);
+                questoesFiltradas = questoesFiltradas.filter(q => 
+                    !idsSelecionados.includes(q.id) && !idsSalvos.includes(q.id)
+                );
+                
+                if (!questoesFiltradas.length) {
+                    elementos.questoesDisponiveis.innerHTML = '<div class="msg-vazio">Nenhuma questão disponível com os filtros atuais.</div>';
+                    return;
+                }
+                
+                elementos.questoesDisponiveis.innerHTML = '';
+                questoesFiltradas.forEach(questao => {
+                    const questaoElement = criarElementoQuestao(questao, true);
+                    elementos.questoesDisponiveis.appendChild(questaoElement);
+                });
+            }
+            
+            function renderizarQuestoesSelecionadas() {
+                if (!questoesSelecionadas.length) {
+                    elementos.questoesSelecionadasContainer.innerHTML = '<div class="msg-vazio">Nenhuma questão selecionada</div>';
+                    return;
+                }
+                
+                elementos.questoesSelecionadasContainer.innerHTML = '';
+                questoesSelecionadas.forEach(questao => {
+                    const questaoElement = criarElementoQuestao(questao, false);
+                    elementos.questoesSelecionadasContainer.appendChild(questaoElement);
+                });
+            }
+            
+            function criarElementoQuestao(questao, paraAdicionar) {
+                const div = document.createElement('div');
+                div.className = 'questao-item';
+                div.dataset.id = questao.id;
+                
+                const habilidade = habilidades.find(h => h.id == questao.habilidade_id) || { codigo: 'N/A' };
+                
+                let html = `
+                    <div class="questao-header">
+                        <span class="questao-titulo">Questão #${questao.id}</span>
+                        <span class="questao-habilidade">${habilidade.codigo}</span>
+                    </div>
+                    <div class="questao-enunciado">${questao.enunciado}</div>
+                    <ul class="questao-alternativas">
+                `;
+                
+                if (questao.alternativas) {
+                    questao.alternativas.forEach((alt, index) => {
+                        const letra = String.fromCharCode(65 + index);
+                        html += `<li class="${alt.correta ? 'correta' : ''}">${letra}) ${alt.texto}</li>`;
+                    });
+                }
+                
+                html += '</ul>';
+                
+                if (paraAdicionar) {
+                    html += `<button class="btn-questao btn-adicionar" data-id="${questao.id}">
+                        <i class="fas fa-plus"></i> Adicionar
+                    </button>`;
+                } else {
+                    html += `<button class="btn-questao btn-remover" data-id="${questao.id}">
+                        <i class="fas fa-minus"></i> Remover
+                    </button>`;
+                }
+                
+                div.innerHTML = html;
+                
+                const botao = div.querySelector('.btn-questao');
+                botao.addEventListener('click', function() {
+                    const id = parseInt(this.dataset.id);
+                    if (paraAdicionar) {
+                        adicionarQuestao(id);
+                    } else {
+                        removerQuestao(id);
+                    }
+                });
+                
+                return div;
+            }
+            
+            function adicionarQuestao(id) {
+                const totalAtual = questoesSalvasBloco.length + questoesSelecionadas.length;
+                if (totalAtual >= totalQuestoes) {
+                    showWarning('Limite atingido', `Você já selecionou o máximo de ${totalQuestoes} questões!`);
+                    return;
+                }
+                
+                const questao = questoes.find(q => q.id === id);
+                if (questao) {
+                    questoesSelecionadas.push(questao);
+                    renderizarQuestoesDisponiveis();
+                    renderizarQuestoesSelecionadas();
+                    atualizarBarraProgresso();
+                }
+            }
+            
+            function removerQuestao(id) {
+                questoesSelecionadas = questoesSelecionadas.filter(q => q.id !== id);
+                renderizarQuestoesDisponiveis();
+                renderizarQuestoesSelecionadas();
+                atualizarBarraProgresso();
+            }
+            
+            function atualizarBarraProgresso() {
+                const totalSalvas = questoesSalvasBloco.length;
+                const totalSelecionadas = questoesSelecionadas.length;
+                const totalAtual = totalSalvas + totalSelecionadas;
+                
+                elementos.badgeSelecionadas.textContent = totalAtual;
+                elementos.questoesSelecionadasCount.textContent = totalAtual;
+                
+                const percentual = (totalAtual / totalQuestoes) * 100;
+                elementos.progressoSelecao.style.width = `${percentual}%`;
+                
+                elementos.btnSalvar.disabled = totalAtual !== totalQuestoes || totalSelecionadas === 0;
+            }
+            
+            function salvarQuestoes() {
+                const questoesIds = questoesSalvasBloco.map(q => q.id).concat(questoesSelecionadas.map(q => q.id));
+                
+                fetch(`/api/cadernos/bloco/${blocoId}/questoes`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        questoes_ids: questoesIds
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showSuccess('Sucesso!', 'Questões salvas com sucesso!');
+                        carregarQuestoesSalvas();
+                        questoesSelecionadas = [];
+                        renderizarQuestoesSelecionadas();
+                        renderizarQuestoesDisponiveis();
+                        atualizarBarraProgresso();
+                    } else {
+                        showError('Erro', data.error || 'Erro ao salvar questões');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    showError('Erro', 'Erro ao processar requisição');
+                });
+            }
+            
+            function renderizarTabelaQuestoesSalvas() {
+                const tbody = document.querySelector('#tabela-questoes-salvas tbody');
+                if (!tbody) return;
+                
+                tbody.innerHTML = '';
+                
+                if (!questoesSalvasBloco.length) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#888;">Nenhuma questão salva para este bloco.</td></tr>';
+                    return;
+                }
+                
+                questoesSalvasBloco.forEach((q, idx) => {
+                    // Buscar a resposta correta
+                    let respostaCorreta = '-';
+                    if (q.alternativas && Array.isArray(q.alternativas) && q.alternativas.length > 0) {
+                        const alternativaCorreta = q.alternativas.find(alt => alt.correta === true);
+                        if (alternativaCorreta) {
+                            const indice = q.alternativas.indexOf(alternativaCorreta);
+                            respostaCorreta = String.fromCharCode(65 + indice); // A, B, C, D, E...
+                        }
+                    }
+                    
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${q.ordem}</td>
+                        <td>${q.enunciado.length > 50 ? q.enunciado.substring(0, 50) + '...' : q.enunciado}</td>
+                        <td><span class="resposta-correta">${respostaCorreta}</span></td>
+                        <td>${q.ano || '-'}</td>
+                        <td>${q.habilidade_codigo || '-'}</td>
+                        <td class="acoes-questao">
+                            <button class="btn-acao btn-up" title="Mover para cima" data-id="${q.id}" data-ordem="${q.ordem}" ${idx === 0 ? 'disabled' : ''}>
+                                <i class="fas fa-arrow-up"></i>
+                            </button>
+                            <button class="btn-acao btn-down" title="Mover para baixo" data-id="${q.id}" data-ordem="${q.ordem}" ${idx === questoesSalvasBloco.length - 1 ? 'disabled' : ''}>
+                                <i class="fas fa-arrow-down"></i>
+                            </button>
+                            <button class="btn-acao btn-remover-salva" title="Remover" data-id="${q.id}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+                
+                // Adicionar listeners
+                document.querySelectorAll('.btn-remover-salva').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const id = this.dataset.id;
+                        removerQuestaoSalva(id);
+                    });
+                });
+                
+                document.querySelectorAll('.btn-up').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const id = parseInt(this.dataset.id);
+                        const ordem = parseInt(this.dataset.ordem);
+                        moverQuestao(id, ordem, 'up');
+                    });
+                });
+                
+                document.querySelectorAll('.btn-down').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const id = parseInt(this.dataset.id);
+                        const ordem = parseInt(this.dataset.ordem);
+                        moverQuestao(id, ordem, 'down');
+                    });
+                });
+            }
+            
+            function removerQuestaoSalva(questaoId) {
+                fetch(`/api/cadernos/bloco/${blocoId}/questao/${questaoId}`, {
+                    method: 'DELETE'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showSuccess('Sucesso!', 'Questão removida com sucesso!');
+                        carregarQuestoesSalvas();
+                        renderizarQuestoesDisponiveis();
+                    } else {
+                        showError('Erro', data.error || 'Erro ao remover questão');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    showError('Erro', 'Erro ao processar requisição');
+                });
+            }
+            
+            function moverQuestao(questaoId, ordemAtual, direcao) {
+                // Encontrar a questão atual e a questão de destino
+                const questaoAtual = questoesSalvasBloco.find(q => q.id === questaoId);
+                if (!questaoAtual) return;
+                
+                let novaOrdem;
+                if (direcao === 'up') {
+                    novaOrdem = ordemAtual - 1;
+                } else {
+                    novaOrdem = ordemAtual + 1;
+                }
+                
+                // Verificar se a nova ordem é válida
+                if (novaOrdem < 1 || novaOrdem > questoesSalvasBloco.length) {
+                    return;
+                }
+                
+                // Criar a nova ordem das questões
+                const novaOrdemQuestoes = [...questoesSalvasBloco];
+                
+                // Encontrar índices das questões que vão trocar de posição
+                const indiceAtual = novaOrdemQuestoes.findIndex(q => q.ordem === ordemAtual);
+                const indiceDestino = novaOrdemQuestoes.findIndex(q => q.ordem === novaOrdem);
+                
+                if (indiceAtual === -1 || indiceDestino === -1) return;
+                
+                // Trocar as ordens
+                novaOrdemQuestoes[indiceAtual].ordem = novaOrdem;
+                novaOrdemQuestoes[indiceDestino].ordem = ordemAtual;
+                
+                // Reordenar o array por ordem
+                novaOrdemQuestoes.sort((a, b) => a.ordem - b.ordem);
+                
+                // Criar array com IDs na nova ordem
+                const questoesIds = novaOrdemQuestoes.map(q => q.id);
+                
+                // Enviar para a API
+                fetch(`/api/cadernos/bloco/${blocoId}/questoes/ordenar`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        nova_ordem: questoesIds
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showSuccess('Sucesso!', 'Ordem das questões atualizada!');
+                        carregarQuestoesSalvas();
+                    } else {
+                        showError('Erro', data.error || 'Erro ao reordenar questões');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    showError('Erro', 'Erro ao processar requisição');
+                });
+            }
+        });
+    </script>
+{% endblock %} 

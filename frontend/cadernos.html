@@ -1,0 +1,2448 @@
+{% extends "base.html" %}
+
+{% block title %}Cadernos{% endblock %}
+
+{% block content %}
+    <div class="cadernos-container">
+        <!-- Sistema de Notificações Toast -->
+        <div id="toast-container" class="toast-container"></div>
+        
+        <!-- Header da página -->
+        <header class="page-header">
+            <div class="header-content">
+                <h1><i class="fas fa-book"></i> Gestão de Cadernos</h1>
+                <p>Sistema inteligente para gerenciar cadernos de questões</p>
+            </div>
+            <div class="header-stats">
+                <div class="stat-item">
+                    <span class="stat-number" id="total-cadernos">0</span>
+                    <span class="stat-label">Cadernos</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="total-blocos">0</span>
+                    <span class="stat-label">Blocos</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="total-questoes">0</span>
+                    <span class="stat-label">Questões</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Cards de ações -->
+        <section class="actions-section">
+            <div class="actions-grid">
+                <!-- Card de Cadastro -->
+                <div class="action-card form-card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-plus-circle"></i>
+                        </div>
+                        <div class="card-title">
+                            <h2>Novo Caderno</h2>
+                            <p>Crie um novo caderno de questões</p>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <form id="form-cadastro-caderno">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="titulo-caderno">Título do Caderno *</label>
+                                    <input type="text" id="titulo-caderno" name="titulo" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="serie-caderno">Série *</label>
+                                    <select id="serie-caderno" name="serie" required>
+                                        <option value="">Selecione...</option>
+                                        <option value="1">1º ano</option>
+                                        <option value="2">2º ano</option>
+                                        <option value="3">3º ano</option>
+                                        <option value="4">4º ano</option>
+                                        <option value="5">5º ano</option>
+                                        <option value="6">6º ano</option>
+                                        <option value="7">7º ano</option>
+                                        <option value="8">8º ano</option>
+                                        <option value="9">9º ano</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="qtd-blocos">Qtd. de Blocos *</label>
+                                    <select id="qtd-blocos" name="qtd_blocos" required>
+                                        <option value="">Selecione...</option>
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="4">4</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="qtd-questoes">Questões por Bloco *</label>
+                                    <select id="qtd-questoes" name="qtd_questoes_por_bloco" required>
+                                        <option value="">Selecione...</option>
+                                        <option value="10">10</option>
+                                        <option value="12">12</option>
+                                        <option value="15">15</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-buttons">
+                                <button type="submit" class="btn btn-primary btn-block">
+                                    <i class="fas fa-save"></i>
+                                    Salvar Caderno
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Lista de Cadernos -->
+        <section class="list-section">
+            <div class="list-card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-list"></i>
+                    </div>
+                    <div class="card-title">
+                        <h2>Cadernos Cadastrados</h2>
+                        <p>Visualize e gerencie todos os cadernos</p>
+                    </div>
+                    <div class="search-controls">
+                    <div class="search-box">
+                            <input type="text" id="search-cadernos" placeholder="Buscar por título...">
+                        <i class="fas fa-search"></i>
+                        </div>
+                        <div class="search-box">
+                            <input type="text" id="search-codigo-caderno" placeholder="Buscar por código..." maxlength="3">
+                            <i class="fas fa-hashtag"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <div class="cadernos-grid" id="cadernos-container">
+                        <!-- Os cadernos serão carregados dinamicamente -->
+                    </div>
+
+                    <div class="empty-state" id="empty-state" style="display: none;">
+                        <div class="empty-icon">
+                            <i class="fas fa-book-open"></i>
+                        </div>
+                        <h3>Nenhum caderno cadastrado</h3>
+                        <p>Comece criando o primeiro caderno do sistema</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Card de Detalhes -->
+        <section class="list-section" id="card-detalhes-caderno" style="display:none;">
+            <div class="list-card">
+                <div class="card-header">
+                    <div class="card-icon">
+                        <i class="fas fa-info-circle"></i>
+                    </div>
+                    <div class="card-title">
+                        <h2>Detalhes do Caderno</h2>
+                        <p>Visualize e gerencie os blocos</p>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <div id="detalhes-caderno-info" class="info-panel">
+                        <!-- Informações do caderno -->
+                    </div>
+
+                    <div class="table-container">
+                        <table id="tabela-blocos-caderno" class="modern-table">
+                            <thead>
+                                <tr>
+                                    <th>Ordem</th>
+                                    <th>Componente</th>
+                                    <th>Total de Questões</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Blocos via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="actions-detalhes">
+                        <button id="btn-gerar-gabarito" class="action-btn primary-btn" style="display:none;">
+                            <i class="fas fa-file-pdf"></i>
+                            Gerar Gabarito OCR/OMR
+                        </button>
+                        <button id="btn-fechar-detalhes" class="action-btn secondary-btn">
+                            <i class="fas fa-times"></i>
+                            Fechar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Botão Voltar -->
+        <div class="back-section">
+            <a href="/dashboard" class="btn btn-back">
+                <i class="fas fa-arrow-left"></i>
+                Voltar ao Dashboard
+            </a>
+        </div>
+    </div>
+
+<!-- Modal de Loading -->
+<div id="modal-loading" class="modal-overlay" style="display:none;">
+    <div class="modal-content loading-modal">
+        <div class="loading-spinner"></div>
+        <h3>Gerando Gabarito OCR/OMR...</h3>
+        <p>Por favor, aguarde. O sistema está criando folhas de resposta otimizadas para correção automática.</p>
+        <div class="loading-details">
+            <p><i class="fas fa-check"></i> Processando dados dos alunos...</p>
+            <p><i class="fas fa-check"></i> Organizando questões por bloco...</p>
+            <p><i class="fas fa-check"></i> Gerando formato OCR/OMR...</p>
+            <p><i class="fas fa-spinner fa-spin"></i> Criando arquivo PDF...</p>
+        </div>
+    </div>
+</div>
+
+<style>
+        /* Variáveis CSS */
+        :root {
+            --primary: #6C63FF;
+            --primary-dark: #4D44DB;
+            --secondary: #FFFFFD;
+            --gray-light: #f8f9fa;
+            --text-primary: #2c3e50;
+            --text-secondary: #7f8c8d;
+            --danger: #dc3545;
+            --glass: rgba(255, 255, 255, 0.25);
+            --glass-border: rgba(255, 255, 255, 0.18);
+            --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+
+        /* Cadernos Styles - Seguindo padrão do Habilidades */
+        .cadernos-container {
+            padding: 0;
+            max-width: 100%;
+        }
+
+        .page-header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 2rem 1.5rem;
+            margin: -1.5rem -1.5rem 2rem -1.5rem;
+            border-radius: 0 0 20px 20px;
+        }
+
+        .header-content {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin: 0 0 0.5rem 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .page-header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin: 0;
+        }
+
+        .header-stats {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 1rem 1.5rem;
+            min-width: 120px;
+        }
+
+        .stat-number {
+            display: block;
+            font-size: 2rem;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Actions Section */
+        .actions-section {
+            margin-bottom: 2rem;
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .action-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .action-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+        }
+
+        .card-header {
+            background: var(--gray-light);
+            padding: 1.5rem;
+            border-bottom: 1px solid #e1e8ed;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--primary);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .card-title {
+            flex: 1;
+        }
+
+        .card-title h2 {
+            font-size: 1.3rem;
+            color: var(--primary-dark);
+            margin: 0 0 0.25rem 0;
+        }
+
+        .card-title p {
+            color: #666;
+            margin: 0;
+            font-size: 0.9rem;
+        }
+
+        .card-content {
+            padding: 1.5rem;
+        }
+
+        /* Sistema de Notificações Toast */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            background: white;
+            border-radius: 12px;
+            padding: 16px 20px;
+            min-width: 300px;
+            max-width: 400px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            border-left: 4px solid;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transform: translateX(100%);
+            opacity: 0;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            border-left-color: #28a745;
+        }
+
+        .toast.error {
+            border-left-color: #dc3545;
+        }
+
+        .toast.warning {
+            border-left-color: #ffc107;
+        }
+
+        .toast.info {
+            border-left-color: #17a2b8;
+        }
+
+        .toast-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        .toast.success .toast-icon {
+            background: #28a745;
+        }
+
+        .toast.error .toast-icon {
+            background: #dc3545;
+        }
+
+        .toast.warning .toast-icon {
+            background: #ffc107;
+        }
+
+        .toast.info .toast-icon {
+            background: #17a2b8;
+        }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-title {
+            font-weight: 600;
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 2px;
+        }
+
+        .toast-message {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            font-size: 18px;
+            color: #999;
+            cursor: pointer;
+            padding: 0;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .toast-close:hover {
+            color: #666;
+        }
+
+        .toast-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 0 0 12px 12px;
+            animation: toast-progress 4s linear forwards;
+        }
+
+        @keyframes toast-progress {
+            from { width: 100%; }
+            to { width: 0%; }
+        }
+
+        /* Form Styles */
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            color: var(--primary-dark);
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 0.75rem;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            text-align: center;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .btn-back {
+            background: var(--gray-light);
+            color: var(--primary-dark);
+            border: 1px solid #e1e8ed;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-block {
+            width: 100%;
+        }
+
+        /* Form buttons */
+        .form-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        /* Search Controls */
+        .search-controls {
+            display: flex;
+            gap: 1rem;
+            margin-left: auto;
+            align-items: center;
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-box input {
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            border: 2px solid #e1e8ed;
+            border-radius: 25px;
+            width: 200px;
+            font-size: 1rem;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+        }
+
+        /* Busca por código específica */
+        #search-codigo-caderno {
+            width: 150px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        /* List Section */
+        .list-section {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .list-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+
+        /* Header Moderno */
+    .modern-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        animation: slideDown 0.8s ease-out;
+    }
+
+    .header-content {
+        margin-bottom: 2rem;
+    }
+
+    .icon-wrapper {
+        display: inline-block;
+        width: 80px;
+        height: 80px;
+        background: var(--glass);
+        border: 1px solid var(--glass-border);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        box-shadow: var(--shadow);
+    }
+
+    .icon-wrapper i {
+        font-size: 2.5rem;
+        color: white;
+    }
+
+    .modern-header h1 {
+        font-size: 3rem;
+        font-weight: 700;
+        color: white;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .modern-header p {
+        font-size: 1.2rem;
+        color: rgba(255, 255, 255, 0.8);
+        font-weight: 300;
+    }
+
+    .stats-bar {
+        display: flex;
+        justify-content: center;
+        gap: 3rem;
+        margin-top: 2rem;
+    }
+
+    .stat-item {
+        text-align: center;
+        background: var(--glass);
+        border: 1px solid var(--glass-border);
+        border-radius: 15px;
+        padding: 1.5rem 2rem;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        box-shadow: var(--shadow);
+        transition: transform 0.3s ease;
+    }
+
+    .stat-item:hover {
+        transform: translateY(-5px);
+    }
+
+    .stat-number {
+        display: block;
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: white;
+        line-height: 1;
+    }
+
+    .stat-label {
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.8);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    /* Glass Cards */
+    .glass-card {
+        background: var(--glass);
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        padding: 2.5rem;
+        margin-bottom: 2rem;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        box-shadow: var(--shadow);
+        animation: slideUp 0.8s ease-out;
+    }
+
+    .card-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 2rem;
+        gap: 1rem;
+    }
+
+    .header-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 15px rgba(69, 125, 151, 0.3);
+    }
+
+    .header-icon i {
+        font-size: 1.5rem;
+        color: var(--secondary);
+    }
+
+    .header-text h2 {
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: white;
+        margin-bottom: 0.3rem;
+    }
+
+    .header-text p {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 1rem;
+    }
+
+    .search-wrapper {
+        margin-left: auto;
+        position: relative;
+    }
+
+    .search-wrapper input {
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        border-radius: 25px;
+        padding: 0.8rem 1rem 0.8rem 3rem;
+        color: white;
+        font-size: 1rem;
+        width: 250px;
+        transition: all 0.3s ease;
+    }
+
+    .search-wrapper input::placeholder {
+        color: rgba(255, 255, 255, 0.6);
+    }
+
+    .search-wrapper input:focus {
+        outline: none;
+        background: rgba(255, 255, 255, 0.3);
+        border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .search-wrapper i {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: rgba(255, 255, 255, 0.6);
+    }
+
+    /* Formulário Moderno */
+    .modern-form {
+        animation: fadeIn 0.6s ease-out 0.2s both;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .input-group {
+        position: relative;
+    }
+
+    .input-wrapper {
+        position: relative;
+    }
+
+    .input-wrapper input {
+        width: 100%;
+        padding: 1.2rem 1rem 0.8rem;
+        background: rgba(255, 255, 255, 0.9);
+        border: 2px solid transparent;
+        border-radius: 12px;
+        font-size: 1rem;
+        color: var(--text-primary);
+        transition: all 0.3s ease;
+    }
+
+    .input-wrapper input:focus {
+        outline: none;
+        border-color: var(--primary);
+        background: white;
+    }
+
+    .input-wrapper label {
+        position: absolute;
+        top: 50%;
+        left: 1rem;
+        transform: translateY(-50%);
+        color: var(--text-secondary);
+        font-size: 1rem;
+        pointer-events: none;
+        transition: all 0.3s ease;
+    }
+
+    .input-wrapper input:focus + label,
+    .input-wrapper input:valid + label {
+        top: 0.8rem;
+        font-size: 0.8rem;
+        color: var(--primary);
+        font-weight: 500;
+    }
+
+    .input-highlight {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 0;
+        height: 2px;
+        background: var(--primary);
+        transition: width 0.3s ease;
+    }
+
+    .input-wrapper input:focus ~ .input-highlight {
+        width: 100%;
+    }
+
+    .select-wrapper {
+        position: relative;
+    }
+
+    .select-wrapper select {
+        width: 100%;
+        padding: 1.2rem 3rem 0.8rem 1rem;
+        background: rgba(255, 255, 255, 0.9);
+        border: 2px solid transparent;
+        border-radius: 12px;
+        font-size: 1rem;
+        color: var(--text-primary);
+        appearance: none;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .select-wrapper select:focus {
+        outline: none;
+        border-color: var(--primary);
+        background: white;
+    }
+
+    .select-wrapper label {
+        position: absolute;
+        top: 0.8rem;
+        left: 1rem;
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        font-weight: 500;
+        pointer-events: none;
+    }
+
+    .select-arrow {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-secondary);
+        pointer-events: none;
+    }
+
+    /* Botão Submit */
+    .submit-btn {
+        position: relative;
+        background: linear-gradient(135deg, var(--primary), var(--text-secondary));
+        border: none;
+        border-radius: 15px;
+        padding: 1.2rem 2rem;
+        color: var(--secondary);
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(69, 125, 151, 0.4);
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(69, 125, 151, 0.6);
+    }
+
+    .btn-text {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    .btn-ripple {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+        transform: scale(0);
+        transition: transform 0.6s ease;
+    }
+
+    .submit-btn:active .btn-ripple {
+        transform: scale(1);
+    }
+
+    /* Grid de Cadernos */
+    .cadernos-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+
+    .caderno-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        animation: slideUp 0.5s ease-out;
+    }
+
+    .caderno-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .caderno-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .caderno-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 600;
+        font-size: 1.2rem;
+        margin-right: 1rem;
+    }
+
+    .caderno-info h3 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 0.2rem;
+    }
+
+    .caderno-info p {
+        font-size: 0.9rem;
+        color: var(--text-secondary);
+    }
+
+    .caderno-details {
+        margin-bottom: 1rem;
+    }
+
+    .detail-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .detail-item i {
+        width: 20px;
+        color: var(--primary);
+        margin-right: 0.5rem;
+    }
+
+            .caderno-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+
+        .action-btn {
+            padding: 0.5rem 0.8rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem;
+            text-decoration: none;
+            font-weight: 500;
+            flex: 1;
+            min-width: 85px;
+            max-width: 110px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+    .primary-btn {
+        background: linear-gradient(135deg, var(--primary), var(--text-secondary));
+        color: var(--secondary);
+    }
+
+    .secondary-btn {
+        background: #6c757d;
+        color: white;
+    }
+
+    .info-btn {
+        background: linear-gradient(135deg, #17a2b8, #138496);
+        color: white;
+    }
+
+    .danger-btn {
+        background: var(--danger);
+        color: white;
+    }
+
+    .action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .empty-icon {
+        width: 80px;
+        height: 80px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+    }
+
+    .empty-icon i {
+        font-size: 2rem;
+        color: rgba(255, 255, 255, 0.6);
+    }
+
+    .empty-state h3 {
+        font-size: 1.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    /* Info Panel */
+    .info-panel {
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border-left: 4px solid var(--primary);
+    }
+
+    .info-panel h3 {
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+        font-size: 1.3rem;
+    }
+
+    .info-panel p {
+        margin: 0.5rem 0;
+        color: var(--text-secondary);
+    }
+
+    /* Tabela Moderna */
+    .table-container {
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 12px;
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+
+    .modern-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .modern-table th,
+    .modern-table td {
+        padding: 1rem;
+        text-align: left;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .modern-table th {
+        background: var(--primary);
+        color: white;
+        font-weight: 500;
+        text-transform: uppercase;
+        font-size: 0.9rem;
+        letter-spacing: 0.5px;
+    }
+
+    .modern-table tr:hover {
+        background: rgba(69, 125, 151, 0.05);
+    }
+
+    /* Actions detalhes */
+    .actions-detalhes {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    /* Modal */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(5px);
+        -webkit-backdrop-filter: blur(5px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+    }
+
+    .modal-content {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        max-width: 400px;
+        width: 90%;
+        text-align: center;
+    }
+
+    .loading-modal h3 {
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+    }
+
+    .loading-modal p {
+        color: var(--text-secondary);
+        margin: 0;
+    }
+
+    .loading-spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid var(--primary);
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 20px;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* Animações */
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(50px);
+    }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+
+        /* Cadernos Grid */
+        .cadernos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .caderno-card {
+            background: white;
+            border-radius: 15px;
+            border: 2px solid #e1e8ed;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            min-width: 360px;
+            max-width: 450px;
+        }
+
+        .caderno-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            border-color: var(--primary);
+        }
+
+        .caderno-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .caderno-info h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary-dark);
+            margin-bottom: 0.2rem;
+        }
+
+        .caderno-info p {
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .caderno-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .action-btn {
+            padding: 0.6rem 1rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.3rem;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .primary-btn {
+            background: var(--primary);
+            color: white;
+        }
+
+        .info-btn {
+            background: #17a2b8;
+            color: white;
+        }
+
+
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+
+        .empty-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--gray-light);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            color: var(--primary);
+            font-size: 2rem;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin: 0 0 0.5rem 0;
+            color: var(--primary-dark);
+        }
+
+        /* Back Section */
+        .back-section {
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        /* Info Panel */
+        .info-panel {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--primary);
+        }
+
+        .info-panel h3 {
+            color: var(--primary-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .info-panel p {
+            margin: 0.25rem 0;
+            color: #666;
+        }
+
+        /* Tabela Moderna */
+        .table-container {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+            border: 1px solid #e1e8ed;
+        }
+
+        .modern-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .modern-table th,
+        .modern-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e1e8ed;
+        }
+
+        .modern-table th {
+            background: var(--primary);
+            color: white;
+            font-weight: 500;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+        }
+
+        .modern-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        /* Actions detalhes */
+        .actions-detalhes {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            max-width: 90vw;
+            max-height: 90vh;
+            width: 800px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.show .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            background: var(--primary);
+            color: white;
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            transition: background 0.3s ease;
+        }
+
+        .modal-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-body {
+            padding: 2rem;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        /* Detalhes do Caderno */
+        .caderno-info-detalhes {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e1e8ed;
+        }
+
+        .info-row:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: var(--primary-dark);
+        }
+
+        .info-value {
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        /* Seção de Blocos */
+        .blocos-section h3 {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            color: var(--primary-dark);
+        }
+
+        .blocos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .bloco-card {
+            background: white;
+            border: 1px solid #e1e8ed;
+            border-radius: 10px;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .bloco-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .bloco-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .bloco-numero {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+
+        .bloco-componente {
+            background: var(--primary);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .bloco-info {
+            margin-bottom: 1.5rem;
+        }
+
+        .bloco-questoes {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            color: var(--primary-dark);
+            font-weight: 500;
+        }
+
+        .bloco-progresso {
+            margin-bottom: 0.5rem;
+        }
+
+        .progresso-texto {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .progress-bar-mini {
+            background: #e9ecef;
+            border-radius: 10px;
+            height: 8px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        .bloco-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        /* Actions no modal de caderno */
+        .caderno-actions-modal {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 2px solid #e1e8ed;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        /* Loading details */
+        .loading-details {
+            margin-top: 1rem;
+            text-align: left;
+        }
+
+        .loading-details p {
+            margin: 0.5rem 0;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .loading-details .fa-check {
+            color: #28a745;
+        }
+
+        .loading-details .fa-spinner {
+            color: var(--primary);
+        }
+
+        /* Melhorias no action-btn */
+        .action-btn.primary-btn {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            box-shadow: 0 4px 15px rgba(69, 125, 151, 0.3);
+        }
+
+        .action-btn.primary-btn:hover {
+            box-shadow: 0 6px 20px rgba(69, 125, 151, 0.4);
+            transform: translateY(-2px);
+        }
+
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .page-header {
+                padding: 1.5rem 1rem;
+                margin: -1rem -1rem 1.5rem -1rem;
+            }
+
+            .page-header h1 {
+                font-size: 2rem;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .header-stats {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .actions-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .card-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .search-box {
+                margin-left: 0;
+                width: 100%;
+            }
+
+            .search-box input {
+                width: 100%;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .cadernos-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .caderno-card {
+                padding: 1rem;
+            }
+
+            .caderno-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .action-btn {
+                flex: none;
+                width: 100%;
+                margin-bottom: 0.5rem;
+            }
+
+            .actions-detalhes {
+                flex-direction: column;
+            }
+
+            /* Responsividade Modal */
+            .modal-content {
+                max-width: 95vw;
+                margin: 1rem;
+                width: auto;
+            }
+
+            .modal-body {
+                padding: 1rem;
+            }
+
+            .blocos-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .bloco-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+
+            .modal-header h2 {
+                font-size: 1.5rem;
+            }
+
+            .caderno-info-detalhes {
+                padding: 1rem;
+            }
+
+            .info-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+        }
+
+        @media (max-width: 1024px) and (min-width: 769px) {
+            .cadernos-grid {
+                grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            }
+
+            .action-btn {
+                padding: 0.4rem 0.6rem;
+                font-size: 0.8rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .stat-item {
+                padding: 0.75rem 1rem;
+                min-width: 100px;
+            }
+
+            .stat-number {
+                font-size: 1.5rem;
+            }
+
+            .cadernos-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .action-btn {
+                padding: 0.6rem;
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+
+    <script src="/js/cadernos.js"></script>
+    <script>
+        // Sistema de Notificações Toast
+        function showToast(type, title, message) {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+
+            // Criar elemento toast
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            // Definir ícones para cada tipo
+            const icons = {
+                success: '✓',
+                error: '✕',
+                warning: '⚠',
+                info: 'ℹ'
+            };
+
+            toast.innerHTML = `
+                <div class="toast-icon">
+                    ${icons[type] || 'ℹ'}
+                </div>
+                <div class="toast-content">
+                    <div class="toast-title">${title}</div>
+                    <div class="toast-message">${message}</div>
+                </div>
+                <button class="toast-close" onclick="closeToast(this)">×</button>
+                <div class="toast-progress"></div>
+            `;
+
+            // Adicionar ao container
+            container.appendChild(toast);
+
+            // Mostrar toast com animação
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 100);
+
+            // Auto remover após 4 segundos
+            setTimeout(() => {
+                closeToast(toast);
+            }, 4000);
+        }
+
+        function closeToast(element) {
+            const toast = element.classList ? element : element.closest('.toast');
+            if (toast) {
+                toast.classList.remove('show');
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }
+        }
+
+        // Funções de conveniência para diferentes tipos de toast
+        function showSuccess(title, message = '') {
+            showToast('success', title, message);
+        }
+
+        function showError(title, message = '') {
+            showToast('error', title, message);
+        }
+
+        function showWarning(title, message = '') {
+            showToast('warning', title, message);
+        }
+
+        function showInfo(title, message = '') {
+            showToast('info', title, message);
+        }
+
+        // Inicialização da página
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Inicializando página de cadernos...');
+            
+            // Carregar estatísticas
+            carregarEstatisticas();
+            
+            // Carregar cadernos
+            carregarCadernos();
+            
+            // Configurar funcionalidades da página
+            configurarBusca();
+            configurarFormulario();
+        });
+
+        // Função para carregar estatísticas
+        function carregarEstatisticas() {
+            // Implementar contador animado se necessário
+            const totalCadernos = document.querySelectorAll('.caderno-card').length;
+            animarContador('total-cadernos', totalCadernos);
+        }
+
+        // Função para animar contadores
+        function animarContador(elementId, valorFinal) {
+            const elemento = document.getElementById(elementId);
+            if (!elemento) return;
+            
+            const valorInicial = 0;
+            const duracao = 1000;
+            const incremento = valorFinal / (duracao / 16);
+            
+            let valorAtual = valorInicial;
+            
+            const timer = setInterval(() => {
+                valorAtual += incremento;
+                if (valorAtual >= valorFinal) {
+                    elemento.textContent = valorFinal;
+                    clearInterval(timer);
+                } else {
+                    elemento.textContent = Math.floor(valorAtual);
+                }
+            }, 16);
+        }
+
+        // Configurar busca
+        function configurarBusca() {
+            const searchInput = document.getElementById('search-cadernos');
+            const searchCodigoInput = document.getElementById('search-codigo-caderno');
+            
+            // Busca por título
+            if (searchInput) {
+                searchInput.addEventListener('input', function(e) {
+                    const searchTerm = e.target.value.toLowerCase();
+                    filtrarCadernos(searchTerm, '');
+                });
+            }
+            
+            // Busca por código
+            if (searchCodigoInput) {
+                // Permitir apenas números
+                searchCodigoInput.addEventListener('input', function(e) {
+                    e.target.value = e.target.value.replace(/[^0-9]/g, '');
+                    const codigoTerm = e.target.value;
+                    
+                    if (codigoTerm.length <= 3) {
+                        filtrarCadernos('', codigoTerm);
+                        
+                        // Se digitou 3 dígitos, buscar no servidor
+                        if (codigoTerm.length === 3) {
+                            buscarCadernoPorCodigo(codigoTerm);
+                        }
+                    }
+                });
+                
+                // Busca em tempo real conforme digita
+                searchCodigoInput.addEventListener('keyup', function(e) {
+                    const codigoTerm = e.target.value;
+                    if (codigoTerm.length > 0) {
+                        destacarCadernoPorCodigo(codigoTerm);
+                    }
+                });
+            }
+        }
+        
+        // Função para filtrar cadernos na interface
+        function filtrarCadernos(tituloTerm, codigoTerm) {
+                    const cards = document.querySelectorAll('.caderno-card');
+                    
+                    cards.forEach(card => {
+                        const titulo = card.querySelector('h3').textContent.toLowerCase();
+                const codigoElement = card.querySelector('.caderno-icon');
+                const codigo = codigoElement ? codigoElement.textContent : '';
+                
+                let mostrar = true;
+                
+                // Filtro por título
+                if (tituloTerm && !titulo.includes(tituloTerm)) {
+                    mostrar = false;
+                }
+                
+                // Filtro por código
+                if (codigoTerm && !codigo.startsWith(codigoTerm)) {
+                    mostrar = false;
+                }
+                
+                card.style.display = mostrar ? '' : 'none';
+            });
+        }
+        
+        // Função para destacar caderno por código
+        function destacarCadernoPorCodigo(codigo) {
+            const cards = document.querySelectorAll('.caderno-card');
+            
+            cards.forEach(card => {
+                const codigoElement = card.querySelector('.caderno-icon');
+                if (codigoElement && codigoElement.textContent === codigo.padStart(3, '0')) {
+                    card.style.border = '3px solid var(--primary)';
+                    card.style.transform = 'scale(1.02)';
+                    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        } else {
+                    card.style.border = '';
+                    card.style.transform = '';
+                }
+            });
+        }
+        
+        // Função para buscar caderno por código no servidor
+        async function buscarCadernoPorCodigo(codigo) {
+            try {
+                const response = await fetch(`/api/cadernos/buscar-por-codigo/${codigo}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    showSuccess('Caderno Encontrado!', `${data.caderno.titulo} - ${data.caderno.serie}º ano`);
+                    destacarCadernoPorCodigo(codigo);
+                } else {
+                    showWarning('Código não encontrado', `Nenhum caderno com código ${codigo}`);
+                }
+            } catch (error) {
+                console.error('Erro ao buscar caderno por código:', error);
+            }
+        }
+
+        // Configurar formulário
+        function configurarFormulario() {
+            const form = document.getElementById('form-cadastro-caderno');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    salvarCaderno();
+                });
+            }
+        }
+
+        // Função para salvar caderno
+        async function salvarCaderno() {
+            const formData = new FormData(document.getElementById('form-cadastro-caderno'));
+            const caderno = {
+                titulo: formData.get('titulo'),
+                serie: formData.get('serie'),
+                qtd_blocos: formData.get('qtd_blocos'),
+                qtd_questoes_por_bloco: formData.get('qtd_questoes_por_bloco')
+            };
+
+            try {
+                const response = await fetch('/api/cadernos', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(caderno)
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showSuccess('Sucesso!', 'Caderno criado com sucesso!');
+                    
+                    // Resetar formulário
+                    document.getElementById('form-cadastro-caderno').reset();
+                    
+                    // Recarregar cadernos
+                    setTimeout(() => carregarCadernos(), 1000);
+                } else {
+                    showError('Erro', data.error || 'Erro ao criar caderno');
+                }
+            } catch (error) {
+                console.error('Erro ao salvar caderno:', error);
+                showError('Erro', 'Erro ao salvar caderno. Tente novamente');
+            }
+        }
+
+        // Função para carregar cadernos
+        async function carregarCadernos() {
+            try {
+                console.log('Carregando cadernos...');
+                const response = await fetch('/api/cadernos', {
+                    method: 'GET',
+                    credentials: 'same-origin',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                console.log('Status da resposta:', response.status);
+                const data = await response.json();
+                
+                console.log('Resposta da API:', data);
+                
+                if (response.status === 401) {
+                    // Problema de autenticação - redirecionar para login
+                    console.log('Usuário não autenticado, redirecionando...');
+                    window.location.href = '/login';
+                    return;
+                }
+                
+                if (data.success && data.cadernos) {
+                    console.log('Cadernos encontrados:', data.cadernos.length);
+                    preencherCadernos(data.cadernos);
+                } else if (data.error) {
+                    console.log('Erro na API:', data.error);
+                    showError('Erro', data.error);
+                    mostrarEmptyState();
+                } else {
+                    console.log('Nenhum caderno encontrado');
+                    mostrarEmptyState();
+                }
+            } catch (error) {
+                console.error('Erro ao carregar cadernos:', error);
+                showError('Erro', 'Erro ao carregar cadernos. Tente novamente');
+                mostrarEmptyState();
+            }
+        }
+
+        // Função para mostrar estado vazio
+        function mostrarEmptyState() {
+            const emptyState = document.querySelector('#empty-state');
+            const grid = document.querySelector('#cadernos-container');
+            
+            if (emptyState && grid) {
+                grid.innerHTML = '';
+                emptyState.style.display = 'block';
+            }
+        }
+
+        // Função para preencher cadernos
+        function preencherCadernos(cadernos) {
+            const container = document.querySelector('#cadernos-container');
+            const emptyState = document.querySelector('#empty-state');
+            
+            console.log('Preenchendo cadernos:', cadernos);
+            
+            if (!container) {
+                console.error('Container de cadernos não encontrado');
+                return;
+            }
+            
+            // Limpar container
+            container.innerHTML = '';
+            
+            if (!cadernos || cadernos.length === 0) {
+                console.log('Mostrando empty state');
+                if (emptyState) {
+                    emptyState.style.display = 'block';
+                }
+                return;
+            }
+            
+            // Esconder empty state
+            if (emptyState) {
+                emptyState.style.display = 'none';
+            }
+            
+            // Adicionar cadernos
+            cadernos.forEach(caderno => {
+                console.log('Criando card para caderno:', caderno);
+                
+                // Formatear código do caderno (3 dígitos)
+                const codigoCaderno = caderno.codigo_caderno || String(caderno.id).padStart(3, '0');
+                
+                const card = document.createElement('div');
+                card.className = 'caderno-card';
+                card.innerHTML = `
+                    <div class="caderno-header">
+                        <div class="caderno-icon">
+                            ${codigoCaderno}
+                        </div>
+                        <div class="caderno-info">
+                            <h3>${caderno.titulo || 'Sem título'}</h3>
+                            <p>COD: ${codigoCaderno} • ${caderno.serie || 'N'}º ano • ${caderno.qtd_blocos || 0} blocos • ${caderno.qtd_questoes_por_bloco || 0} questões/bloco</p>
+                        </div>
+                    </div>
+                    
+                    <div class="caderno-actions">
+                        <button class="action-btn info-btn" onclick="verDetalhes('${caderno.id}')">
+                            <i class="fas fa-eye"></i>
+                            Detalhes
+                        </button>
+                        <button class="action-btn primary-btn" onclick="gerarGabarito('${caderno.id}')">
+                            <i class="fas fa-file-pdf"></i>
+                            Gabarito
+                        </button>
+                        <button class="action-btn danger-btn" onclick="excluirCaderno('${caderno.id}')">
+                            <i class="fas fa-trash"></i>
+                            Excluir
+                        </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+            
+            // Atualizar estatísticas
+            animarContador('total-cadernos', cadernos.length);
+            console.log('Cadernos renderizados com sucesso');
+        }
+
+        // Função para ver detalhes do caderno
+        async function verDetalhes(cadernoId) {
+            try {
+                // Buscar detalhes do caderno com seus blocos
+                const response = await fetch(`/api/cadernos/${cadernoId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    mostrarModalDetalhes(data.caderno);
+                } else {
+                    showError('Erro', data.error || 'Erro ao carregar detalhes do caderno');
+                }
+            } catch (error) {
+                console.error('Erro ao carregar detalhes:', error);
+                showError('Erro', 'Erro ao carregar detalhes. Tente novamente');
+            }
+        }
+
+        // Função para mostrar modal com detalhes do caderno
+        function mostrarModalDetalhes(caderno) {
+            // Criar modal dinamicamente
+            const modalHtml = `
+                <div id="modal-detalhes" class="modal-overlay">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h2><i class="fas fa-book"></i> ${caderno.titulo}</h2>
+                            <button class="modal-close" onclick="fecharModal('modal-detalhes')">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="caderno-info-detalhes">
+                                <div class="info-row">
+                                    <span class="info-label">Série:</span>
+                                    <span class="info-value">${caderno.serie}º ano</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Total de Blocos:</span>
+                                    <span class="info-value">${caderno.qtd_blocos}</span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Questões por Bloco:</span>
+                                    <span class="info-value">${caderno.qtd_questoes_por_bloco}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="blocos-section">
+                                <h3><i class="fas fa-cubes"></i> Blocos do Caderno</h3>
+                                <div class="blocos-grid">
+                                    ${caderno.blocos.map(bloco => `
+                                        <div class="bloco-card">
+                                            <div class="bloco-header">
+                                                <span class="bloco-numero">Bloco ${bloco.ordem}</span>
+                                                <span class="bloco-componente">${bloco.componente}</span>
+                                            </div>
+                                            <div class="bloco-info">
+                                                <div class="bloco-questoes">
+                                                    <i class="fas fa-tasks"></i>
+                                                    ${bloco.total_questoes} questões
+                                                </div>
+                                                <div class="bloco-progresso">
+                                                    <span class="progresso-texto">${bloco.questoes_configuradas || 0}/${bloco.total_questoes} configuradas</span>
+                                                    <div class="progress-bar-mini">
+                                                        <div class="progress-fill" style="width: ${((bloco.questoes_configuradas || 0) / bloco.total_questoes) * 100}%"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="bloco-actions">
+                                                <button class="btn btn-primary btn-sm" onclick="configurarBloco(${bloco.id})">
+                                                    <i class="fas fa-cog"></i>
+                                                    Configurar Questões
+                                                </button>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                                
+                                <div class="caderno-actions-modal">
+                                    <button class="action-btn primary-btn" onclick="gerarGabarito(${caderno.id}); fecharModal('modal-detalhes');">
+                                        <i class="fas fa-file-pdf"></i>
+                                        Gerar Gabarito OCR/OMR
+                                    </button>
+                                    <button class="action-btn info-btn" onclick="visualizarEstatisticas(${caderno.id})">
+                                        <i class="fas fa-chart-bar"></i>
+                                        Ver Estatísticas
+                                    </button>
+                                    <button class="action-btn secondary-btn" onclick="testarModeloPadrao()">
+                                        <i class="fas fa-cog"></i>
+                                        Testar Modelo Padrão
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Adicionar modal ao body
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            
+            // Mostrar modal
+            setTimeout(() => {
+                document.getElementById('modal-detalhes').classList.add('show');
+            }, 10);
+        }
+
+        // Função para fechar modal
+        function fecharModal(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.classList.remove('show');
+                setTimeout(() => {
+                    modal.remove();
+                }, 300);
+            }
+        }
+
+        // Função para configurar questões do bloco
+        function configurarBloco(blocoId) {
+            // Fechar modal atual
+            fecharModal('modal-detalhes');
+            
+            // Redirecionar para página de configuração de questões do bloco
+            window.location.href = `/cadernos/bloco/${blocoId}`;
+        }
+
+        // Função para visualizar estatísticas do caderno
+        function visualizarEstatisticas(cadernoId) {
+            showInfo('Em Desenvolvimento', 'Funcionalidade de estatísticas será implementada em breve.');
+        }
+
+        // Função para gerar gabarito
+        async function gerarGabarito(cadernoId) {
+            try {
+                // Mostrar modal de loading
+                document.getElementById('modal-loading').style.display = 'flex';
+                
+                // Atualizar texto do modal para modelo padrão
+                const loadingModal = document.querySelector('.loading-modal h3');
+                if (loadingModal) {
+                    loadingModal.textContent = 'Gerando Gabarito com Modelo Padrão...';
+                }
+                
+                const loadingDetails = document.querySelector('.loading-details');
+                if (loadingDetails) {
+                    loadingDetails.innerHTML = `
+                        <p><i class="fas fa-check"></i> Carregando modelo padrão PDF...</p>
+                        <p><i class="fas fa-check"></i> Processando dados dos alunos...</p>
+                        <p><i class="fas fa-check"></i> Organizando questões por bloco...</p>
+                        <p><i class="fas fa-check"></i> Adicionando informações no modelo...</p>
+                        <p><i class="fas fa-spinner fa-spin"></i> Criando arquivo PDF personalizado...</p>
+                    `;
+                }
+                
+                // Fazer requisição para gerar o PDF
+                const response = await fetch(`/api/cadernos/${cadernoId}/cartoes-gabarito`, {
+                    method: 'POST'
+                });
+                
+                if (response.ok) {
+                    // Baixar o arquivo PDF
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = `gabarito_caderno_${cadernoId}.pdf`;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    
+                    showSuccess('Sucesso!', 'Gabarito gerado com modelo padrão!');
+                } else {
+                    const errorData = await response.json();
+                    showError('Erro', errorData.error || 'Erro ao gerar gabarito');
+                }
+            } catch (error) {
+                console.error('Erro ao gerar gabarito:', error);
+                showError('Erro', 'Erro ao gerar gabarito. Tente novamente');
+            } finally {
+                // Esconder modal de loading
+                document.getElementById('modal-loading').style.display = 'none';
+            }
+        }
+
+        // Função para excluir caderno
+        async function excluirCaderno(cadernoId) {
+            if (!confirm('Tem certeza que deseja excluir este caderno?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/cadernos/${cadernoId}`, {
+                    method: 'DELETE'
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showSuccess('Sucesso!', 'Caderno excluído com sucesso!');
+                    carregarCadernos();
+                } else {
+                    showError('Erro', data.error || 'Erro ao excluir caderno');
+                }
+            } catch (error) {
+                console.error('Erro ao excluir caderno:', error);
+                showError('Erro', 'Erro ao excluir caderno. Tente novamente');
+            }
+        }
+
+        // Função para testar modelo padrão
+        async function testarModeloPadrao() {
+            try {
+                showInfo('Testando...', 'Verificando modelo padrão PDF...');
+                
+                const response = await fetch('/api/cadernos/teste-modelo-padrao');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const info = data.info;
+                    
+                    if (info.template_existe) {
+                        showSuccess(
+                            'Modelo Padrão OK!', 
+                            `Template encontrado! Tamanho: ${(info.tamanho_arquivo / 1024).toFixed(1)} KB`
+                        );
+                    } else {
+                        showWarning(
+                            'Modelo Não Encontrado', 
+                            `Template não encontrado em: ${info.caminho_template}`
+                        );
+                        
+                        // Mostrar arquivos PDF disponíveis
+                        if (info.arquivos_pdf.length > 0) {
+                            console.log('PDFs disponíveis:', info.arquivos_pdf);
+                        }
+                    }
+                } else {
+                    showError('Erro no Teste', data.error || 'Erro ao testar modelo padrão');
+                }
+            } catch (error) {
+                console.error('Erro ao testar modelo padrão:', error);
+                showError('Erro', 'Erro ao testar modelo padrão. Tente novamente');
+            }
+        }
+    </script>
+{% endblock %} 

@@ -1,0 +1,11 @@
+[ARQUIVO BINÁRIO EXCEL]
+
+Este arquivo deve ser um .xlsx real. Recomendo criar manualmente no Excel ou Google Sheets com as seguintes colunas na primeira linha:
+
+código | componente | ano | descrição
+
+E exemplos:
+EF03MA01 | Matemática | 3 | Resolver problemas simples de adição e subtração.
+EF04LP02 | Língua Portuguesa | 4 | Identificar elementos da narrativa em textos literários.
+
+Salve como .xlsx e coloque na pasta static. 

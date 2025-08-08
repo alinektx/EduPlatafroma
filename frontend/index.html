@@ -1,0 +1,2564 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PODC|EduPlataforma | Planejamento Educacional Inteligente</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/static/img/favicon.png">
+    <link rel="icon" type="image/svg+xml" href="/static/img/favicon-simple.svg">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome (Ícones) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6C63FF;
+            --secondary: #4D44DB;
+            --accent: #FF6584;
+            --success: #2ecc71;
+            --warning: #f39c12;
+            --info: #3498db;
+            --light-bg: #F8F9FA;
+            --dark-text: #2E2E3A;
+            --light-text: #666;
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--light-bg);
+            color: var(--dark-text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* ===== HEADER ===== */
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            padding: 1rem 2rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: var(--dark-text);
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--primary);
+        }
+
+        .nav-cta {
+            background: var(--accent);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .nav-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 101, 132, 0.4);
+        }
+
+        /* ===== HERO SECTION ===== */
+        .hero {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 8rem 2rem 5rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1.5" fill="rgba(255,255,255,0.08)"/><circle cx="50" cy="10" r="0.8" fill="rgba(255,255,255,0.12)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            animation: float 20s linear infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            100% { transform: translate(-50px, -50px) rotate(360deg); }
+        }
+
+        .hero-content {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            margin-bottom: 2.5rem;
+            opacity: 0.9;
+        }
+
+        .hero-buttons-container {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: floatButtons 6s ease-in-out infinite;
+        }
+        
+        @keyframes floatButtons {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            25% {
+                transform: translateY(-5px);
+            }
+            50% {
+                transform: translateY(0px);
+            }
+            75% {
+                transform: translateY(-3px);
+            }
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 5px 20px rgba(255, 101, 132, 0.3);
+            animation: pulseButton 4s ease-in-out infinite;
+            animation-delay: 0s;
+        }
+        
+        @keyframes pulseButton {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 5px 20px rgba(255, 101, 132, 0.3);
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 8px 25px rgba(255, 101, 132, 0.5);
+            }
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            animation: glowButton 4s ease-in-out infinite;
+            animation-delay: 1s;
+        }
+        
+        @keyframes glowButton {
+            0%, 100% {
+                box-shadow: 0 0 0 rgba(255, 255, 255, 0);
+            }
+            50% {
+                box-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
+            }
+        }
+
+        .btn-primary:hover, .btn-secondary:hover {
+            transform: translateY(-3px);
+            animation-play-state: paused;
+        }
+
+        .btn-secondary:hover {
+            background: white;
+            color: var(--primary);
+        }
+        
+        .btn-newsletter {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+            animation: slideButton 4s ease-in-out infinite;
+            animation-delay: 2s;
+        }
+        
+        @keyframes slideButton {
+            0%, 100% {
+                transform: translateX(0px);
+            }
+            25% {
+                transform: translateX(-3px);
+            }
+            75% {
+                transform: translateX(3px);
+            }
+        }
+        
+        .btn-instagram {
+            background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+            color: white;
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 5px 20px rgba(220, 39, 67, 0.3);
+            animation: rotateButton 4s ease-in-out infinite;
+            animation-delay: 3s;
+        }
+        
+        @keyframes rotateButton {
+            0%, 100% {
+                transform: rotate(0deg);
+            }
+            25% {
+                transform: rotate(2deg);
+            }
+            75% {
+                transform: rotate(-2deg);
+            }
+        }
+        
+        .btn-newsletter:hover, .btn-instagram:hover {
+            transform: translateY(-3px);
+            animation-play-state: paused;
+        }
+        
+        .btn-newsletter:hover {
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-instagram:hover {
+            box-shadow: 0 8px 25px rgba(220, 39, 67, 0.4);
+        }
+
+        /* ===== ABOUT SECTION ===== */
+        .about {
+            padding: 5rem 2rem;
+            background: white;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-title h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--dark-text);
+            margin-bottom: 1rem;
+        }
+
+        .section-title p {
+            font-size: 1.2rem;
+            color: var(--light-text);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .feature-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            color: white;
+            font-size: 2rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--dark-text);
+        }
+
+        /* ===== MISSION VISION VALUES ===== */
+        .mvv {
+            padding: 5rem 2rem;
+            background: var(--light-bg);
+        }
+
+        .mvv-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        .mvv-card {
+            background: white;
+            padding: 3rem 2rem;
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mvv-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+        }
+
+        .mvv-icon {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, var(--info), var(--success));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            color: white;
+            font-size: 1.8rem;
+        }
+
+        .mvv-card.vision .mvv-icon {
+            background: linear-gradient(135deg, var(--warning), var(--accent));
+        }
+
+        .mvv-card.values .mvv-icon {
+            background: linear-gradient(135deg, var(--success), var(--info));
+        }
+
+        .mvv-card h3 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--dark-text);
+        }
+
+        .mvv-card p {
+            color: var(--light-text);
+            line-height: 1.8;
+        }
+
+        /* ===== INSTAGRAM SECTION - PHONE DESIGN ===== */
+        .instagram-section {
+            padding: 5rem 2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .instagram-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="10" cy="60" r="0.5" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            pointer-events: none;
+        }
+        
+        .phone-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 40px;
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+        
+        /* Phone Frame */
+        .phone-frame {
+            width: 300px;
+            height: 600px;
+            background: #1a1a1a;
+            border-radius: 35px;
+            padding: 6px;
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.4);
+            position: relative;
+            border: 2px solid #333;
+        }
+        
+        .phone-notch {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 20px;
+            background: #1a1a1a;
+            border-radius: 0 0 12px 12px;
+            z-index: 10;
+        }
+        
+        /* Instagram App */
+        .instagram-app {
+            width: 100%;
+            height: 100%;
+            background: #fafafa;
+            border-radius: 29px;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* App Header */
+        .instagram-app-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: white;
+            border-bottom: 1px solid #dbdbdb;
+            flex-shrink: 0;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .header-left i {
+            color: #e4405f;
+            font-size: 20px;
+        }
+        
+        .header-right {
+            display: flex;
+            gap: 12px;
+            color: #262626;
+            font-size: 16px;
+        }
+        
+        /* Profile Section */
+        .profile-section {
+            padding: 16px;
+            background: white;
+            border-bottom: 1px solid #dbdbdb;
+            flex-shrink: 0;
+        }
+        
+        .profile-header {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        
+        .profile-avatar {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 28px;
+            border: 2px solid #e4405f;
+            flex-shrink: 0;
+        }
+        
+        .profile-info {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .profile-info h3 {
+            margin: 0 0 4px 0;
+            font-size: 14px;
+            font-weight: 600;
+            color: #262626;
+        }
+        
+        .profile-bio {
+            margin: 0 0 8px 0;
+            font-size: 11px;
+            color: #262626;
+            line-height: 1.3;
+        }
+        
+        .profile-stats {
+            display: flex;
+            gap: 16px;
+        }
+        
+        .stat {
+            text-align: center;
+        }
+        
+        .stat strong {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #262626;
+        }
+        
+        .stat span {
+            font-size: 10px;
+            color: #8e8e8e;
+        }
+        
+        .profile-actions {
+            display: flex;
+            gap: 6px;
+            margin-top: 8px;
+        }
+        
+        .follow-btn {
+            flex: 1;
+            background: #0095f6;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            transition: background 0.3s ease;
+        }
+        
+        .follow-btn:hover {
+            background: #0081d6;
+        }
+        
+        .message-btn {
+            flex: 1;
+            background: white;
+            color: #262626;
+            border: 1px solid #dbdbdb;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+        
+        /* Stories */
+        .stories-section {
+            display: flex;
+            gap: 12px;
+            padding: 12px 16px;
+            background: white;
+            border-bottom: 1px solid #dbdbdb;
+            overflow-x: auto;
+            flex-shrink: 0;
+        }
+        
+        .story-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            min-width: 50px;
+            flex-shrink: 0;
+        }
+        
+        .story-avatar {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+            border: 2px solid #e4405f;
+        }
+        
+        .story-item.active .story-avatar {
+            border: 2px solid #0095f6;
+        }
+        
+        .story-item span {
+            font-size: 9px;
+            color: #262626;
+            text-align: center;
+        }
+        
+        /* Posts Grid */
+        .posts-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1px;
+            background: #dbdbdb;
+            flex: 1;
+            min-height: 0;
+        }
+        
+        .post-item {
+            aspect-ratio: 1;
+            background: white;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: #667eea;
+        }
+        
+        .post-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            color: white;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .post-item:hover .post-overlay {
+            opacity: 1;
+        }
+        
+        .post-overlay i {
+            font-size: 14px;
+        }
+        
+        .post-overlay span {
+            font-size: 10px;
+            font-weight: 600;
+        }
+        
+        /* Bottom Navigation */
+        .bottom-nav {
+            display: flex;
+            background: white;
+            border-top: 1px solid #dbdbdb;
+            padding: 8px 0;
+            flex-shrink: 0;
+        }
+        
+        .nav-item {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #8e8e8e;
+            font-size: 18px;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+        
+        .nav-item.active {
+            color: #262626;
+        }
+        
+        .nav-avatar {
+            width: 20px;
+            height: 20px;
+            background: #dbdbdb;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+        }
+        
+        /* Call to Action */
+        .instagram-cta {
+            text-align: center;
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+        }
+        
+        .instagram-cta h3 {
+            margin: 0 0 10px 0;
+            color: #262626;
+            font-size: 24px;
+        }
+        
+        .instagram-cta p {
+            margin: 0 0 25px 0;
+            color: #8e8e8e;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        
+        .cta-follow-btn {
+            background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0 auto;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .cta-follow-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(220, 39, 67, 0.3);
+        }
+        
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .phone-frame {
+                width: 260px;
+                height: 520px;
+                border-radius: 28px;
+            }
+            
+            .phone-notch {
+                width: 85px;
+                height: 18px;
+            }
+            
+            .instagram-app {
+                border-radius: 24px;
+            }
+            
+            .profile-avatar {
+                width: 55px;
+                height: 55px;
+                font-size: 22px;
+            }
+            
+            .profile-info h3 {
+                font-size: 13px;
+            }
+            
+            .profile-bio {
+                font-size: 10px;
+            }
+            
+            .profile-stats {
+                gap: 12px;
+            }
+            
+            .stat strong {
+                font-size: 11px;
+            }
+            
+            .stat span {
+                font-size: 9px;
+            }
+            
+            .stories-section {
+                gap: 8px;
+                padding: 10px 12px;
+            }
+            
+            .story-avatar {
+                width: 38px;
+                height: 38px;
+                font-size: 14px;
+            }
+            
+            .story-item span {
+                font-size: 8px;
+            }
+            
+            .instagram-cta {
+                padding: 18px;
+                max-width: 300px;
+            }
+            
+            .instagram-cta h3 {
+                font-size: 18px;
+            }
+            
+            .instagram-cta p {
+                font-size: 13px;
+            }
+            
+            .cta-follow-btn {
+                padding: 10px 20px;
+                font-size: 13px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .phone-frame {
+                width: 230px;
+                height: 460px;
+                border-radius: 22px;
+            }
+            
+            .phone-notch {
+                width: 70px;
+                height: 15px;
+            }
+            
+            .instagram-app {
+                border-radius: 18px;
+            }
+            
+            .profile-section {
+                padding: 12px;
+            }
+            
+            .profile-header {
+                gap: 8px;
+            }
+            
+            .profile-avatar {
+                width: 45px;
+                height: 45px;
+                font-size: 18px;
+            }
+            
+            .profile-stats {
+                gap: 8px;
+            }
+            
+            .stories-section {
+                gap: 6px;
+                padding: 8px 10px;
+            }
+            
+            .story-avatar {
+                width: 32px;
+                height: 32px;
+                font-size: 12px;
+            }
+            
+            .instagram-cta {
+                padding: 12px;
+                max-width: 260px;
+            }
+        }
+
+
+
+        /* ===== TEAM SECTION ===== */
+        .team {
+            padding: 5rem 2rem;
+            background: white;
+        }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .team-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .team-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .team-image {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 50%;
+            margin: 2rem auto 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 3rem;
+            font-weight: 700;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .team-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .team-image.has-photo {
+            background: none;
+        }
+
+        .team-card h4 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--dark-text);
+        }
+
+        .team-role {
+            color: var(--primary);
+            font-weight: 500;
+            margin-bottom: 1rem;
+        }
+
+        .team-description {
+            padding: 0 1.5rem 2rem;
+            color: var(--light-text);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .team-social {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            padding-bottom: 2rem;
+        }
+
+        .team-social a {
+            width: 40px;
+            height: 40px;
+            background: var(--light-bg);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--light-text);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .team-social a:hover {
+            background: var(--primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* ===== PARTNERSHIPS SECTION ===== */
+        .partnerships {
+            padding: 5rem 2rem;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        }
+
+        .partnerships-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .partnership-card {
+            background: white;
+            padding: 2.5rem 2rem;
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .partnership-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+        }
+
+        .partnership-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .partnership-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--success), var(--info));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            color: white;
+            font-size: 2rem;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .partnership-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .partnership-icon.has-logo {
+            background: white;
+            border: 2px solid #f0f0f0;
+        }
+
+        .partnership-icon.has-logo i {
+            display: none;
+        }
+
+        .partnership-card h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--dark-text);
+        }
+
+        .partnership-type {
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .partnership-card p {
+            color: var(--light-text);
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .partnership-benefits {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .benefit-tag {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .partnership-cta {
+            text-align: center;
+            margin-top: 4rem;
+            padding: 3rem 2rem;
+            background: white;
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
+        }
+
+        .partnership-cta h3 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--dark-text);
+            margin-bottom: 1rem;
+        }
+
+        .partnership-cta p {
+            font-size: 1.1rem;
+            color: var(--light-text);
+            margin-bottom: 2rem;
+        }
+
+        .btn-partnership {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 5px 20px rgba(108, 99, 255, 0.3);
+        }
+
+        .btn-partnership:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(108, 99, 255, 0.4);
+            color: white;
+        }
+
+        /* ===== NEWSLETTER SECTION ===== */
+        .newsletter {
+            padding: 5rem 2rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .newsletter::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="newsletter-grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1.5" fill="rgba(255,255,255,0.08)"/><circle cx="50" cy="10" r="0.8" fill="rgba(255,255,255,0.12)"/></pattern></defs><rect width="100" height="100" fill="url(%23newsletter-grain)"/></svg>');
+            animation: float 20s linear infinite;
+        }
+
+        .newsletter-content {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+        }
+
+        .newsletter h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: white;
+        }
+
+        .newsletter p {
+            font-size: 1.2rem;
+            margin-bottom: 2.5rem;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        .newsletter-form {
+            background: rgba(255, 255, 255, 0.1);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: white;
+            font-size: 0.9rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            border: none;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--dark-text);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+        }
+
+        .form-group input:focus {
+            outline: none;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .form-group input::placeholder {
+            color: var(--light-text);
+        }
+
+        .newsletter-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 1rem 3rem;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 5px 20px rgba(255, 101, 132, 0.3);
+            width: 100%;
+            justify-content: center;
+        }
+
+        .newsletter-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 101, 132, 0.4);
+            background: #ff4d6d;
+        }
+
+        .newsletter-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .newsletter-benefits {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .benefit-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .benefit-item i {
+            color: var(--accent);
+            font-size: 1rem;
+        }
+
+        .success-message {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+            padding: 1.5rem 2rem;
+            border-radius: 20px;
+            margin-top: 1.5rem;
+            display: none;
+            animation: slideIn 0.5s ease;
+            box-shadow: 0 8px 25px rgba(46, 204, 113, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+        
+        .success-message strong {
+            font-size: 1.2rem;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+        
+        .success-message i {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {
+                transform: translateY(0);
+            }
+            40% {
+                transform: translateY(-10px);
+            }
+            60% {
+                transform: translateY(-5px);
+            }
+        }
+        
+        .success-message.show {
+            animation: slideIn 0.6s ease, bounce 1s ease 0.6s;
+        }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            background: var(--dark-text);
+            color: white;
+            padding: 3rem 2rem 1rem;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .footer-section h3 {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: white;
+        }
+
+        .footer-section p, .footer-section li {
+            color: #ccc;
+            line-height: 1.8;
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section a {
+            color: #ccc;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-section a:hover {
+            color: var(--primary);
+        }
+
+        .footer-bottom {
+            border-top: 1px solid #444;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            text-align: center;
+            color: #888;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .social-links a {
+            width: 45px;
+            height: 45px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .social-links a:hover {
+            background: var(--accent);
+            transform: translateY(-3px);
+        }
+
+        /* ===== PARTICLES ===== */
+        .particles {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(108, 99, 255, 0.1);
+            border-radius: 50%;
+            animation: particle-float linear infinite;
+        }
+
+        @keyframes particle-float {
+            0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100px) rotate(360deg); opacity: 0; }
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .nav-menu {
+                display: none;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero-buttons-container {
+                flex-direction: column;
+                align-items: center;
+                gap: 1rem;
+            }
+            
+            .btn-newsletter, .btn-instagram {
+                padding: 0.7rem 1.5rem;
+                font-size: 0.9rem;
+            }
+
+            .section-title h2 {
+                font-size: 2rem;
+            }
+
+            .mvv-grid, .team-grid, .partnerships-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .instagram-card {
+                width: 100%;
+                height: auto;
+                min-height: 600px;
+            }
+
+            .content-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .content-item {
+                padding: 1.5rem;
+            }
+
+            .item-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 1.4rem;
+            }
+
+            .newsletter h2 {
+                font-size: 2rem;
+            }
+
+            .newsletter p {
+                font-size: 1rem;
+            }
+
+            .newsletter-form {
+                padding: 2rem 1.5rem;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .newsletter-benefits {
+                flex-direction: column;
+                gap: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .instagram-card {
+                border-radius: 10px;
+            }
+
+            .instagram-header {
+                padding: 1rem;
+            }
+
+            .instagram-content {
+                padding: 1rem;
+            }
+
+            .instagram-footer {
+                padding: 1rem;
+            }
+
+            .content-item {
+                padding: 1rem;
+            }
+
+            .content-item h4 {
+                font-size: 1rem;
+            }
+
+            .content-item p {
+                font-size: 0.8rem;
+            }
+        }
+
+        /* ===== ANIMATIONS ===== */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="logo">
+                <i class="fas fa-graduation-cap"></i> PODC | EduPlataforma
+            </a>
+            <ul class="nav-menu">
+                <li><a href="#about" class="nav-link">Sobre</a></li>
+                <li><a href="#missao" class="nav-link">Missão</a></li>
+                <li><a href="#instagram" class="nav-link">Instagram</a></li>
+                <li><a href="#equipe" class="nav-link">Equipe</a></li>
+                <li><a href="#parcerias" class="nav-link">Parcerias</a></li>
+                <li><a href="#newsletter" class="nav-link">Newsletter</a></li>
+                <li><a href="#contato" class="nav-link">Contato</a></li>
+            </ul>
+            <a href="/login" class="nav-cta">
+                <i class="fas fa-sign-in-alt"></i> Entrar
+            </a>
+        </div>
+    </nav>
+
+
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Transforme sua prática pedagógica</h1>
+            <p>Plataforma inteligente para planejamento educacional com IA, gestão de questões alinhadas à BNCC e ferramentas completas para educadores modernos</p>
+            <div class="hero-buttons-container">
+                <a href="login.html" class="btn-primary" id="comecar-btn">
+                    <i class="fas fa-rocket"></i> Começar Agora
+                </a>
+                <a href="#about" class="btn-secondary">
+                    <i class="fas fa-info-circle"></i> Saiba Mais
+                </a>
+                <a href="#newsletter" class="btn-newsletter">
+                    <i class="fas fa-envelope"></i> Inscrever-se
+                </a>
+                <a href="https://www.instagram.com/eduplatafroma/" target="_blank" rel="noopener" class="btn-instagram">
+                    <i class="fab fa-instagram"></i> Seguir Instagram
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="about" id="about">
+        <div class="container">
+            <div class="section-title fade-in">
+                <h2>Sobre o EduPlataforma</h2>
+                <p>Uma solução completa para modernizar o ensino e otimizar o trabalho pedagógico</p>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h3>Inteligência Artificial</h3>
+                    <p>Geração automática de planos de aula, atividades e avaliações personalizadas usando IA avançada</p>
+                </div>
+
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">
+                        <i class="fas fa-book-open"></i>
+                    </div>
+                    <h3>Alinhado à BNCC</h3>
+                    <p>Todas as atividades e questões são criadas seguindo rigorosamente as diretrizes da Base Nacional Comum Curricular</p>
+                </div>
+
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3>Gestão Colaborativa</h3>
+                    <p>Ferramentas para gestão de escolas, turmas, alunos e colaboração entre educadores</p>
+                </div>
+
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h3>Relatórios Detalhados</h3>
+                    <p>Análise de desempenho com gráficos e relatórios para acompanhar o progresso dos estudantes</p>
+                </div>
+
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">
+                        <i class="fas fa-question-circle"></i>
+                    </div>
+                    <h3>Banco de Questões</h3>
+                    <p>Biblioteca nacional compartilhada de questões por ano e componente curricular</p>
+                </div>
+
+                <div class="feature-card fade-in">
+                    <div class="feature-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <h3>Responsivo</h3>
+                    <p>Acesse de qualquer dispositivo - computador, tablet ou smartphone</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Mission, Vision, Values -->
+    <section class="mvv" id="missao">
+        <div class="container">
+            <div class="section-title fade-in">
+                <h2>Nossa Essência</h2>
+                <p>Os valores que nos guiam na transformação da educação brasileira</p>
+            </div>
+
+            <div class="mvv-grid">
+                <div class="mvv-card mission fade-in">
+                    <div class="mvv-icon">
+                       <i class="fa-solid fa-book-open"></i>
+                    </div>
+                    <h3>Missão</h3>
+                    <p>Democratizar o acesso a ferramentas educacionais de qualidade, empoderando 
+                        educadores com tecnologia inteligente para transformar o processo de 
+                        ensino-aprendizagem e formar cidadãos críticos e preparados para o futuro.</p>
+                </div>
+
+                <div class="mvv-card vision fade-in">
+                    <div class="mvv-icon">
+                        <i class="fas fa-eye"></i>
+                    </div>
+                    <h3>Visão</h3>
+                    <p>Ser uma plataforma educacional, reconhecida pela inovação, 
+                        qualidade e impacto positivo na educação, conectando varios educadores 
+                        e transformando a vida de milhares de professores e estudantes.</p>
+                </div>
+
+                <div class="mvv-card values fade-in">
+                    <div class="mvv-icon">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <h3>Valores</h3>
+                    <p>Inovação constante, qualidade educacional, acessibilidade, colaboração, transparência, sustentabilidade, respeito à diversidade e compromisso com o desenvolvimento humano e social.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Instagram Section -->
+    <section class="instagram-section" id="instagram">
+        <div class="container">
+            <div class="section-title fade-in">
+                <h2>Conecte-se Conosco</h2>
+                <p>Siga-nos no Instagram e descubra mais sobre nossa plataforma</p>
+            </div>
+            
+            <div class="phone-container fade-in">
+                <!-- Phone Frame -->
+                <div class="phone-frame">
+                    <!-- Phone Notch -->
+                    <div class="phone-notch"></div>
+                    
+                    <!-- Instagram App Interface -->
+                    <div class="instagram-app">
+                        <!-- Instagram Header -->
+                        <div class="instagram-app-header">
+                            <div class="header-left">
+                                <i class="fab fa-instagram"></i>
+                                <span>Instagram</span>
+                            </div>
+                            <div class="header-right">
+                                <i class="fas fa-plus-square"></i>
+                                <i class="fas fa-heart"></i>
+                                <i class="fab fa-facebook-messenger"></i>
+                            </div>
+                        </div>
+                        
+                        <!-- Profile Section -->
+                        <div class="profile-section">
+                            <div class="profile-header">
+                                <div class="profile-avatar">
+                                    <i class="fas fa-graduation-cap"></i>
+                                </div>
+                                <div class="profile-info">
+                                    <h3>eduplataforma</h3>
+                                    <p class="profile-bio">Transformando a educação brasileira com tecnologia e inovação! 🚀📚</p>
+                                    <div class="profile-stats">
+                                        <div class="stat">
+                                            <strong>1.2k</strong>
+                                            <span>posts</span>
+                                        </div>
+                                        <div class="stat">
+                                            <strong>5.8k</strong>
+                                            <span>seguidores</span>
+                                        </div>
+                                        <div class="stat">
+                                            <strong>890</strong>
+                                            <span>seguindo</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="profile-actions">
+                                <button class="follow-btn" onclick="window.open('https://www.instagram.com/eduplatafroma/', '_blank')">
+                                    <i class="fab fa-instagram"></i>
+                                    Seguir
+                                </button>
+                                <button class="message-btn">
+                                    <i class="fas fa-envelope"></i>
+                                    Mensagem
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Stories -->
+                        <div class="stories-section">
+                            <div class="story-item active">
+                                <div class="story-avatar">
+                                    <i class="fas fa-brain"></i>
+                                </div>
+                                <span>IA</span>
+                            </div>
+                            <div class="story-item">
+                                <div class="story-avatar">
+                                    <i class="fas fa-chart-line"></i>
+                                </div>
+                                <span>Relatórios</span>
+                            </div>
+                            <div class="story-item">
+                                <div class="story-avatar">
+                                    <i class="fas fa-book-open"></i>
+                                </div>
+                                <span>BNCC</span>
+                            </div>
+                            <div class="story-item">
+                                <div class="story-avatar">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <span>Tempo</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Posts Grid -->
+                        <div class="posts-grid">
+                            <div class="post-item">
+                                <div class="post-image">
+                                    <i class="fas fa-brain"></i>
+                                </div>
+                                <div class="post-overlay">
+                                    <i class="fas fa-heart"></i>
+                                    <span>1.2k</span>
+                                </div>
+                            </div>
+                            <div class="post-item">
+                                <div class="post-image">
+                                    <i class="fas fa-chart-line"></i>
+                                </div>
+                                <div class="post-overlay">
+                                    <i class="fas fa-heart"></i>
+                                    <span>856</span>
+                                </div>
+                            </div>
+                            <div class="post-item">
+                                <div class="post-image">
+                                    <i class="fas fa-book-open"></i>
+                                </div>
+                                <div class="post-overlay">
+                                    <i class="fas fa-heart"></i>
+                                    <span>1.5k</span>
+                                </div>
+                            </div>
+                            <div class="post-item">
+                                <div class="post-image">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div class="post-overlay">
+                                    <i class="fas fa-heart"></i>
+                                    <span>743</span>
+                                </div>
+                            </div>
+                            <div class="post-item">
+                                <div class="post-image">
+                                    <i class="fas fa-graduation-cap"></i>
+                                </div>
+                                <div class="post-overlay">
+                                    <i class="fas fa-heart"></i>
+                                    <span>2.1k</span>
+                                </div>
+                            </div>
+                            <div class="post-item">
+                                <div class="post-image">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <div class="post-overlay">
+                                    <i class="fas fa-heart"></i>
+                                    <span>1.8k</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Bottom Navigation -->
+                        <div class="bottom-nav">
+                            <div class="nav-item active">
+                                <i class="fas fa-home"></i>
+                            </div>
+                            <div class="nav-item">
+                                <i class="fas fa-search"></i>
+                            </div>
+                            <div class="nav-item">
+                                <i class="fas fa-plus-square"></i>
+                            </div>
+                            <div class="nav-item">
+                                <i class="fas fa-heart"></i>
+                            </div>
+                            <div class="nav-item">
+                                <div class="nav-avatar">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Call to Action -->
+                <div class="instagram-cta">
+                    <h3>🎉 Siga-nos no Instagram!</h3>
+                    <p>Fique por dentro das novidades, dicas pedagógicas e muito mais!</p>
+                    <button class="cta-follow-btn" onclick="window.open('https://www.instagram.com/eduplatafroma/', '_blank')">
+                        <i class="fab fa-instagram"></i>
+                        Seguir @eduplataforma
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Team Section -->
+    <section class="team" id="equipe">
+        <div class="container">
+            <div class="section-title fade-in">
+                <h2>Nossa Equipe</h2>
+                <p>Profissionais apaixonados por educação e tecnologia</p>
+            </div>
+
+            <div class="team-grid">
+                <div class="team-card fade-in">
+                    <div class="team-image has-photo">
+                        <img src="static/img/team/MATEUS.jpg" alt="Prof. Matheus Thrive">
+                    </div>
+                    <h4>Mateus Oliveira da Conceição</h4>
+                    <div class="team-role"><p>Desenvolvedor Full-Stack</p>
+                         <P1>É Fundador & CEO</P1> </div>
+                    <div class="team-description">
+                        Desenvolvedor experiente em Python, Php, JavaScript e bancos de dados MySQL, focado em performance e escalabilidade..
+                    </div>
+                    <div class="team-social">
+                        <a href="https://api.whatsapp.com/send?phone=5599988585269&text=Ola%2C%20sou%20o%20aluno%20%28Seu%20nome%29%2C%20queria%20uma%20ajuda%20com..."><i class="fab fa-whatsapp"></i></a>
+                        <a href="https://github.com/ADMuemasul"><i class="fab fa-github"></i></a>
+                        <a href="https://www.instagram.com/mateusoli.adm/"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+
+                <div class="team-card fade-in">
+                    <div class="team-image has-photo">
+                        <img src="static/img/team/alinea.jpg" alt="Aline Silva">
+                    </div>
+                    <h4>Aline Farias Lima</h4>
+                    <div class="team-role">Diretora Pedagógica</div>
+                    <div class="team-description">
+                        Mestre em Educação com experiência em coordenação pedagógica e implementação da BNCC.
+                    </div>
+                    <div class="team-social">
+                        <a href="https://api.whatsapp.com/send?phone=5599984463387"><i class="fab fa-whatsapp"></i></a>
+                        <a href="https://www.instagram.com/lalinefarias/"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+
+                <div class="team-card fade-in">
+                    <div class="team-image has-photo">
+                        <img src="static/img/team/GLESIANE.jpg" alt="Glesiane Costa">
+                    </div>
+                    <h4>Glesiane Coutinho da Silva</h4>
+                    <div class="team-role">CTO - Tecnologia</div>
+                    <div class="team-description">
+                        Engenheira de Software especializada em IA e machine learning, responsável pela arquitetura tecnológica.
+                    </div>
+                    <div class="team-social">
+                        <a href=https://www.instagram.com/sr_e_sra_coutinho/"><i class="fab fa-instagram"></i></a>
+                        <a href="https://api.whatsapp.com/send?phone=5599991377188"><i class="fab fa-whatsapp"></i></a>
+                    </div>
+                </div>
+
+                <div class="team-card fade-in">
+                    <div class="team-image has-photo">
+                        <img src="static/img/team/DEBORA.jpg" alt="Débora Oliveira">
+                    </div>
+                    <h4>Débora Rocha de Oliveira Sousa</h4>
+                    <div class="team-role">Designer UX/UI</div>
+                    <div class="team-description">
+                        Especialista em experiência do usuário com foco em interfaces educacionais intuitivas e acessíveis.
+                    </div>
+                    <div class="team-social">
+                        <a href="https://api.whatsapp.com/send?phone=5599991135801"><i class="fab fa-whatsapp"></i></a>
+                        <a href="https://www.instagram.com/debora_rocha73/"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                
+                <div class="team-card fade-in">
+                    <div class="team-image has-photo">
+                        <img src="static/img/team/marcelo.jpg" alt="Maria'na">
+                    </div>
+                    <h4>Marcelo </h4>
+                    <div class="team-role">Professor Orientador</div>
+                    <div class="team-description">
+                        Estatística especializada em análise de dados educacionais e desenvolvimento de métricas de aprendizagem.
+                    </div>
+                    <div class="team-social">
+                        <a href="https://api.whatsapp.com/send?phone=5599991834899"><i class="fab fa-whatsapp"></i></a>
+                        <a href="https://www.instagram.com/maryanna_carvalho_limaa/"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+
+                <div class="team-card fade-in">
+                    <div class="team-image has-photo">
+                        <img src="static/img/team/MARIANA.jpg" alt="Maria'na">
+                    </div>
+                    <h4>Mariana Carvalho de Lima</h4>
+                    <div class="team-role">Analista de Dados</div>
+                    <div class="team-description">
+                        Estatística especializada em análise de dados educacionais e desenvolvimento de métricas de aprendizagem.
+                    </div>
+                    <div class="team-social">
+                        <a href="https://api.whatsapp.com/send?phone=5599991834899"><i class="fab fa-whatsapp"></i></a>
+                        <a href="https://www.instagram.com/maryanna_carvalho_limaa/"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Partnerships Section -->
+    <section class="partnerships" id="parcerias">
+        <div class="container">
+            <div class="section-title fade-in">
+                <h2>Nossas Parcerias</h2>
+                <p>Juntos por uma educação mais forte e inovadora</p>
+            </div>
+
+            <div class="partnerships-grid">
+                <!-- EXEMPLO COM LOGO: Para adicionar logo, use a classe "has-logo" e coloque a imagem -->
+                <div class="partnership-card fade-in">
+                    <div class="partnership-icon has-logo">
+                        <!-- DESCOMENTE A LINHA ABAIXO E ADICIONE O CAMINHO DA SUA LOGO -->
+                        <img src="static/img/partners/uemasul-logo.png" alt="UEMASUL Logo">
+                        <i class="fas fa-university"></i>
+                    </div>
+                    <h3>UEMASUL</h3>
+                    <div class="partnership-type">Instituição de Ensino Superior</div>
+                    <p>Parceria acadêmica para desenvolvimento de pesquisas em tecnologia educacional e formação de professores.</p>
+                    <div class="partnership-benefits">
+                        <span class="benefit-tag">Pesquisa</span>
+                        <span class="benefit-tag">Formação</span>
+                        <span class="benefit-tag">Inovação</span>
+                    </div>
+                </div>
+
+                <!-- EXEMPLO COM LOGO: Para adicionar logo, use a classe "has-logo" e coloque a imagem -->
+                <div class="partnership-card fade-in">
+                    <div class="partnership-icon has-logo">
+                        <!-- <img src="static/img/partners/secretaria-logo.png" alt="Secretaria de Educação Logo"> -->
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <h3>Secretarias de Educação</h3>
+                    <div class="partnership-type">Órgãos Públicos</div>
+                    <p>Colaboração com secretarias municipais e estaduais para implementação de soluções educacionais digitais.</p>
+                    <div class="partnership-benefits">
+                        <span class="benefit-tag">Implementação</span>
+                        <span class="benefit-tag">Escalabilidade</span>
+                        <span class="benefit-tag">Impacto</span>
+                    </div>
+                </div>
+
+                <!-- EXEMPLO COM LOGO: Para adicionar logo, use a classe "has-logo" e coloque a imagem -->
+                <div class="partnership-card fade-in">
+                    <div class="partnership-icon has-logo">
+                        <!-- <img src="static/img/partners/escola-logo.png" alt="Escola Particular Logo"> -->
+                        <i class="fas fa-school"></i>
+                    </div>
+                    <h3>Escolas Particulares</h3>
+                    <div class="partnership-type">Rede Privada</div>
+                    <p>Parcerias estratégicas com escolas particulares para desenvolvimento de soluções personalizadas.</p>
+                    <div class="partnership-benefits">
+                        <span class="benefit-tag">Personalização</span>
+                        <span class="benefit-tag">Qualidade</span>
+                        <span class="benefit-tag">Resultados</span>
+                    </div>
+                </div>
+
+                <!-- EXEMPLO COM LOGO REAL: Esta é como fica quando você adiciona uma logo -->
+                <div class="partnership-card fade-in">
+                    <div class="partnership-icon has-logo">
+                        <!-- EXEMPLO: Logo da OpenAI (substitua pelo caminho da sua logo) -->
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/OpenAI_Logo.svg/1280px-OpenAI_Logo.svg.png" alt="OpenAI Logo">
+                        <!-- <i class="fas fa-microchip"></i> -->
+                    </div>
+                    <h3>OpenAI</h3>
+                    <div class="partnership-type">Tecnologia de IA</div>
+                    <p>Integração com a OpenAI para desenvolvimento de funcionalidades de inteligência artificial educacional.</p>
+                    <div class="partnership-benefits">
+                        <span class="benefit-tag">IA Avançada</span>
+                        <span class="benefit-tag">Inovação</span>
+                        <span class="benefit-tag">Futuro</span>
+                    </div>
+                </div>
+
+                <!-- EXEMPLO COM LOGO: Para adicionar logo, use a classe "has-logo" e coloque a imagem -->
+                <div class="partnership-card fade-in">
+                    <div class="partnership-icon has-logo">
+                        <!-- <img src="static/img/partners/comunidade-logo.png" alt="Comunidade Educacional Logo"> -->
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3>Comunidade Educacional</h3>
+                    <div class="partnership-type">Rede Colaborativa</div>
+                    <p>Rede de professores e educadores que contribuem com conteúdo e feedback para melhorias da plataforma.</p>
+                    <div class="partnership-benefits">
+                        <span class="benefit-tag">Colaboração</span>
+                        <span class="benefit-tag">Feedback</span>
+                        <span class="benefit-tag">Crescimento</span>
+                    </div>
+                </div>
+
+                <!-- EXEMPLO COM LOGO: Para adicionar logo, use a classe "has-logo" e coloque a imagem -->
+                <div class="partnership-card fade-in">
+                    <div class="partnership-icon has-logo">
+                        <!-- <img src="static/img/partners/startup-logo.png" alt="Startup Educacional Logo"> -->
+                        <i class="fas fa-rocket"></i>
+                    </div>
+                    <h3>Startups Educacionais</h3>
+                    <div class="partnership-type">Ecossistema de Inovação</div>
+                    <p>Colaboração com outras startups do setor educacional para criar um ecossistema de inovação.</p>
+                    <div class="partnership-benefits">
+                        <span class="benefit-tag">Inovação</span>
+                        <span class="benefit-tag">Sinergia</span>
+                        <span class="benefit-tag">Crescimento</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="partnership-cta fade-in">
+                <h3>Quer ser nosso parceiro?</h3>
+                <p>Junte-se a nós na transformação da educação brasileira</p>
+                <a href="#contato" class="btn-partnership">
+                    <i class="fas fa-handshake"></i> Fale Conosco
+                </a>
+            </div>
+
+            <!-- INSTRUÇÕES PARA ADICIONAR LOGOS -->
+            <!-- <div class="partnership-instructions fade-in" style="margin-top: 3rem; padding: 2rem; background: #f8f9fa; border-radius: 15px; border-left: 4px solid var(--primary);">
+                <h4 style="color: var(--primary); margin-bottom: 1rem;">
+                    <i class="fas fa-info-circle"></i> Como adicionar logos das empresas parceiras:
+                </h4>
+                <ol style="color: var(--light-text); line-height: 1.8; padding-left: 1.5rem;">
+                    <li><strong>Adicione suas logos</strong> na pasta <code>frontend/static/img/partners/</code></li>
+                    <li><strong>Descomente a linha</strong> com a tag <code>&lt;img&gt;</code> no card da parceria</li>
+                    <li><strong>Atualize o caminho</strong> para apontar para sua logo: <code>src="static/img/partners/sua-logo.png"</code></li>
+                    <li><strong>Comente a linha</strong> com o ícone <code>&lt;i class="fas fa-..."&gt;</code></li>
+                    <li><strong>Mantenha a classe</strong> <code>has-logo</code> no div da parceria</li>
+                </ol>
+                <p style="margin-top: 1rem; font-size: 0.9rem; color: var(--light-text);">
+                    <strong>Formato recomendado:</strong> PNG ou JPG, 200x200px, fundo transparente ou branco
+                </p>
+            </div> -->
+        </div>
+    </section> 
+
+    <!-- Newsletter Section -->
+    <section class="newsletter" id="newsletter">
+        <div class="newsletter-content">
+            <h2 class="fade-in">Fique por dentro das novidades!</h2>
+            <p class="fade-in">Inscreva-se para receber atualizações exclusivas sobre novas funcionalidades, dicas pedagógicas e novidades da plataforma</p>
+            
+            <div class="newsletter-form fade-in">
+                <form id="newsletterForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="nome">Nome Completo</label>
+                            <input type="text" id="nome" name="nome" placeholder="Digite seu nome completo" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">E-mail</label>
+                            <input type="email" id="email" name="email" placeholder="seu@email.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="whatsapp">WhatsApp</label>
+                            <input type="tel" id="whatsapp" name="whatsapp" placeholder="(99) 99999-9999" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="newsletter-btn">
+                        <i class="fas fa-paper-plane"></i>
+                        Inscrever-se Gratuitamente
+                    </button>
+                </form>
+                
+                <div class="success-message" id="successMessage">
+                    <i class="fas fa-check-circle"></i>
+                    Inscrição realizada com sucesso! Em breve você receberá nossas novidades.
+                </div>
+            </div>
+            
+            <div class="newsletter-benefits fade-in">
+                <div class="benefit-item">
+                    <i class="fas fa-bell"></i>
+                    <span>Novidades em primeira mão</span>
+                </div>
+                <div class="benefit-item">
+                    <i class="fas fa-gift"></i>
+                    <span>Conteúdo exclusivo</span>
+                </div>
+                <div class="benefit-item">
+                    <i class="fas fa-shield-alt"></i>
+                    <span>Sem spam, apenas conteúdo útil</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer" id="contato">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>EduPlataforma</h3>
+                <p>Transformando a educação brasileira através da tecnologia e inovação. Junte-se a nós nessa jornada de transformação pedagógica.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+
+            <div class="footer-section">
+                <h3>Produtos</h3>
+                <ul>
+                    <li><a href="#">Planos de Aula com IA</a></li>
+                    <li><a href="#">Banco de Questões BNCC</a></li>
+                    <li><a href="#">Gestão Escolar</a></li>
+                    <li><a href="#">Relatórios e Analytics</a></li>
+                    <li><a href="#">Cadernos Digitais</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h3>Suporte</h3>
+                <ul>
+                    <li><a href="#">Central de Ajuda</a></li>
+                    <li><a href="#">Documentação</a></li>
+                    <li><a href="#">Treinamentos</a></li>
+                    <li><a href="#">API</a></li>
+                    <li><a href="#">Status do Sistema</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h3>Contato</h3>
+                <p><i class="fas fa-map-marker-alt"></i> Senador La Rocque - MA</p>
+                <p><i class="fas fa-phone"></i> (99) 98858-5269</p>
+                <p><i class="fas fa-envelope"></i> contato@eduplataforma.com.br</p>
+                <p><i class="fas fa-clock"></i> Seg-Sex: 8h às 18h</p>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; 2024 EduPlataforma. Todos os direitos reservados. | PODC - Plataforma Organizada de Dados Compartilhados</p>
+        </div>
+    </footer>
+
+    <!-- Particles -->
+    <div class="particles" id="particles"></div>
+
+    <script>
+        // Smooth scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 100) {
+                navbar.style.background = 'rgba(255, 255, 255, 0.98)';
+                navbar.style.boxShadow = '0 5px 25px rgba(0, 0, 0, 0.15)';
+            } else {
+                navbar.style.background = 'rgba(255, 255, 255, 0.95)';
+                navbar.style.boxShadow = '0 2px 20px rgba(0, 0, 0, 0.1)';
+            }
+        });
+
+        // Fade in animation on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.fade-in').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Particles effect
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 30;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                // Random properties
+                const size = Math.random() * 4 + 2;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.bottom = `-20px`;
+                
+                // Random animation duration
+                const duration = Math.random() * 20 + 15;
+                particle.style.animation = `particle-float ${duration}s linear infinite`;
+                particle.style.animationDelay = `${Math.random() * 20}s`;
+                
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Button click effects
+        document.getElementById('comecar-btn').addEventListener('click', function(e) {
+            this.style.transform = 'translateY(-5px) scale(0.95)';
+            
+            setTimeout(() => {
+                window.location.href = '/login';
+            }, 150);
+            
+            e.preventDefault();
+        });
+
+        // Newsletter form handling
+        document.getElementById('newsletterForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const nome = document.getElementById('nome').value;
+            const email = document.getElementById('email').value;
+            const whatsapp = document.getElementById('whatsapp').value;
+            
+            // Validação básica
+            if (!nome || !email || !whatsapp) {
+                alert('Por favor, preencha todos os campos!');
+                return;
+            }
+            
+            // Validação de email
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                alert('Por favor, insira um e-mail válido!');
+                return;
+            }
+            
+            // Validação de WhatsApp (formato brasileiro)
+            const whatsappRegex = /^\(?[1-9]{2}\)? ?(?:[2-8]|9[1-9])[0-9]{3}\-?[0-9]{4}$/;
+            if (!whatsappRegex.test(whatsapp.replace(/\s/g, ''))) {
+                alert('Por favor, insira um número de WhatsApp válido!');
+                return;
+            }
+            
+            // Preparar dados para envio
+            const dados = {
+                nome: nome,
+                email: email,
+                whatsapp: whatsapp
+            };
+            
+            // Botão de envio
+            const submitBtn = document.querySelector('.newsletter-btn');
+            const originalText = submitBtn.innerHTML;
+            
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+            submitBtn.disabled = true;
+            
+            // Enviar para API
+            console.log('📤 Enviando dados para API:', dados);
+            
+            // Determinar URL base
+            const baseUrl = window.location.origin;
+            const apiUrl = `${baseUrl}/api/newsletter/inscrever`;
+            console.log('🌐 URL da API:', apiUrl);
+            
+            fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(dados)
+            })
+            .then(response => {
+                console.log('📊 Resposta da API:', response.status, response.statusText);
+                return response.json();
+            })
+            .then(data => {
+                console.log('📄 Dados da resposta:', data);
+                if (data.success) {
+                    // Sucesso - Mensagem personalizada com o nome
+                    const nomeUsuario = dados.nome;
+                    const mensagemPersonalizada = `
+                        <i class="fas fa-check-circle"></i>
+                        <strong>🎉 Parabéns, ${nomeUsuario}! 🎊</strong><br>
+                        <span style="font-size: 0.9em; opacity: 0.9;">Sua inscrição foi realizada com sucesso! Em breve você receberá um email de boas-vindas. 📧✨</span>
+                        <div style="margin-top: 0.5rem; font-size: 1.2rem;">🎈🎁🚀</div>
+                    `;
+                    
+                    document.getElementById('successMessage').innerHTML = mensagemPersonalizada;
+                    document.getElementById('successMessage').style.display = 'block';
+                    
+                    // Adicionar classe para animação
+                    setTimeout(() => {
+                        document.getElementById('successMessage').classList.add('show');
+                    }, 100);
+                    
+                    // Efeito de confete
+                    criarEfeitoConfete();
+                    
+                    // Limpar formulário
+                    document.getElementById('newsletterForm').reset();
+                    
+                    console.log('✅ Newsletter salva no banco:', data.data);
+                } else {
+                    // Erro
+                    alert('Erro: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('❌ Erro ao enviar newsletter:', error);
+                alert('Erro ao enviar inscrição. Tente novamente.');
+            })
+            .finally(() => {
+                // Restaurar botão
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+                
+                // Esconder mensagem após 5 segundos
+                setTimeout(() => {
+                    document.getElementById('successMessage').style.display = 'none';
+                }, 5000);
+            });
+        });
+        
+        // Máscara para WhatsApp
+        document.getElementById('whatsapp').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length <= 11) {
+                value = value.replace(/^(\d{2})(\d)/g, '($1) $2');
+                value = value.replace(/(\d)(\d{4})$/, '$1-$2');
+                e.target.value = value;
+            }
+        });
+        
+        // Função para criar efeito de confete
+        function criarEfeitoConfete() {
+            const confetes = ['🎉', '🎊', '🎈', '🎁', '✨', '🌟', '🚀', '💫'];
+            const newsletterSection = document.querySelector('.newsletter');
+            
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => {
+                    const confete = document.createElement('div');
+                    confete.textContent = confetes[Math.floor(Math.random() * confetes.length)];
+                    confete.style.cssText = `
+                        position: absolute;
+                        left: ${Math.random() * 100}%;
+                        top: -20px;
+                        font-size: 1.5rem;
+                        pointer-events: none;
+                        z-index: 1000;
+                        animation: confeteFall 3s linear forwards;
+                    `;
+                    
+                    newsletterSection.appendChild(confete);
+                    
+                    // Remover confete após animação
+                    setTimeout(() => {
+                        if (confete.parentNode) {
+                            confete.parentNode.removeChild(confete);
+                        }
+                    }, 3000);
+                }, i * 100);
+            }
+        }
+        
+        // CSS para animação do confete
+        const confeteStyle = document.createElement('style');
+        confeteStyle.textContent = `
+            @keyframes confeteFall {
+                0% {
+                    transform: translateY(-20px) rotate(0deg);
+                    opacity: 1;
+                }
+                100% {
+                    transform: translateY(100vh) rotate(360deg);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(confeteStyle);
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            createParticles();
+            
+            // Add stagger delay to cards
+            document.querySelectorAll('.feature-card, .team-card').forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.1}s`;
+            });
+            
+
+        });
+
+        // Team card hover effects
+        document.querySelectorAll('.team-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-15px) scale(1.02)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+    </script>
+</body>
+</html>
