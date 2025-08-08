@@ -1,0 +1,66 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+ENV/
+env/
+.env
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Database
+*.sqlite3
+*.db
+
+# Media
+uploads/
+media/
+
+# Cache
+.cache/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Node
+node_modules/
+
+# Arquivos com chaves sensíveis
+backend/.env
+backend/config/openai.js
+CONFIGURAR_OPENAI_MANUAL.md
+configurar_openai.py
+**/openai.js
+**/.env
+**/configurar_openai*
+
+# Misc
+.DS_Store
+Thumbs.db
