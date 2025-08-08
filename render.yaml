@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: edu-plataforma
+    env: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "cd backend && python servidor.py"
+    plan: free
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: eduplataforma-db
+          property: connectionString
+
+databases:
+  - name: eduplataforma-db
+    databaseName: eduplataforma
+    user: eduuser
+    plan: free 
