@@ -90,11 +90,18 @@ app.config['SESSION_PERMANENT'] = True
 # Configurar URI do banco dinamicamente
 app.config['SQLALCHEMY_DATABASE_URI'] = get_database_uri()
 
-# Inicializa o banco de dados com o app
 db.init_app(app)
-
-# Inicializa o Flask-Migrate para gerenciar migrações do banco de dados
 migrate = Migrate(app, db)
+
+# Criação automática das tabelas em ambiente de produção se necessário
+with app.app_context():
+    try:
+        # Tenta acessar a conexão; se o banco ainda não existir ou estiver vazio, cria tabelas
+        db.engine.connect()
+        # Opcionalmente, poderíamos verificar metadados. Para simplificar, chamamos init_db uma vez.
+        init_db()
+    except Exception as e:
+        print(f"[WARN] Falha ao inicializar banco automaticamente: {e}")
 
 # Registrar blueprints
 app.register_blueprint(auth_bp)
