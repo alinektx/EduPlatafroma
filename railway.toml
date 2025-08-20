@@ -5,15 +5,15 @@ builder = "nixpacks"
 healthcheckPath = "/health"
 healthcheckTimeout = 300
 restartPolicyType = "on_failure"
-startCommand = "gunicorn --bind 0.0.0.0:$PORT --workers 2 --timeout 300 backend.app:app"
+startCommand = "cd backend && gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --timeout 300"
 
 [environment]
 FLASK_ENV = "production"
 SECRET_KEY = "${{RAILWAY_STATIC_URL}}-secret-key-production-2024"
 DATABASE_URL = "${{Postgres.DATABASE_URL}}"
 OPENAI_API_KEY = "${{OPENAI_API_KEY}}"
-PYTHONPATH = "/app"
+PYTHONPATH = "/app/backend:/app"
 PORT = "${{PORT}}"
 
 [service]
-name = "web" 
+name = "web"
